@@ -569,3 +569,156 @@ body.dark-mode .properties-map-full {
     animation-duration: 15s;
   }
 }
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.agent-card {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(10, 42, 94, 0.16);
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease, opacity 0.5s ease;
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.agent-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.agent-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 22px 42px rgba(10, 42, 94, 0.26);
+  border-color: rgba(255, 255, 255, 0.36);
+}
+
+.agent-photo {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+}
+
+.agent-content {
+  padding: 1rem;
+}
+
+.agent-role {
+  color: var(--blue-secondary);
+  font-weight: 600;
+  margin-top: -0.4rem;
+}
+
+.agent-social {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.9rem 0 1rem;
+}
+
+.agent-social a {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--blue-deep);
+  background: rgba(10, 42, 94, 0.08);
+  border: 1px solid rgba(10, 42, 94, 0.2);
+  opacity: 0.68;
+  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.agent-social a svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.agent-social a:hover {
+  opacity: 1;
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 8px 16px rgba(10, 42, 94, 0.28);
+}
+
+.agent-properties {
+  margin-top: 1rem;
+}
+
+.agent-properties h3 {
+  font-size: 1.02rem;
+  margin-bottom: 0.7rem;
+}
+
+.agent-properties-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.agent-property-card {
+  display: grid;
+  grid-template-columns: 95px 1fr;
+  gap: 0.6rem;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.agent-property-card img {
+  width: 100%;
+  height: 100%;
+  min-height: 80px;
+  object-fit: cover;
+}
+
+.agent-property-content {
+  padding: 0.5rem 0.6rem 0.5rem 0;
+}
+
+.agent-property-content h4 {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.agent-property-content p {
+  margin: 0.15rem 0;
+  font-size: 0.85rem;
+}
+
+body.dark-mode .agent-card,
+body.dark-mode .agent-property-card {
+  background: rgba(30, 41, 59, 0.35);
+  border-color: rgba(148, 163, 184, 0.42);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
+}
+
+body.dark-mode .agent-role,
+body.dark-mode .agent-social a {
+  color: #D4AF37;
+}
+
+body.dark-mode .agent-social a {
+  background: rgba(148, 163, 184, 0.16);
+  border-color: rgba(148, 163, 184, 0.32);
+}
+
+@media (max-width: 1080px) {
+  .agents-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .agents-grid {
+    grid-template-columns: 1fr;
+  }
+}
