@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Carlos Ramirez",
+    "photo": "https://randomuser.me/api/portraits/men/32.jpg",
+    "role": "Agente Inmobiliario",
+    "description": "Especialista en propiedades residenciales en Managua y zonas de alto crecimiento.",
+    "phone": "+505 8888 8888",
+    "email": "carlos@inmonicaragua.com",
+    "instagram": "https://www.instagram.com",
+    "facebook": "https://www.facebook.com",
+    "tiktok": "https://www.tiktok.com",
+    "whatsapp": "https://wa.me/50588888888"
+  },
+  {
+    "name": "Mariana Lopez",
+    "photo": "https://randomuser.me/api/portraits/women/44.jpg",
+    "role": "Especialista en Propiedades de Lujo",
+    "description": "Asesora a compradores internacionales en propiedades premium frente al mar.",
+    "phone": "+505 8777 7788",
+    "email": "mariana@inmonicaragua.com",
+    "instagram": "https://www.instagram.com",
+    "facebook": "https://www.facebook.com",
+    "tiktok": "https://www.tiktok.com",
+    "whatsapp": "https://wa.me/50587777788"
+  },
+  {
+    "name": "Javier Morales",
+    "photo": "https://randomuser.me/api/portraits/men/52.jpg",
+    "role": "Asesor en Inversiones Inmobiliarias",
+    "description": "Enfocado en terrenos y fincas con alto potencial de retorno en Rivas y Matagalpa.",
+    "phone": "+505 8666 6677",
+    "email": "javier@inmonicaragua.com",
+    "instagram": "https://www.instagram.com",
+    "facebook": "https://www.facebook.com",
+    "tiktok": "https://www.tiktok.com",
+    "whatsapp": "https://wa.me/50586666677"
+  },
+  {
+    "name": "Andrea Castillo",
+    "photo": "https://randomuser.me/api/portraits/women/68.jpg",
+    "role": "Consultora de Propiedades Urbanas",
+    "description": "Experta en apartamentos ejecutivos y casas familiares en ciudades clave de Nicaragua.",
+    "phone": "+505 8555 5566",
+    "email": "andrea@inmonicaragua.com",
+    "instagram": "https://www.instagram.com",
+    "facebook": "https://www.facebook.com",
+    "tiktok": "https://www.tiktok.com",
+    "whatsapp": "https://wa.me/50585555566"
+  }
+]
