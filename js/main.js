@@ -8,6 +8,29 @@ if (menuToggle && mainNav) {
   });
 }
 
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('themeMode');
+
+function applyTheme(theme) {
+  const isDarkMode = theme === 'dark';
+  document.body.classList.toggle('dark-mode', isDarkMode);
+
+  if (themeToggle) {
+    themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+    themeToggle.setAttribute('aria-label', isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro');
+  }
+}
+
+applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
+
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+    localStorage.setItem('themeMode', nextTheme);
+    applyTheme(nextTheme);
+  });
+}
+
 const yearElement = document.getElementById('currentYear');
 if (yearElement) {
   yearElement.textContent = new Date().getFullYear();
