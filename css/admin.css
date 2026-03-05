@@ -138,21 +138,36 @@ button:hover {
   color: #d4e4ff;
 }
 
-.property-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.5rem;
-  max-height: 400px;
-  overflow-y: auto;
+.properties-table-wrapper {
+  overflow: auto;
+  max-height: 450px;
+  border: 1px solid #2a3f63;
+  border-radius: 10px;
 }
 
-.property-list button {
+.properties-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+  font-size: 0.88rem;
+}
+
+.properties-table th,
+.properties-table td {
+  padding: 0.55rem;
+  border-bottom: 1px solid #223352;
   text-align: left;
-  background: var(--card);
-  color: var(--text);
-  border: 1px solid #2a3f63;
+}
+
+.properties-table tbody tr:nth-child(even) {
+  background: rgba(22, 36, 63, 0.7);
+}
+
+.edit-btn {
+  background: #38bdf8;
+  color: #001227;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.8rem;
 }
 
 .preview-card {
