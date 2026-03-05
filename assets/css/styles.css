@@ -1,0 +1,37 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f7f9fc;
+  color: #1f2937;
+}
+
+.site-header {
+  background: #0a3a7a;
+  color: #fff;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem;
+}
+
+section {
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+code {
+  background: #eef2ff;
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+}
