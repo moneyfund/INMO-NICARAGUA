@@ -108,9 +108,24 @@
         </form>
 
         <aside class="manager-panel">
-          <h2>Propiedades cargadas</h2>
-          <p>Selecciona una propiedad para editarla.</p>
-          <ul id="propertyList" class="property-list"></ul>
+          <h2>CURRENT PROPERTIES</h2>
+          <p>Selecciona una propiedad para editarla con el botón <strong>EDIT</strong>.</p>
+          <div class="properties-table-wrapper">
+            <table class="properties-table" aria-label="Current properties list">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>City</th>
+                  <th>Price</th>
+                  <th>Bedrooms</th>
+                  <th>Bathrooms</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="propertyList"></tbody>
+            </table>
+          </div>
         </aside>
       </section>
 

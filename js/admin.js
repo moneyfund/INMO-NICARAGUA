@@ -105,16 +105,35 @@ function refreshOutput() {
 
 function renderList() {
   list.innerHTML = "";
+
+  if (!state.properties.length) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 7;
+    cell.textContent = "No properties found in /data/propiedades.json.";
+    row.appendChild(cell);
+    list.appendChild(row);
+    return;
+  }
+
   state.properties
     .sort((a, b) => Number(a.id) - Number(b.id))
     .forEach((item) => {
-      const li = document.createElement("li");
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = `#${item.id} - ${item.titulo}`;
-      btn.addEventListener("click", () => fillForm(item));
-      li.appendChild(btn);
-      list.appendChild(li);
+      const row = document.createElement("tr");
+      const [city = ""] = String(item.ubicacion || "").split(",");
+
+      row.innerHTML = `
+        <td>${item.id ?? ""}</td>
+        <td>${item.titulo ?? ""}</td>
+        <td>${city.trim()}</td>
+        <td>${formatCurrency(sanitizePrice(item.precio))}</td>
+        <td>${item.habitaciones ?? 0}</td>
+        <td>${item.banos ?? 0}</td>
+        <td><button type="button" class="edit-btn" data-id="${item.id}">EDIT</button></td>
+      `;
+
+      row.querySelector(".edit-btn").addEventListener("click", () => fillForm(item));
+      list.appendChild(row);
     });
 }
 
@@ -203,3 +222,5 @@ loginForm.addEventListener("submit", async (event) => {
   loginError.textContent = "Credenciales incorrectas.";
   adminPanel.classList.add("hidden");
 });
+
+loadProperties();
