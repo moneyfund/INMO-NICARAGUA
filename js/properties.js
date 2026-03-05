@@ -7,8 +7,10 @@ async function loadProperties() {
 }
 
 function propertyCardTemplate(property) {
+  const featuredClass = property.featured ? ' is-featured' : '';
+
   return `
-    <article class="property-card">
+    <article class="property-card${featuredClass}">
       <img src="${property.imagen}" alt="${property.titulo}">
       <div class="property-card-content">
         <p class="badge">${property.tipo}</p>
