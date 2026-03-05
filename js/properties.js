@@ -30,6 +30,7 @@ function renderFeatured(properties) {
   const featuredGrid = document.getElementById('featuredGrid');
   if (!featuredGrid) return;
   featuredGrid.innerHTML = properties.slice(0, 3).map(propertyCardTemplate).join('');
+  applyCardRevealAnimation(featuredGrid);
 }
 
 function renderPropertyList(properties) {
@@ -39,6 +40,29 @@ function renderPropertyList(properties) {
 
   grid.innerHTML = properties.map(propertyCardTemplate).join('');
   if (emptyState) emptyState.classList.toggle('hidden', properties.length !== 0);
+  applyCardRevealAnimation(grid);
+}
+
+function applyCardRevealAnimation(container) {
+  const cards = container.querySelectorAll('.property-card');
+  if (!cards.length) return;
+
+  cards.forEach((card) => {
+    card.classList.add('reveal-on-scroll');
+  });
+
+  const observer = new IntersectionObserver((entries, observerRef) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      observerRef.unobserve(entry.target);
+    });
+  }, {
+    threshold: 0.2,
+    rootMargin: '0px 0px -30px 0px'
+  });
+
+  cards.forEach((card) => observer.observe(card));
 }
 
 function getInitialFilters() {

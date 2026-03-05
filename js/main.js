@@ -37,3 +37,39 @@ if (contactForm) {
     contactForm.reset();
   });
 }
+
+const whatsappFloat = document.getElementById('whatsapp-float');
+
+function getRandomInterval() {
+  return Math.floor(Math.random() * 3000) + 5000;
+}
+
+function moveWhatsappButton() {
+  if (!whatsappFloat) return;
+
+  const padding = 24;
+  const maxX = window.innerWidth - whatsappFloat.offsetWidth - padding;
+  const maxY = window.innerHeight - whatsappFloat.offsetHeight - padding;
+  const minX = padding;
+  const minY = padding;
+
+  const nextX = Math.floor(Math.random() * Math.max(maxX - minX, 1)) + minX;
+  const nextY = Math.floor(Math.random() * Math.max(maxY - minY, 1)) + minY;
+
+  whatsappFloat.style.left = `${nextX}px`;
+  whatsappFloat.style.top = `${nextY}px`;
+}
+
+if (whatsappFloat) {
+  setTimeout(moveWhatsappButton, 1500);
+
+  (function scheduleWhatsappMove() {
+    const interval = getRandomInterval();
+    setTimeout(() => {
+      moveWhatsappButton();
+      scheduleWhatsappMove();
+    }, interval);
+  })();
+
+  window.addEventListener('resize', moveWhatsappButton);
+}
