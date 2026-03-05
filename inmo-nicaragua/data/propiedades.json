@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "titulo": "Casa familiar en Carretera a Masaya",
+    "ciudad": "Managua",
+    "tipo": "venta",
+    "precio": 185000,
+    "habitaciones": 4,
+    "banos": 3,
+    "destacada": true,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Amplia casa con jardín, terraza y seguridad 24/7 en residencial privado."
+  },
+  {
+    "id": 2,
+    "titulo": "Apartamento moderno en zona céntrica",
+    "ciudad": "León",
+    "tipo": "alquiler",
+    "precio": 950,
+    "habitaciones": 2,
+    "banos": 2,
+    "destacada": true,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Apartamento amueblado con excelente iluminación natural y fácil acceso a comercios."
+  },
+  {
+    "id": 3,
+    "titulo": "Villa con vista al lago",
+    "ciudad": "Granada",
+    "tipo": "venta",
+    "precio": 320000,
+    "habitaciones": 5,
+    "banos": 4,
+    "destacada": true,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Propiedad premium con piscina, área social y acabados de lujo en entorno natural."
+  },
+  {
+    "id": 4,
+    "titulo": "Casa de playa para alquiler vacacional",
+    "ciudad": "Rivas",
+    "tipo": "alquiler",
+    "precio": 1500,
+    "habitaciones": 3,
+    "banos": 2,
+    "destacada": false,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Ubicada a pocos metros de la costa, ideal para familias o estadías largas."
+  },
+  {
+    "id": 5,
+    "titulo": "Lote residencial en zona de crecimiento",
+    "ciudad": "Managua",
+    "tipo": "venta",
+    "precio": 58000,
+    "habitaciones": 0,
+    "banos": 0,
+    "destacada": false,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Terreno plano con acceso a servicios básicos, ideal para construcción inmediata."
+  }
+]

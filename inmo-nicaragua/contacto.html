@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INMO NICARAGUA | Contacto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="logo" href="index.html">INMO <span>NICARAGUA</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+      <nav class="main-nav" id="mainNav">
+        <a href="index.html">Inicio</a>
+        <a href="propiedades.html">Propiedades</a>
+        <a href="nosotros.html">Nosotros</a>
+        <a href="contacto.html" class="active">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="section container contact-layout">
+    <section>
+      <h1>Contáctanos</h1>
+      <p>Estamos listos para ayudarte con la compra, venta o alquiler de tu propiedad ideal.</p>
+      <div class="contact-cards">
+        <article><h3>Teléfono</h3><p>+505 0000 0000</p></article>
+        <article><h3>Correo</h3><p>info@inmonicaragua.com</p></article>
+        <article><h3>Dirección</h3><p>Managua, Nicaragua</p></article>
+      </div>
+    </section>
+
+    <section>
+      <form id="contactForm" class="contact-form">
+        <label>Nombre<input type="text" name="name" required></label>
+        <label>Email<input type="email" name="email" required></label>
+        <label>Mensaje<textarea name="message" rows="5" required></textarea></label>
+        <button type="submit" class="btn btn-primary">Enviar mensaje</button>
+      </form>
+      <p id="formFeedback" class="form-feedback" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 2026 INMO NICARAGUA. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
