@@ -1,33 +1,86 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>INMO Nicaragua</title>
-    <link rel="stylesheet" href="./assets/css/styles.css" />
-  </head>
-  <body>
-    <header class="site-header">
-      <h1>INMO Nicaragua</h1>
-      <p>GitHub Pages compatible static site with text-only source files.</p>
-    </header>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="INMO NICARAGUA - Propiedades exclusivas en los destinos más atractivos de Nicaragua." />
+  <title>INMO NICARAGUA | Inicio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a class="brand" href="index.html">INMO <span>NICARAGUA</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+      <nav id="mainNav" class="site-nav">
+        <a href="index.html" class="active">Inicio</a>
+        <a href="propiedades.html">Propiedades</a>
+        <a href="nosotros.html">Nosotros</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+    </div>
+  </header>
 
-    <main>
-      <section>
-        <h2>Status</h2>
-        <p id="status-message">Loading site status…</p>
-      </section>
+  <main>
+    <section class="hero">
+      <div class="overlay"></div>
+      <div class="container hero-content">
+        <p class="eyebrow">Portafolio inmobiliario premium</p>
+        <h1>Encuentra propiedades de lujo en Nicaragua</h1>
+        <p>Explora residencias frente al mar, fincas exclusivas y oportunidades de inversión en ubicaciones privilegiadas.</p>
+        <form class="search-form" id="heroSearchForm">
+          <input type="text" id="searchInput" placeholder="Ciudad o zona (Ej: San Juan del Sur)" aria-label="Buscar ubicación" />
+          <select id="typeInput" aria-label="Tipo de propiedad">
+            <option value="">Tipo de propiedad</option>
+            <option value="Casa">Casa</option>
+            <option value="Apartamento">Apartamento</option>
+            <option value="Terreno">Terreno</option>
+            <option value="Finca">Finca</option>
+          </select>
+          <button type="submit">Buscar ahora</button>
+        </form>
+      </div>
+    </section>
 
-      <section>
-        <h2>Assets path policy</h2>
-        <p>
-          Place any required images under
-          <code>/assets/images</code> and reference them using
-          <code>/assets/images/&lt;file-name&gt;</code>.
-        </p>
-      </section>
-    </main>
+    <section class="section container">
+      <div class="section-header">
+        <h2>Propiedades destacadas</h2>
+        <a href="propiedades.html" class="text-link">Ver todas</a>
+      </div>
+      <div id="featuredGrid" class="properties-grid"></div>
+    </section>
 
-    <script src="./assets/js/main.js"></script>
-  </body>
+    <section class="section section-dark">
+      <div class="container split-grid">
+        <div>
+          <h2>Asesoría inmobiliaria integral</h2>
+          <p>Te acompañamos en cada etapa: desde la búsqueda ideal hasta el cierre notarial, con transparencia y enfoque en resultados.</p>
+          <ul class="checklist">
+            <li>Selección curada de inmuebles premium</li>
+            <li>Soporte legal y documental</li>
+            <li>Análisis de inversión y retorno</li>
+          </ul>
+        </div>
+        <div class="highlight-card">
+          <h3>Más de 12 años conectando clientes con propiedades extraordinarias</h3>
+          <p>Atención personalizada para compradores nacionales e internacionales.</p>
+          <a href="contacto.html" class="button-outline">Solicitar asesoría</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <p>© <span id="currentYear"></span> INMO NICARAGUA. Todos los derechos reservados.</p>
+      <p>Desarrollado para despliegue en GitHub Pages.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/properties.js"></script>
+</body>
 </html>
