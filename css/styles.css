@@ -143,29 +143,64 @@ button:hover { background: var(--gold-light); }
   gap: 1.2rem;
 }
 .property-card {
-  border: 1px solid #e5e7eb;
-  background: var(--white);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 24px rgba(10,42,94,.08);
+  box-shadow: 0 10px 28px rgba(10, 42, 94, 0.16);
   position: relative;
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  z-index: 0;
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.property-card::before {
+  content: '';
+  position: absolute;
+  top: -120%;
+  left: -140%;
+  width: 70%;
+  height: 320%;
+  background: linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.05) 35%, rgba(255, 255, 255, 0.38) 50%, rgba(255, 255, 255, 0.08) 65%, transparent 100%);
+  opacity: 0;
+  transform: rotate(16deg);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  z-index: 1;
 }
 .property-card::after {
   content: '';
   position: absolute;
   inset: 0;
-  border: 1px solid rgba(212, 175, 55, 0);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: inherit;
   transition: border-color 0.35s ease;
   pointer-events: none;
+  z-index: 2;
+}
+
+.property-card.is-featured {
+  border-color: #D4AF37;
+}
+
+.property-card.is-featured::after {
+  border-color: rgba(212, 175, 55, 0.8);
 }
 .property-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(10,42,94,.22);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 24px 48px rgba(10, 42, 94, 0.3);
+  z-index: 5;
+}
+.property-card:hover::before {
+  opacity: 1;
+  animation: cardLightSweep 1.15s ease;
 }
 .property-card:hover::after {
-  border-color: rgba(212, 175, 55, 0.65);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.property-card.is-featured:hover::after {
+  border-color: #D4AF37;
 }
 .property-card img {
   width: 100%;
@@ -176,6 +211,15 @@ button:hover { background: var(--gold-light); }
 }
 .property-card:hover img {
   transform: scale(1.08);
+}
+
+@keyframes cardLightSweep {
+  0% {
+    left: -145%;
+  }
+  100% {
+    left: 170%;
+  }
 }
 .property-card-content { padding: 1rem; }
 .property-meta { display: flex; justify-content: space-between; gap: 0.75rem; font-size: .9rem; color: #4b5563; }
@@ -408,9 +452,23 @@ body.dark-mode label {
 body.dark-mode .property-card,
 body.dark-mode .contact-form,
 body.dark-mode .highlight-card {
-  background: #1e293b;
-  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(30, 41, 59, 0.35);
+  border-color: rgba(148, 163, 184, 0.42);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
+}
+
+body.dark-mode .property-card::after {
+  border-color: rgba(148, 163, 184, 0.42);
+}
+
+body.dark-mode .property-card:hover::after {
+  border-color: rgba(226, 232, 240, 0.42);
+}
+
+body.dark-mode .property-card.is-featured,
+body.dark-mode .property-card.is-featured::after,
+body.dark-mode .property-card.is-featured:hover::after {
+  border-color: #D4AF37;
 }
 
 body.dark-mode .price,
