@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "titulo": "Villa Frente al Mar en San Juan del Sur",
+    "ubicacion": "San Juan del Sur, Rivas",
+    "tipo": "Casa",
+    "precio": 780000,
+    "habitaciones": 5,
+    "banos": 4,
+    "area": 420,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Residencia de alto nivel con vista panorámica al Pacífico, piscina infinita y acabados premium."
+  },
+  {
+    "id": 2,
+    "titulo": "Penthouse Urbano en Managua",
+    "ubicacion": "Managua",
+    "tipo": "Apartamento",
+    "precio": 310000,
+    "habitaciones": 3,
+    "banos": 3,
+    "area": 210,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Penthouse moderno con terraza privada, seguridad 24/7 y ubicación estratégica en zona corporativa."
+  },
+  {
+    "id": 3,
+    "titulo": "Terreno Premium en Costa Esmeralda",
+    "ubicacion": "Tola, Rivas",
+    "tipo": "Terreno",
+    "precio": 195000,
+    "habitaciones": 0,
+    "banos": 0,
+    "area": 1500,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Lote amplio ideal para desarrollo residencial o vacacional, a minutos de playa y resorts de lujo."
+  },
+  {
+    "id": 4,
+    "titulo": "Finca Productiva en Matagalpa",
+    "ubicacion": "Matagalpa",
+    "tipo": "Finca",
+    "precio": 460000,
+    "habitaciones": 4,
+    "banos": 3,
+    "area": 980,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Finca con topografía privilegiada, acceso vial y potencial para café de especialidad o eco-turismo."
+  },
+  {
+    "id": 5,
+    "titulo": "Casa Colonial Renovada en Granada",
+    "ubicacion": "Granada",
+    "tipo": "Casa",
+    "precio": 285000,
+    "habitaciones": 4,
+    "banos": 3,
+    "area": 260,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Propiedad histórica restaurada con patio central, detalles artesanales y excelente ubicación turística."
+  },
+  {
+    "id": 6,
+    "titulo": "Apartamento Ejecutivo en León",
+    "ubicacion": "León",
+    "tipo": "Apartamento",
+    "precio": 148000,
+    "habitaciones": 2,
+    "banos": 2,
+    "area": 120,
+    "imagen": "https://via.placeholder.com/800x600",
+    "descripcion": "Unidad funcional de diseño contemporáneo para vivir o rentar en una de las ciudades con mayor proyección."
+  }
+]
