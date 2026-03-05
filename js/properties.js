@@ -47,9 +47,7 @@ function applyCardRevealAnimation(container) {
   const cards = container.querySelectorAll('.property-card');
   if (!cards.length) return;
 
-  cards.forEach((card) => {
-    card.classList.add('reveal-on-scroll');
-  });
+  cards.forEach((card) => card.classList.add('reveal-on-scroll'));
 
   const observer = new IntersectionObserver((entries, observerRef) => {
     entries.forEach((entry) => {
@@ -86,6 +84,25 @@ function applyFilters(properties) {
   });
 }
 
+function hasValidCoordinates(property) {
+  return Number.isFinite(property.lat) && Number.isFinite(property.lng);
+}
+
+function renderPropertyDetailMap(property) {
+  const mapElement = document.getElementById('propertyMap');
+  if (!mapElement || typeof L === 'undefined' || !hasValidCoordinates(property)) return;
+
+  const map = L.map(mapElement).setView([property.lat, property.lng], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  L.marker([property.lat, property.lng]).addTo(map)
+    .bindPopup(`<strong>${property.titulo}</strong><br>${property.ubicacion}`)
+    .openPopup();
+}
+
 function renderPropertyDetail(properties) {
   const detailContainer = document.getElementById('propertyDetail');
   if (!detailContainer) return;
@@ -116,7 +133,41 @@ function renderPropertyDetail(properties) {
         <a class="button-outline" href="contacto.html">Solicitar visita privada</a>
       </div>
     </div>
+    <section class="detail-map-section">
+      <h2>Ubicación de la propiedad</h2>
+      <div id="propertyMap" class="property-map"></div>
+    </section>
   `;
+
+  renderPropertyDetailMap(property);
+}
+
+function renderGlobalMap(properties) {
+  const mapElement = document.getElementById('propertiesMap');
+  if (!mapElement || typeof L === 'undefined') return;
+
+  const geolocated = properties.filter(hasValidCoordinates);
+  if (!geolocated.length) return;
+
+  const map = L.map(mapElement).setView([12.8654, -85.2072], 7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  const bounds = [];
+  geolocated.forEach((property) => {
+    const markerPosition = [property.lat, property.lng];
+    bounds.push(markerPosition);
+
+    L.marker(markerPosition).addTo(map)
+      .bindPopup(`
+        <strong>${property.titulo}</strong><br>
+        <a href="propiedad.html?id=${property.id}">Ver propiedad</a>
+      `);
+  });
+
+  map.fitBounds(bounds, { padding: [40, 40] });
 }
 
 (async function initProperties() {
@@ -141,13 +192,8 @@ function renderPropertyDetail(properties) {
     }
 
     renderPropertyDetail(properties);
+    renderGlobalMap(properties);
   } catch (error) {
-    const targets = ['featuredGrid', 'propertiesGrid', 'propertyDetail'];
-    targets.forEach((id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.innerHTML = '<p>No pudimos cargar la información de propiedades. Intenta nuevamente.</p>';
-      }
-    });
+    console.error('Error cargando propiedades:', error);
   }
 })();

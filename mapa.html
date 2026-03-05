@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Detalle de propiedad - INMO NICARAGUA." />
-  <title>INMO NICARAGUA | Detalle de Propiedad</title>
+  <meta name="description" content="Mapa interactivo de propiedades en Nicaragua - INMO NICARAGUA." />
+  <title>INMO NICARAGUA | Mapa</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -18,8 +18,8 @@
       <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
       <nav id="mainNav" class="site-nav">
         <a href="index.html">Inicio</a>
-        <a href="propiedades.html" class="active">Propiedades</a>
-        <a href="mapa.html">Mapa</a>
+        <a href="propiedades.html">Propiedades</a>
+        <a href="mapa.html" class="active">Mapa</a>
         <a href="nosotros.html">Nosotros</a>
         <a href="contacto.html">Contacto</a>
       </nav>
@@ -27,7 +27,17 @@
     </div>
   </header>
 
-  <main class="section container" id="propertyDetail"></main>
+  <main class="map-page-main">
+    <section class="map-page-header">
+      <div class="container">
+        <h1>Explora propiedades en el mapa</h1>
+        <p>Haz clic en cada marcador para conocer el inmueble y abrir su ficha detallada.</p>
+      </div>
+    </section>
+    <section class="map-page-section">
+      <div id="propertiesMap" class="properties-map-full" aria-label="Mapa de propiedades"></div>
+    </section>
+  </main>
 
   <footer class="site-footer">
     <div class="container footer-content">
