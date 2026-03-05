@@ -14,7 +14,7 @@
   <header class="site-header">
     <div class="container nav-wrapper">
       <a class="brand" href="index.html">INMO <span>NICARAGUA</span></a>
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
       <nav id="mainNav" class="site-nav">
         <a href="index.html" class="active">Inicio</a>
         <a href="propiedades.html">Propiedades</a>
@@ -26,7 +26,10 @@
 
   <main>
     <section class="hero">
-      <div class="overlay"></div>
+      <video class="hero-video" autoplay muted loop playsinline>
+        <source src="assets/VIDEO1.mp4" type="video/mp4" />
+      </video>
+      <div class="hero-overlay"></div>
       <div class="container hero-content">
         <p class="eyebrow">Portafolio inmobiliario premium</p>
         <h1>Encuentra propiedades de lujo en Nicaragua</h1>
