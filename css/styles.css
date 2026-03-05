@@ -296,9 +296,66 @@ button:hover { background: var(--gold-light); }
 .form-row label { display: block; margin-bottom: .35rem; font-weight: 600; color: var(--blue-deep); }
 .form-message { margin-top: .75rem; font-weight: 500; color: var(--blue-secondary); }
 
-.site-footer { background: #081f44; color: #d7def0; padding: 1.3rem 0; }
-.footer-content { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.site-footer {
+  width: 100%;
+  background: rgba(10, 42, 94, 0.35);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1.4rem 0 1.1rem;
+}
 
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  text-align: center;
+}
+
+.footer-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.95rem;
+}
+
+.footer-social a {
+  color: rgba(255, 255, 255, 0.8);
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+  opacity: 0.9;
+}
+
+.footer-social svg {
+  width: 26px;
+  height: 26px;
+  fill: currentColor;
+}
+
+.footer-social a:hover {
+  opacity: 1;
+  transform: translateY(-4px) scale(1.1);
+  color: #ffffff;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+}
+
+.footer-text {
+  color: #ffffff;
+  opacity: 0.8;
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
 
 
 .detail-map-section {
@@ -390,8 +447,13 @@ body.dark-mode .contact-form textarea {
 }
 
 body.dark-mode .site-footer {
-  background: #020617;
-  color: #cbd5e1;
+  background: rgba(2, 6, 23, 0.5);
+  border-top-color: rgba(148, 163, 184, 0.24);
+}
+
+body.dark-mode .footer-social a {
+  background: rgba(148, 163, 184, 0.16);
+  border-color: rgba(148, 163, 184, 0.28);
 }
 
 body.dark-mode .theme-toggle {
@@ -433,6 +495,17 @@ body.dark-mode .properties-map-full {
     gap: 1rem;
   }
   .site-nav.open { display: flex; }
+
+
+  .footer-social {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .footer-social a {
+    width: 44px;
+    height: 44px;
+  }
 
   .announcement-track {
     animation-duration: 15s;
