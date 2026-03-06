@@ -63,36 +63,71 @@ if (contactForm) {
 
 const whatsappFloat = document.getElementById('whatsapp-float');
 
-function getRandomInterval() {
-  return Math.floor(Math.random() * 3000) + 5000;
+function getRandomMoveDuration() {
+  return Math.floor(Math.random() * 8000) + 12000;
+}
+
+function getPauseBetweenMoves() {
+  return Math.floor(Math.random() * 2000) + 2000;
+}
+
+function getViewportBounds(element, padding = 24) {
+  const maxX = Math.max(window.innerWidth - element.offsetWidth - padding, padding);
+  const maxY = Math.max(window.innerHeight - element.offsetHeight - padding, padding);
+
+  return {
+    minX: padding,
+    minY: padding,
+    maxX,
+    maxY,
+  };
+}
+
+function getRandomPosition(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 function moveWhatsappButton() {
   if (!whatsappFloat) return;
 
-  const padding = 24;
-  const maxX = window.innerWidth - whatsappFloat.offsetWidth - padding;
-  const maxY = window.innerHeight - whatsappFloat.offsetHeight - padding;
-  const minX = padding;
-  const minY = padding;
+  const { minX, minY, maxX, maxY } = getViewportBounds(whatsappFloat);
 
-  const nextX = Math.floor(Math.random() * Math.max(maxX - minX, 1)) + minX;
-  const nextY = Math.floor(Math.random() * Math.max(maxY - minY, 1)) + minY;
+  const nextX = getRandomPosition(minX, maxX);
+  const nextY = getRandomPosition(minY, maxY);
+  const duration = getRandomMoveDuration();
 
+  whatsappFloat.style.setProperty('--whatsapp-move-duration', `${duration}ms`);
   whatsappFloat.style.left = `${nextX}px`;
   whatsappFloat.style.top = `${nextY}px`;
+
+  return duration;
+}
+
+function keepWhatsappInViewport() {
+  if (!whatsappFloat) return;
+
+  const { minX, minY, maxX, maxY } = getViewportBounds(whatsappFloat);
+  const currentX = parseFloat(whatsappFloat.style.left) || maxX;
+  const currentY = parseFloat(whatsappFloat.style.top) || maxY;
+
+  whatsappFloat.style.left = `${clamp(currentX, minX, maxX)}px`;
+  whatsappFloat.style.top = `${clamp(currentY, minY, maxY)}px`;
 }
 
 if (whatsappFloat) {
-  setTimeout(moveWhatsappButton, 1500);
+  keepWhatsappInViewport();
 
-  (function scheduleWhatsappMove() {
-    const interval = getRandomInterval();
-    setTimeout(() => {
-      moveWhatsappButton();
-      scheduleWhatsappMove();
-    }, interval);
-  })();
+  const runWhatsappAnimation = () => {
+    const duration = moveWhatsappButton();
+    const pause = getPauseBetweenMoves();
+    setTimeout(runWhatsappAnimation, duration + pause);
+  };
 
-  window.addEventListener('resize', moveWhatsappButton);
+  setTimeout(runWhatsappAnimation, 1500);
+
+  window.addEventListener('resize', keepWhatsappInViewport);
 }
