@@ -250,72 +250,76 @@ function clearFormState() {
   updatePreview();
 }
 
-document.getElementById("addBtn").addEventListener("click", () => {
-  if (!form.reportValidity()) return;
-  const property = buildPropertyFromForm();
-  state.properties.push(property);
-  fields.id.value = property.id;
-  renderList();
-  refreshOutput();
-});
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("addBtn").addEventListener("click", () => {
+    if (!form.reportValidity()) return;
+    const property = buildPropertyFromForm();
+    state.properties.push(property);
+    fields.id.value = property.id;
+    renderList();
+    refreshOutput();
+  });
 
-document.getElementById("updateBtn").addEventListener("click", () => {
-  if (!form.reportValidity()) return;
-  const currentId = Number(fields.id.value);
-  if (!currentId) {
-    alert("Selecciona una propiedad primero desde la lista para actualizarla.");
-    return;
-  }
+  document.getElementById("updateBtn").addEventListener("click", () => {
+    if (!form.reportValidity()) return;
+    const currentId = Number(fields.id.value);
+    if (!currentId) {
+      alert("Selecciona una propiedad primero desde la lista para actualizarla.");
+      return;
+    }
 
-  const index = state.properties.findIndex((item) => Number(item.id) === currentId);
-  if (index === -1) {
-    alert("No se encontró la propiedad para actualizar.");
-    return;
-  }
+    const index = state.properties.findIndex((item) => Number(item.id) === currentId);
+    if (index === -1) {
+      alert("No se encontró la propiedad para actualizar.");
+      return;
+    }
 
-  state.properties[index] = buildPropertyFromForm(currentId);
-  renderList();
-  refreshOutput();
-});
+    state.properties[index] = buildPropertyFromForm(currentId);
+    renderList();
+    refreshOutput();
+  });
 
-document.getElementById("clearBtn").addEventListener("click", () => {
-  clearFormState();
-});
-
-document.getElementById("copyBtn").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(output.textContent);
-    alert("JSON copiado al portapapeles.");
-  } catch (error) {
-    alert("No se pudo copiar automáticamente. Copia manualmente el texto.");
-  }
-});
-
-form.addEventListener("input", updatePreview);
-
-const loginForm = document.getElementById("loginForm");
-const loginScreen = document.getElementById("loginScreen");
-const adminPanel = document.getElementById("adminPanel");
-const loginError = document.getElementById("loginError");
-
-loginForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const user = document.getElementById("username").value.trim();
-  const pass = document.getElementById("password").value.trim();
-
-  if (user === LOGIN_USER && pass === LOGIN_PASS) {
-    loginScreen.classList.add("hidden");
-    adminPanel.classList.remove("hidden");
-    initLocationMap();
-    refreshMapSize();
-    await loadProperties();
+  document.getElementById("clearBtn").addEventListener("click", () => {
     clearFormState();
-    loginError.textContent = "";
-    return;
-  }
+  });
 
-  loginError.textContent = "Credenciales incorrectas.";
-  adminPanel.classList.add("hidden");
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(output.textContent);
+      alert("JSON copiado al portapapeles.");
+    } catch (error) {
+      alert("No se pudo copiar automáticamente. Copia manualmente el texto.");
+    }
+  });
+
+  form.addEventListener("input", updatePreview);
+
+  const loginForm = document.getElementById("loginForm");
+  const loginScreen = document.getElementById("loginScreen");
+  const adminPanel = document.getElementById("adminPanel");
+  const loginError = document.getElementById("loginError");
+
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
+
+    if (user === LOGIN_USER && pass === LOGIN_PASS) {
+      loginScreen.classList.add("hidden");
+      adminPanel.classList.remove("hidden");
+      initLocationMap();
+      refreshMapSize();
+      await loadProperties();
+      clearFormState();
+      loginError.textContent = "";
+      return;
+    }
+
+    loginError.textContent = "Credenciales incorrectas.";
+    adminPanel.classList.add("hidden");
+  });
+
+  window.addEventListener("resize", refreshMapSize);
+
+  loadProperties();
 });
-
-loadProperties();
