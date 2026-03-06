@@ -1,4 +1,5 @@
 let allProperties = [];
+const PROPERTY_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
 
 async function loadProperties() {
   const response = await fetch('data/propiedades.json');
@@ -8,10 +9,12 @@ async function loadProperties() {
 
 function propertyCardTemplate(property) {
   const featuredClass = property.featured ? ' is-featured' : '';
+  const imageSrc = getPropertyImage(property);
+  const imageAlt = property.titulo || 'Imagen de la propiedad';
 
   return `
     <article class="property-card${featuredClass}">
-      <img src="${property.imagen}" alt="${property.titulo}">
+      <img src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
       <div class="property-card-content">
         <p class="badge">${property.tipo}</p>
         <h3>${property.titulo}</h3>
@@ -26,6 +29,11 @@ function propertyCardTemplate(property) {
       </div>
     </article>
   `;
+}
+
+function getPropertyImage(property) {
+  const imageSource = String(property.image ?? property.imagen ?? '').trim();
+  return imageSource || PROPERTY_IMAGE_PLACEHOLDER;
 }
 
 function renderFeatured(properties) {
@@ -132,7 +140,7 @@ function renderPropertyDetail(properties) {
 
   detailContainer.innerHTML = `
     <div class="detail-grid">
-      <img src="${property.imagen}" alt="${property.titulo}">
+      <img src="${getPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
       <div>
         <p class="badge">${property.tipo}</p>
         <h1>${property.titulo}</h1>
