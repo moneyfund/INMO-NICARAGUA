@@ -1,5 +1,8 @@
 const LOGIN_USER = "admin";
 const LOGIN_PASS = "inm0nic2025";
+const NICARAGUA_CENTER = [12.8654, -85.2072];
+const DEFAULT_ZOOM = 7;
+const SELECTED_ZOOM = 15;
 
 const state = {
   properties: []
@@ -21,8 +24,8 @@ const fields = {
   type: document.getElementById("propertyType"),
   description: document.getElementById("description"),
   image: document.getElementById("image"),
-  lat: document.getElementById("lat"),
-  lng: document.getElementById("lng")
+  latitude: document.getElementById("latitude"),
+  longitude: document.getElementById("longitude")
 };
 
 const preview = {
@@ -35,10 +38,76 @@ const preview = {
   description: document.getElementById("previewDescription")
 };
 
+let locationMap;
+let locationMarker;
+
 function sanitizePrice(value) {
   if (typeof value === "number") return value;
   const clean = String(value).replace(/[^\d.-]/g, "");
   return Number(clean) || 0;
+}
+
+function getCoordinates(property = {}) {
+  const latitude = Number(property.latitude ?? property.lat);
+  const longitude = Number(property.longitude ?? property.lng);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  return { latitude, longitude };
+}
+
+function formatCoordinate(value) {
+  return Number(value).toFixed(6);
+}
+
+function setCoordinates(latitude, longitude, shouldCenter = false) {
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+
+  fields.latitude.value = formatCoordinate(latitude);
+  fields.longitude.value = formatCoordinate(longitude);
+
+  if (!locationMap || typeof L === "undefined") return;
+
+  if (!locationMarker) {
+    locationMarker = L.marker([latitude, longitude], { draggable: true }).addTo(locationMap);
+    locationMarker.on("dragend", (event) => {
+      const point = event.target.getLatLng();
+      setCoordinates(point.lat, point.lng);
+    });
+  } else {
+    locationMarker.setLatLng([latitude, longitude]);
+  }
+
+  if (shouldCenter) {
+    locationMap.setView([latitude, longitude], SELECTED_ZOOM);
+  }
+}
+
+function initLocationMap() {
+  if (typeof L === "undefined" || locationMap) return;
+  const mapContainer = document.getElementById("locationMap");
+  if (!mapContainer) return;
+
+  locationMap = L.map(mapContainer, {
+    zoomControl: true,
+    scrollWheelZoom: true
+  }).setView(NICARAGUA_CENTER, DEFAULT_ZOOM);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(locationMap);
+
+  locationMap.on("click", (event) => {
+    setCoordinates(event.latlng.lat, event.latlng.lng);
+  });
+}
+
+function refreshMapSize() {
+  if (!locationMap) return;
+  setTimeout(() => locationMap.invalidateSize(), 80);
 }
 
 function getNextId() {
@@ -47,6 +116,9 @@ function getNextId() {
 }
 
 function buildPropertyFromForm(currentId) {
+  const latitude = Number(fields.latitude.value || 0);
+  const longitude = Number(fields.longitude.value || 0);
+
   return {
     id: currentId || getNextId(),
     titulo: fields.title.value.trim(),
@@ -58,8 +130,10 @@ function buildPropertyFromForm(currentId) {
     area: Number(fields.size.value || 0),
     imagen: fields.image.value.trim(),
     descripcion: fields.description.value.trim(),
-    lat: Number(fields.lat.value || 0),
-    lng: Number(fields.lng.value || 0)
+    latitude,
+    longitude,
+    lat: latitude,
+    lng: longitude
   };
 }
 
@@ -76,8 +150,15 @@ function fillForm(property) {
   fields.size.value = property.area ?? 0;
   fields.image.value = property.imagen || "";
   fields.description.value = property.descripcion || "";
-  fields.lat.value = property.lat ?? "";
-  fields.lng.value = property.lng ?? "";
+
+  const coordinates = getCoordinates(property);
+  if (coordinates) {
+    setCoordinates(coordinates.latitude, coordinates.longitude, true);
+  } else {
+    fields.latitude.value = "";
+    fields.longitude.value = "";
+  }
+
   updatePreview();
 }
 
@@ -154,6 +235,18 @@ async function loadProperties() {
 function clearFormState() {
   form.reset();
   fields.id.value = "";
+  fields.latitude.value = "";
+  fields.longitude.value = "";
+
+  if (locationMap) {
+    locationMap.setView(NICARAGUA_CENTER, DEFAULT_ZOOM);
+  }
+
+  if (locationMarker) {
+    locationMap.removeLayer(locationMarker);
+    locationMarker = null;
+  }
+
   updatePreview();
 }
 
@@ -213,6 +306,8 @@ loginForm.addEventListener("submit", async (event) => {
   if (user === LOGIN_USER && pass === LOGIN_PASS) {
     loginScreen.classList.add("hidden");
     adminPanel.classList.remove("hidden");
+    initLocationMap();
+    refreshMapSize();
     await loadProperties();
     clearFormState();
     loginError.textContent = "";

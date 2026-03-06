@@ -228,6 +228,18 @@ button:hover {
   word-break: break-word;
 }
 
+.location-map {
+  width: 100%;
+  min-height: 320px;
+  border-radius: 12px;
+  border: 1px solid #2a3f63;
+  overflow: hidden;
+}
+
+.leaflet-control-zoom a {
+  color: #0b1220;
+}
+
 @media (max-width: 900px) {
   .editor-layout,
   .preview-card,
@@ -237,5 +249,9 @@ button:hover {
 
   .button-row {
     grid-template-columns: 1fr;
+  }
+
+  .location-map {
+    min-height: 260px;
   }
 }

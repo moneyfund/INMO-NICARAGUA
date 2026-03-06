@@ -86,21 +86,33 @@ function applyFilters(properties) {
   });
 }
 
+function getPropertyCoordinates(property) {
+  const latitude = Number(property.latitude ?? property.lat);
+  const longitude = Number(property.longitude ?? property.lng);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+
+  return [latitude, longitude];
+}
+
 function hasValidCoordinates(property) {
-  return Number.isFinite(property.lat) && Number.isFinite(property.lng);
+  return Boolean(getPropertyCoordinates(property));
 }
 
 function renderPropertyDetailMap(property) {
   const mapElement = document.getElementById('propertyMap');
   if (!mapElement || typeof L === 'undefined' || !hasValidCoordinates(property)) return;
 
-  const map = L.map(mapElement).setView([property.lat, property.lng], 14);
+  const coordinates = getPropertyCoordinates(property);
+  if (!coordinates) return;
+
+  const map = L.map(mapElement).setView(coordinates, 14);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  L.marker([property.lat, property.lng]).addTo(map)
+  L.marker(coordinates).addTo(map)
     .bindPopup(`<strong>${property.titulo}</strong><br>${property.ubicacion}`)
     .openPopup();
 }
@@ -159,7 +171,8 @@ function renderGlobalMap(properties) {
 
   const bounds = [];
   geolocated.forEach((property) => {
-    const markerPosition = [property.lat, property.lng];
+    const markerPosition = getPropertyCoordinates(property);
+    if (!markerPosition) return;
     bounds.push(markerPosition);
 
     L.marker(markerPosition).addTo(map)
