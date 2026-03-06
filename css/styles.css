@@ -243,7 +243,8 @@ button:hover { background: var(--gold-light); }
   left: calc(100vw - 86px);
   top: calc(100vh - 86px);
   z-index: 9999;
-  transition: left 3s ease, top 3s ease, transform 0.3s ease;
+  --whatsapp-move-duration: 14000ms;
+  transition: left var(--whatsapp-move-duration) linear, top var(--whatsapp-move-duration) linear, transform 0.3s ease;
 }
 
 #whatsapp-float a {
