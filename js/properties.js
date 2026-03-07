@@ -1,6 +1,46 @@
 let allProperties = [];
 const PROPERTY_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
 
+
+const DIRECT_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
+const FACEBOOK_IMAGE_DOMAINS = ['facebook.com', 'fbcdn.net'];
+
+function isFacebookImageUrl(urlString) {
+  try {
+    const hostname = new URL(urlString).hostname.toLowerCase();
+    return FACEBOOK_IMAGE_DOMAINS.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+  } catch (error) {
+    return false;
+  }
+}
+
+function hasAllowedImageExtension(urlString) {
+  try {
+    const { pathname } = new URL(urlString);
+    const path = pathname.toLowerCase();
+    return DIRECT_IMAGE_EXTENSIONS.some((extension) => path.endsWith(extension));
+  } catch (error) {
+    return false;
+  }
+}
+
+function normalizePropertyImageUrl(urlString) {
+  const normalized = String(urlString || '').trim();
+  if (!normalized) return '';
+
+  if (isFacebookImageUrl(normalized)) {
+    console.warn('Las imágenes de Facebook no pueden ser usadas directamente. Use enlaces de imágenes directos como JPG o PNG.');
+    return '';
+  }
+
+  if (!hasAllowedImageExtension(normalized)) {
+    console.warn(`Imagen descartada por no ser un enlace directo válido (jpg, jpeg, png, webp): ${normalized}`);
+    return '';
+  }
+
+  return normalized;
+}
+
 async function loadProperties() {
   const response = await fetch('data/propiedades.json');
   allProperties = await response.json();
@@ -37,12 +77,12 @@ function getPropertyImages(property) {
     : [];
 
   const normalizedImages = imagesFromArray
-    .map((image) => String(image || '').trim())
+    .map(normalizePropertyImageUrl)
     .filter(Boolean);
 
   if (normalizedImages.length) return normalizedImages;
 
-  const legacyImage = String(property.image ?? property.imagen ?? '').trim();
+  const legacyImage = normalizePropertyImageUrl(property.image ?? property.imagen ?? '');
   return legacyImage ? [legacyImage] : [];
 }
 
