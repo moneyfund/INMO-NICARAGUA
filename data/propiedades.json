@@ -8,11 +8,15 @@
     "habitaciones": 5,
     "banos": 4,
     "area": 420,
-    "imagen": "https://www.facebook.com/photo/?fbid=122113713399219395&set=pcb.122113713897219395",
+    "imagen": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
     "descripcion": "Residencia de alto nivel con vista panorámica al Pacífico, piscina infinita y acabados premium.",
     "lat": 11.2528,
     "lng": -85.8705,
-    "agent": "Carlos Ramirez"
+    "agent": "Carlos Ramirez",
+    "images": [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80"
+    ]
   },
   {
     "id": 2,
@@ -23,11 +27,15 @@
     "habitaciones": 3,
     "banos": 3,
     "area": 210,
-    "imagen": "https://www.facebook.com/photo/?fbid=122113891197219395&set=pcb.122113891683219395",
+    "imagen": "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
     "descripcion": "Penthouse moderno con terraza privada, seguridad 24/7 y ubicación estratégica en zona corporativa.",
     "lat": 12.114993,
     "lng": -86.236174,
-    "agent": "Mariana Lopez"
+    "agent": "Mariana Lopez",
+    "images": [
+      "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80"
+    ]
   },
   {
     "id": 3,
@@ -42,7 +50,10 @@
     "descripcion": "Lote amplio ideal para desarrollo residencial o vacacional, a minutos de playa y resorts de lujo.",
     "lat": 11.4282,
     "lng": -86.0817,
-    "agent": "Javier Morales"
+    "agent": "Javier Morales",
+    "images": [
+      "https://via.placeholder.com/800x600"
+    ]
   },
   {
     "id": 4,
@@ -57,7 +68,10 @@
     "descripcion": "Finca con topografía privilegiada, acceso vial y potencial para café de especialidad o eco-turismo.",
     "lat": 12.9256,
     "lng": -85.917,
-    "agent": "Andrea Castillo"
+    "agent": "Andrea Castillo",
+    "images": [
+      "https://via.placeholder.com/800x600"
+    ]
   },
   {
     "id": 5,
@@ -72,7 +86,10 @@
     "descripcion": "Propiedad histórica restaurada con patio central, detalles artesanales y excelente ubicación turística.",
     "lat": 11.9344,
     "lng": -85.956,
-    "agent": "Carlos Ramirez"
+    "agent": "Carlos Ramirez",
+    "images": [
+      "https://via.placeholder.com/800x600"
+    ]
   },
   {
     "id": 6,
@@ -87,6 +104,9 @@
     "descripcion": "Unidad funcional de diseño contemporáneo para vivir o rentar en una de las ciudades con mayor proyección.",
     "lat": 12.437,
     "lng": -86.878,
-    "agent": "Mariana Lopez"
+    "agent": "Mariana Lopez",
+    "images": [
+      "https://via.placeholder.com/800x600"
+    ]
   }
 ]
