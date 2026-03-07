@@ -237,6 +237,13 @@ button:hover {
   overflow: hidden;
 }
 
+#admin-map {
+  height: 400px;
+  width: 100%;
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
 .leaflet-control-zoom a {
   color: #0b1220;
 }

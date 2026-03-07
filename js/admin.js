@@ -43,6 +43,46 @@ const preview = {
 let locationMap;
 let locationMarker;
 
+
+const DIRECT_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+const FACEBOOK_IMAGE_DOMAINS = ["facebook.com", "fbcdn.net"];
+
+function isFacebookImageUrl(urlString) {
+  try {
+    const hostname = new URL(urlString).hostname.toLowerCase();
+    return FACEBOOK_IMAGE_DOMAINS.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+  } catch (error) {
+    return false;
+  }
+}
+
+function hasAllowedImageExtension(urlString) {
+  try {
+    const { pathname } = new URL(urlString);
+    const path = pathname.toLowerCase();
+    return DIRECT_IMAGE_EXTENSIONS.some((extension) => path.endsWith(extension));
+  } catch (error) {
+    return false;
+  }
+}
+
+function normalizeImageUrl(urlString) {
+  const normalized = String(urlString || "").trim();
+  if (!normalized) return "";
+
+  if (isFacebookImageUrl(normalized)) {
+    console.warn("Las imágenes de Facebook no pueden ser usadas directamente. Use enlaces de imágenes directos como JPG o PNG.");
+    return "";
+  }
+
+  if (!hasAllowedImageExtension(normalized)) {
+    console.warn(`Imagen descartada por no ser un enlace directo válido (jpg, jpeg, png, webp): ${normalized}`);
+    return "";
+  }
+
+  return normalized;
+}
+
 function sanitizePrice(value) {
   if (typeof value === "number") return value;
   const clean = String(value).replace(/[^\d.-]/g, "");
@@ -89,7 +129,7 @@ function setCoordinates(latitude, longitude, shouldCenter = false) {
 
 function initLocationMap() {
   if (typeof L === "undefined" || locationMap) return;
-  const mapContainer = document.getElementById("locationMap");
+  const mapContainer = document.getElementById("admin-map");
   if (!mapContainer) return;
 
   locationMap = L.map(mapContainer, {
@@ -147,18 +187,18 @@ function getImagesFromProperty(property) {
     : [];
 
   const normalized = arrayImages
-    .map((image) => String(image || "").trim())
+    .map(normalizeImageUrl)
     .filter(Boolean);
 
   if (normalized.length) return normalized;
 
-  const fallback = String(property.imagen ?? property.image ?? "").trim();
+  const fallback = normalizeImageUrl(property.imagen ?? property.image ?? "");
   return fallback ? [fallback] : [];
 }
 
 function getImageUrlsFromForm() {
   return Array.from(imagesContainer.querySelectorAll(".image-url-input"))
-    .map((input) => input.value.trim())
+    .map((input) => normalizeImageUrl(input.value))
     .filter(Boolean);
 }
 
@@ -249,7 +289,7 @@ function updatePreview() {
   preview.price.textContent = formatCurrency(sanitizePrice(fields.price.value));
   preview.specs.textContent = `${fields.bedrooms.value || 0} hab • ${fields.bathrooms.value || 0} baños • ${fields.size.value || 0} m²`;
   preview.description.textContent = fields.description.value || "Descripción de la propiedad...";
-  preview.image.src = getImageUrlsFromForm()[0] || "https://via.placeholder.com/600x380?text=Previsualizacion";
+  preview.image.src = getImageUrlsFromForm()[0] || "assets/placeholder.svg";
 }
 
 function refreshOutput() {
