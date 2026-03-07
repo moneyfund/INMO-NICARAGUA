@@ -23,10 +23,12 @@ const fields = {
   size: document.getElementById("size"),
   type: document.getElementById("propertyType"),
   description: document.getElementById("description"),
-  image: document.getElementById("image"),
   latitude: document.getElementById("latitude"),
   longitude: document.getElementById("longitude")
 };
+
+const imagesContainer = document.getElementById("imagesContainer");
+const addImageBtn = document.getElementById("addImageBtn");
 
 const preview = {
   image: document.getElementById("previewImage"),
@@ -118,6 +120,7 @@ function getNextId() {
 function buildPropertyFromForm(currentId) {
   const latitude = Number(fields.latitude.value || 0);
   const longitude = Number(fields.longitude.value || 0);
+  const images = getImageUrlsFromForm();
 
   return {
     id: currentId || getNextId(),
@@ -128,13 +131,81 @@ function buildPropertyFromForm(currentId) {
     habitaciones: Number(fields.bedrooms.value || 0),
     banos: Number(fields.bathrooms.value || 0),
     area: Number(fields.size.value || 0),
-    imagen: fields.image.value.trim(),
+    images,
+    imagen: images[0] || "",
     descripcion: fields.description.value.trim(),
     latitude,
     longitude,
     lat: latitude,
     lng: longitude
   };
+}
+
+function getImagesFromProperty(property) {
+  const arrayImages = Array.isArray(property.images)
+    ? property.images
+    : [];
+
+  const normalized = arrayImages
+    .map((image) => String(image || "").trim())
+    .filter(Boolean);
+
+  if (normalized.length) return normalized;
+
+  const fallback = String(property.imagen ?? property.image ?? "").trim();
+  return fallback ? [fallback] : [];
+}
+
+function getImageUrlsFromForm() {
+  return Array.from(imagesContainer.querySelectorAll(".image-url-input"))
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+function refreshImageFieldLabels() {
+  const rows = imagesContainer.querySelectorAll(".image-input-row");
+  rows.forEach((row, index) => {
+    const label = row.querySelector("label");
+    if (label) label.textContent = `Imagen ${index + 1}`;
+
+    const removeButton = row.querySelector(".remove-image-btn");
+    if (removeButton) removeButton.disabled = rows.length === 1;
+  });
+}
+
+function addImageField(value = "") {
+  const row = document.createElement("div");
+  row.className = "image-input-row";
+
+  const index = imagesContainer.children.length + 1;
+  row.innerHTML = `
+    <label>Imagen ${index}</label>
+    <div class="image-input-controls">
+      <input type="url" class="image-url-input" placeholder="https://..." required>
+      <button type="button" class="ghost remove-image-btn">Quitar</button>
+    </div>
+  `;
+
+  const input = row.querySelector(".image-url-input");
+  const removeBtn = row.querySelector(".remove-image-btn");
+
+  input.value = value;
+  input.addEventListener("input", updatePreview);
+  removeBtn.addEventListener("click", () => {
+    if (imagesContainer.children.length === 1) return;
+    row.remove();
+    refreshImageFieldLabels();
+    updatePreview();
+  });
+
+  imagesContainer.appendChild(row);
+  refreshImageFieldLabels();
+}
+
+function resetImageFields(values = [""]) {
+  imagesContainer.innerHTML = "";
+  values.forEach((value) => addImageField(value));
+  refreshImageFieldLabels();
 }
 
 function fillForm(property) {
@@ -148,7 +219,8 @@ function fillForm(property) {
   fields.bedrooms.value = property.habitaciones ?? 0;
   fields.bathrooms.value = property.banos ?? 0;
   fields.size.value = property.area ?? 0;
-  fields.image.value = property.imagen || "";
+  const images = getImagesFromProperty(property);
+  resetImageFields(images.length ? images : [""]);
   fields.description.value = property.descripcion || "";
 
   const coordinates = getCoordinates(property);
@@ -177,7 +249,7 @@ function updatePreview() {
   preview.price.textContent = formatCurrency(sanitizePrice(fields.price.value));
   preview.specs.textContent = `${fields.bedrooms.value || 0} hab • ${fields.bathrooms.value || 0} baños • ${fields.size.value || 0} m²`;
   preview.description.textContent = fields.description.value || "Descripción de la propiedad...";
-  preview.image.src = fields.image.value || "https://via.placeholder.com/600x380?text=Previsualizacion";
+  preview.image.src = getImageUrlsFromForm()[0] || "https://via.placeholder.com/600x380?text=Previsualizacion";
 }
 
 function refreshOutput() {
@@ -237,6 +309,7 @@ function clearFormState() {
   fields.id.value = "";
   fields.latitude.value = "";
   fields.longitude.value = "";
+  resetImageFields([""]);
 
   if (locationMap) {
     locationMap.setView(NICARAGUA_CENTER, DEFAULT_ZOOM);
@@ -251,6 +324,12 @@ function clearFormState() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  resetImageFields([""]);
+
+  addImageBtn.addEventListener("click", () => {
+    addImageField("");
+  });
+
   document.getElementById("addBtn").addEventListener("click", () => {
     if (!form.reportValidity()) return;
     const property = buildPropertyFromForm();

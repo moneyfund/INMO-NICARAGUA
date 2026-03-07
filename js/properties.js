@@ -9,7 +9,7 @@ async function loadProperties() {
 
 function propertyCardTemplate(property) {
   const featuredClass = property.featured ? ' is-featured' : '';
-  const imageSrc = getPropertyImage(property);
+  const imageSrc = getPrimaryPropertyImage(property);
   const imageAlt = property.titulo || 'Imagen de la propiedad';
 
   return `
@@ -31,9 +31,24 @@ function propertyCardTemplate(property) {
   `;
 }
 
-function getPropertyImage(property) {
-  const imageSource = String(property.image ?? property.imagen ?? '').trim();
-  return imageSource || PROPERTY_IMAGE_PLACEHOLDER;
+function getPropertyImages(property) {
+  const imagesFromArray = Array.isArray(property.images)
+    ? property.images
+    : [];
+
+  const normalizedImages = imagesFromArray
+    .map((image) => String(image || '').trim())
+    .filter(Boolean);
+
+  if (normalizedImages.length) return normalizedImages;
+
+  const legacyImage = String(property.image ?? property.imagen ?? '').trim();
+  return legacyImage ? [legacyImage] : [];
+}
+
+function getPrimaryPropertyImage(property) {
+  const [primaryImage] = getPropertyImages(property);
+  return primaryImage || PROPERTY_IMAGE_PLACEHOLDER;
 }
 
 function renderFeatured(properties) {
@@ -138,9 +153,11 @@ function renderPropertyDetail(properties) {
     return;
   }
 
+  const galleryImages = getPropertyImages(property);
+
   detailContainer.innerHTML = `
     <div class="detail-grid">
-      <img src="${getPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
+      <img src="${getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
       <div>
         <p class="badge">${property.tipo}</p>
         <h1>${property.titulo}</h1>
@@ -155,6 +172,7 @@ function renderPropertyDetail(properties) {
         <a class="button-outline" href="contacto.html">Solicitar visita privada</a>
       </div>
     </div>
+    <section class="detail-gallery-section hidden" data-gallery-images='${JSON.stringify(galleryImages)}'></section>
     <section class="detail-map-section">
       <h2>Ubicación de la propiedad</h2>
       <div id="propertyMap" class="property-map"></div>
