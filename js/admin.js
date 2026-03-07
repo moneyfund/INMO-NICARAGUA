@@ -127,8 +127,14 @@ function setCoordinates(latitude, longitude, shouldCenter = false) {
   }
 }
 
-function initLocationMap() {
-  if (typeof L === "undefined" || locationMap) return;
+function initAdminMap() {
+  if (locationMap || typeof L === "undefined") {
+    if (typeof L === "undefined") {
+      console.error("Leaflet no está disponible. Verifique que leaflet.js se cargue correctamente.");
+    }
+    return;
+  }
+
   const mapContainer = document.getElementById("admin-map");
   if (!mapContainer) return;
 
@@ -145,11 +151,15 @@ function initLocationMap() {
   locationMap.on("click", (event) => {
     setCoordinates(event.latlng.lat, event.latlng.lng);
   });
+
+  setTimeout(() => {
+    locationMap.invalidateSize();
+  }, 300);
 }
 
 function refreshMapSize() {
   if (!locationMap) return;
-  setTimeout(() => locationMap.invalidateSize(), 80);
+  setTimeout(() => locationMap.invalidateSize(), 300);
 }
 
 function getNextId() {
@@ -364,6 +374,7 @@ function clearFormState() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  initAdminMap();
   resetImageFields([""]);
 
   addImageBtn.addEventListener("click", () => {
@@ -426,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (user === LOGIN_USER && pass === LOGIN_PASS) {
       loginScreen.classList.add("hidden");
       adminPanel.classList.remove("hidden");
-      initLocationMap();
+      initAdminMap();
       refreshMapSize();
       await loadProperties();
       clearFormState();
