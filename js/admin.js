@@ -44,23 +44,12 @@ let locationMap;
 let locationMarker;
 
 
-const DIRECT_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
 const FACEBOOK_IMAGE_DOMAINS = ["facebook.com", "fbcdn.net"];
 
 function isFacebookImageUrl(urlString) {
   try {
     const hostname = new URL(urlString).hostname.toLowerCase();
     return FACEBOOK_IMAGE_DOMAINS.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
-  } catch (error) {
-    return false;
-  }
-}
-
-function hasAllowedImageExtension(urlString) {
-  try {
-    const { pathname } = new URL(urlString);
-    const path = pathname.toLowerCase();
-    return DIRECT_IMAGE_EXTENSIONS.some((extension) => path.endsWith(extension));
   } catch (error) {
     return false;
   }
@@ -75,8 +64,14 @@ function normalizeImageUrl(urlString) {
     return "";
   }
 
-  if (!hasAllowedImageExtension(normalized)) {
-    console.warn(`Imagen descartada por no ser un enlace directo válido (jpg, jpeg, png, webp): ${normalized}`);
+  try {
+    const parsed = new URL(normalized, window.location.origin);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      console.warn(`Imagen descartada por protocolo no compatible: ${normalized}`);
+      return "";
+    }
+  } catch (error) {
+    console.warn(`Imagen descartada por URL inválida: ${normalized}`);
     return "";
   }
 
@@ -182,7 +177,6 @@ function buildPropertyFromForm(currentId) {
     banos: Number(fields.bathrooms.value || 0),
     area: Number(fields.size.value || 0),
     images,
-    imagen: images[0] || "",
     descripcion: fields.description.value.trim(),
     latitude,
     longitude,
@@ -202,7 +196,7 @@ function getImagesFromProperty(property) {
 
   if (normalized.length) return normalized;
 
-  const fallback = normalizeImageUrl(property.imagen ?? property.image ?? "");
+  const fallback = normalizeImageUrl(property.image ?? "");
   return fallback ? [fallback] : [];
 }
 

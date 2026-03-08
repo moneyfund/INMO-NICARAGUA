@@ -2,23 +2,13 @@ let allProperties = [];
 const PROPERTY_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
 
 
-const DIRECT_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
 const FACEBOOK_IMAGE_DOMAINS = ['facebook.com', 'fbcdn.net'];
+const SWIPE_THRESHOLD = 45;
 
 function isFacebookImageUrl(urlString) {
   try {
     const hostname = new URL(urlString).hostname.toLowerCase();
     return FACEBOOK_IMAGE_DOMAINS.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
-  } catch (error) {
-    return false;
-  }
-}
-
-function hasAllowedImageExtension(urlString) {
-  try {
-    const { pathname } = new URL(urlString);
-    const path = pathname.toLowerCase();
-    return DIRECT_IMAGE_EXTENSIONS.some((extension) => path.endsWith(extension));
   } catch (error) {
     return false;
   }
@@ -33,8 +23,14 @@ function normalizePropertyImageUrl(urlString) {
     return '';
   }
 
-  if (!hasAllowedImageExtension(normalized)) {
-    console.warn(`Imagen descartada por no ser un enlace directo válido (jpg, jpeg, png, webp): ${normalized}`);
+  try {
+    const parsed = new URL(normalized, window.location.origin);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      console.warn(`Imagen descartada por protocolo no compatible: ${normalized}`);
+      return '';
+    }
+  } catch (error) {
+    console.warn(`Imagen descartada por URL inválida: ${normalized}`);
     return '';
   }
 
@@ -82,7 +78,7 @@ function getPropertyImages(property) {
 
   if (normalizedImages.length) return normalizedImages;
 
-  const legacyImage = normalizePropertyImageUrl(property.image ?? property.imagen ?? '');
+  const legacyImage = normalizePropertyImageUrl(property.image ?? '');
   return legacyImage ? [legacyImage] : [];
 }
 
@@ -195,9 +191,20 @@ function renderPropertyDetail(properties) {
 
   const galleryImages = getPropertyImages(property);
 
+  const galleryMarkup = galleryImages.length > 1
+    ? `
+      <button class="gallery-nav gallery-prev" type="button" aria-label="Imagen anterior">&#10094;</button>
+      <button class="gallery-nav gallery-next" type="button" aria-label="Imagen siguiente">&#10095;</button>
+      <div class="gallery-indicators" aria-label="Indicadores de imágenes"></div>
+    `
+    : '';
+
   detailContainer.innerHTML = `
     <div class="detail-grid">
-      <img src="${getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
+      <section class="detail-gallery" data-gallery-images='${JSON.stringify(galleryImages)}'>
+        <img class="detail-gallery-main-image" src="${getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
+        ${galleryMarkup}
+      </section>
       <div>
         <p class="badge">${property.tipo}</p>
         <h1>${property.titulo}</h1>
@@ -212,14 +219,78 @@ function renderPropertyDetail(properties) {
         <a class="button-outline" href="contacto.html">Solicitar visita privada</a>
       </div>
     </div>
-    <section class="detail-gallery-section hidden" data-gallery-images='${JSON.stringify(galleryImages)}'></section>
     <section class="detail-map-section">
       <h2>Ubicación de la propiedad</h2>
       <div id="propertyMap" class="property-map"></div>
     </section>
   `;
 
+  initPropertyGallery(detailContainer);
   renderPropertyDetailMap(property);
+}
+
+function initPropertyGallery(scope = document) {
+  const gallery = scope.querySelector('.detail-gallery');
+  if (!gallery) return;
+
+  const mainImage = gallery.querySelector('.detail-gallery-main-image');
+  if (!mainImage) return;
+
+  const images = (() => {
+    try {
+      const parsed = JSON.parse(gallery.dataset.galleryImages || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  })();
+
+  if (!images.length) return;
+
+  const indicators = gallery.querySelector('.gallery-indicators');
+  let currentIndex = 0;
+  let pointerStartX = 0;
+
+  function updateImage(index) {
+    currentIndex = (index + images.length) % images.length;
+    mainImage.src = images[currentIndex] || PROPERTY_IMAGE_PLACEHOLDER;
+    mainImage.alt = `Imagen ${currentIndex + 1} de ${images.length}`;
+
+    if (!indicators) return;
+    indicators.querySelectorAll('button').forEach((dot, dotIndex) => {
+      dot.classList.toggle('is-active', dotIndex === currentIndex);
+      dot.setAttribute('aria-current', dotIndex === currentIndex ? 'true' : 'false');
+    });
+  }
+
+  if (indicators) {
+    indicators.innerHTML = images
+      .map((_, index) => `<button type="button" aria-label="Ver imagen ${index + 1}"></button>`)
+      .join('');
+
+    indicators.querySelectorAll('button').forEach((dot, dotIndex) => {
+      dot.addEventListener('click', () => updateImage(dotIndex));
+    });
+  }
+
+  gallery.querySelector('.gallery-prev')?.addEventListener('click', () => updateImage(currentIndex - 1));
+  gallery.querySelector('.gallery-next')?.addEventListener('click', () => updateImage(currentIndex + 1));
+
+  gallery.addEventListener('pointerdown', (event) => {
+    pointerStartX = event.clientX;
+  });
+
+  gallery.addEventListener('pointerup', (event) => {
+    const diffX = event.clientX - pointerStartX;
+    if (Math.abs(diffX) < SWIPE_THRESHOLD) return;
+    if (diffX < 0) {
+      updateImage(currentIndex + 1);
+      return;
+    }
+    updateImage(currentIndex - 1);
+  });
+
+  updateImage(0);
 }
 
 function renderGlobalMap(properties) {
