@@ -336,7 +336,55 @@ button:hover { background: var(--gold-light); }
 .empty-state { text-align: center; margin-top: 1rem; color: #4b5563; }
 
 .detail-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; }
-.detail-grid img { width: 100%; border-radius: 12px; }
+.detail-gallery {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: pan-y;
+  background: #f3f4f6;
+}
+.detail-gallery-main-image {
+  width: 100%;
+  min-height: 320px;
+  max-height: 520px;
+  object-fit: cover;
+  display: block;
+}
+.gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--white);
+  background: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  z-index: 2;
+}
+.gallery-prev { left: 12px; }
+.gallery-next { right: 12px; }
+.gallery-indicators {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.45rem;
+  z-index: 2;
+}
+.gallery-indicators button {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+.gallery-indicators button.is-active {
+  background: var(--gold);
+}
 .badge {
   display: inline-block;
   background: rgba(212,175,55,.18);
