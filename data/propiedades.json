@@ -1,6 +1,6 @@
 [
   {
-    "id": 8,
+    "id": 1,
     "titulo": "HOTEL CAMPESTRE",
     "ubicacion": "Esteli, Frente a la escuela Normal",
     "tipo": "Casa",
@@ -22,5 +22,29 @@
     "longitude": -86.357041,
     "lat": 13.101754,
     "lng": -86.357041
+  },
+  {
+    "id": 2,
+    "titulo": "LINDA CASA EN VENTA",
+    "ubicacion": "Somoto, a 400mts de la panamericana",
+    "tipo": "Casa",
+    "precio": 165000,
+    "habitaciones": 3,
+    "banos": 3,
+    "area": 436,
+    "images": [
+      "https://i.imgur.com/P3ufgLL.jpeg",
+      "https://i.imgur.com/w9KnhCB.jpeg",
+      "https://i.imgur.com/dh5gsyp.jpeg",
+      "https://i.imgur.com/Y0w4RwI.jpeg",
+      "https://i.imgur.com/qYqIaAZ.jpeg",
+      "https://i.imgur.com/eUkHgFK.jpeg",
+      "https://i.imgur.com/psANn5z.jpeg"
+    ],
+    "descripcion": "Linda casa con amplias areas multifuncional para gimnasio, oficina, cuarto de servicio, bodega. todos usus documentos en regla.",
+    "latitude": 13.478289,
+    "longitude": -86.585118,
+    "lat": 13.478289,
+    "lng": -86.585118
   }
 ]
