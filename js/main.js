@@ -11,6 +11,16 @@ if (menuToggle && mainNav) {
 const themeToggle = document.getElementById('themeToggle');
 const savedTheme = localStorage.getItem('themeMode');
 
+const siteHeader = document.querySelector('.site-header');
+
+function updateHeaderOnScroll() {
+  if (!siteHeader) return;
+  siteHeader.classList.toggle('is-scrolled', window.scrollY > 12);
+}
+
+updateHeaderOnScroll();
+window.addEventListener('scroll', updateHeaderOnScroll, { passive: true });
+
 function applyTheme(theme) {
   const isDarkMode = theme === 'dark';
   document.body.classList.toggle('dark-mode', isDarkMode);
