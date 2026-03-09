@@ -94,6 +94,46 @@ function renderFeatured(properties) {
   applyCardRevealAnimation(featuredGrid);
 }
 
+function renderCategory(properties, gridId, filterFn) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+
+  const filtered = properties.filter(filterFn).slice(0, 3);
+  grid.innerHTML = filtered.map(propertyCardTemplate).join('');
+  applyCardRevealAnimation(grid);
+}
+
+function renderTerrenos(properties) {
+  renderCategory(properties, 'terrenosGrid', (property) => property.tipo === 'Terreno');
+}
+
+function renderAlquileres(properties) {
+  const grid = document.getElementById('alquileresGrid');
+  if (!grid) return;
+
+  const rentalKeywords = ['alquiler', 'renta'];
+  const rentals = properties.filter((property) => {
+    const searchableFields = [property.tipo, property.titulo, property.descripcion]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    return rentalKeywords.some((keyword) => searchableFields.includes(keyword));
+  });
+
+  const fallbackRentals = properties
+    .filter((property) => property.tipo === 'Casa' || property.tipo === 'Apartamento')
+    .slice(0, 3)
+    .map((property) => ({ ...property, tipo: 'Alquiler' }));
+
+  const cards = (rentals.length ? rentals.slice(0, 3) : fallbackRentals)
+    .map(propertyCardTemplate)
+    .join('');
+
+  grid.innerHTML = cards;
+  applyCardRevealAnimation(grid);
+}
+
 function renderPropertyList(properties) {
   const grid = document.getElementById('propertiesGrid');
   const emptyState = document.getElementById('emptyState');
@@ -326,6 +366,8 @@ function renderGlobalMap(properties) {
   try {
     const properties = await loadProperties();
     renderFeatured(properties);
+    renderTerrenos(properties);
+    renderAlquileres(properties);
 
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {
