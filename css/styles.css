@@ -30,10 +30,17 @@ a { text-decoration: none; }
   left: 0;
   width: 100%;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.94);
-  border-bottom: 1px solid #f0d0d0;
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.site-header.is-scrolled {
+  background: rgba(115, 13, 13, 0.35);
+  border-bottom-color: rgba(255, 255, 255, 0.28);
 }
 .nav-wrapper {
   min-height: 84px;
@@ -42,7 +49,7 @@ a { text-decoration: none; }
   align-items: center;
   gap: 1rem;
 }
-.brand { color: #4a1f1f; font-weight: 700; letter-spacing: 1px; font-size: 1.1rem; }
+.brand { color: #ffffff; font-weight: 700; letter-spacing: 1px; font-size: 1.1rem; }
 .brand span { color: var(--gold-light); }
 .site-nav {
   justify-self: center;
@@ -52,7 +59,7 @@ a { text-decoration: none; }
   gap: 2.25rem;
 }
 .site-nav a {
-  color: #402020;
+  color: #ffffff;
   font-weight: 500;
   position: relative;
   transition: color 0.3s ease, transform 0.2s ease;
@@ -74,7 +81,7 @@ a { text-decoration: none; }
 .site-nav a.active::after, .site-nav a:hover::after {
   width: 100%;
 }
-.menu-toggle { display: none; background: none; border: none; color: #4a1f1f; font-size: 1.6rem; }
+.menu-toggle { display: none; background: none; border: none; color: #ffffff; font-size: 1.6rem; }
 .theme-toggle {
   background: #ffffff;
   color: #4a1f1f;
@@ -307,7 +314,7 @@ button:hover { background: #ffe3e3; }
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-.section-dark h2, .section-dark h3 { color: #222; }
+.section-dark h2, .section-dark h3 { color: #ffffff; }
 .split-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem; align-items: start; }
 .highlight-card {
   background: linear-gradient(160deg, rgba(212,175,55,.22), rgba(242,208,107,.15));
@@ -538,8 +545,16 @@ body.dark-mode label {
 }
 
 body.dark-mode .site-header {
-  background: rgba(26, 0, 0, 0.72);
+  background: transparent;
   border-bottom-color: rgba(255, 255, 255, 0.16);
+}
+
+body.dark-mode .site-header.is-scrolled {
+  background: rgba(26, 0, 0, 0.65);
+}
+
+body.dark-mode .section-properties {
+  background: #5a0f0f;
 }
 
 body.dark-mode .property-card,
