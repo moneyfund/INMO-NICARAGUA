@@ -280,7 +280,10 @@ button:hover { background: #ffe3e3; }
   transform: scale(1.08);
 }
 
-.section-dark { background: var(--blue-deep); color: #f8eaea; }
+.section-dark {
+  background: #fff5f5;
+  color: #222;
+}
 .announcement-bar {
   overflow: hidden;
   border-top: 1px solid rgba(160, 88, 88, 0.24);
@@ -304,7 +307,7 @@ button:hover { background: #ffe3e3; }
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-.section-dark h2, .section-dark h3 { color: var(--white); }
+.section-dark h2, .section-dark h3 { color: #222; }
 .split-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem; align-items: start; }
 .highlight-card {
   background: linear-gradient(160deg, rgba(212,175,55,.22), rgba(242,208,107,.15));
@@ -316,8 +319,8 @@ button:hover { background: #ffe3e3; }
 .button-outline {
   display: inline-block;
   margin-top: 1rem;
-  border: 1px solid var(--gold-light);
-  color: var(--gold-light);
+  border: 1px solid #8f1d1d;
+  color: #8f1d1d;
   padding: .6rem 1rem;
   border-radius: 8px;
 }
@@ -427,8 +430,8 @@ button:hover { background: #ffe3e3; }
 
 .site-footer {
   width: 100%;
-  background: rgba(255, 255, 255, 0.94);
-  border-top: 1px solid #f0d0d0;
+  background: #c62828;
+  border-top: 1px solid #ab1f1f;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 1.4rem 0 1.1rem;
@@ -452,15 +455,15 @@ button:hover { background: #ffe3e3; }
 }
 
 .footer-social a {
-  color: rgba(74, 31, 31, 0.85);
+  color: #ffffff;
   width: 48px;
   height: 48px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 245, 245, 0.9);
-  border: 1px solid #f0d0d0;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
   opacity: 0.9;
 }
@@ -474,12 +477,12 @@ button:hover { background: #ffe3e3; }
 .footer-social a:hover {
   opacity: 1;
   transform: translateY(-4px) scale(1.1);
-  color: #a91f1f;
-  box-shadow: 0 0 18px rgba(198, 40, 40, 0.28);
+  color: #ffeaea;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
 }
 
 .footer-text {
-  color: #4a1f1f;
+  color: #ffffff;
   opacity: 0.8;
   margin: 0;
   font-size: 14px;
