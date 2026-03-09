@@ -120,5 +120,29 @@
     "longitude": -85.942557,
     "lat": 12.909531,
     "lng": -85.942557
+  },
+  {
+    "id": 8,
+    "titulo": "HOTEL CAMPESTRE",
+    "ubicacion": "Esteli, Frente a la escuela Normal",
+    "tipo": "Casa",
+    "precio": 350000,
+    "habitaciones": 23,
+    "banos": 21,
+    "area": 646,
+    "images": [
+      "https://i.imgur.com/JGiPwbF.jpeg",
+      "https://i.imgur.com/vi63ix2.jpeg",
+      "https://i.imgur.com/jrOUHDA.jpeg",
+      "https://i.imgur.com/qlCNHdI.jpeg",
+      "https://i.imgur.com/4V5m9ep.jpeg",
+      "https://i.imgur.com/kKPz0GX.jpeg",
+      "https://i.imgur.com/uwdMtDg.jpeg"
+    ],
+    "descripcion": "Excelente oportunidad de inversion ,ideal para renta de habitaciones, con alta demanda estudiantil,propiedad con alta demanda",
+    "latitude": 13.101754,
+    "longitude": -86.357041,
+    "lat": 13.101754,
+    "lng": -86.357041
   }
 ]
