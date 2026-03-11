@@ -47,6 +47,7 @@ function propertyCardTemplate(property) {
   const featuredClass = property.featured ? ' is-featured' : '';
   const imageSrc = getPrimaryPropertyImage(property);
   const imageAlt = property.titulo || 'Imagen de la propiedad';
+  const detailUrl = `propiedad.html?id=${encodeURIComponent(String(property.id ?? ''))}`;
 
   return `
     <article class="property-card${featuredClass}">
@@ -61,7 +62,7 @@ function propertyCardTemplate(property) {
           <span>${property.banos} baños</span>
           <span>${property.area} m²</span>
         </div>
-        <p><a class="text-link" href="propiedad.html?id=${property.id}">Ver detalle</a></p>
+        <p><a class="text-link" href="${detailUrl}">Ver detalle</a></p>
       </div>
     </article>
   `;
@@ -221,8 +222,14 @@ function renderPropertyDetail(properties) {
   if (!detailContainer) return;
 
   const params = new URLSearchParams(window.location.search);
-  const propertyId = Number(params.get('id'));
-  const property = properties.find((item) => item.id === propertyId);
+  const propertyId = params.get('id');
+
+  if (!propertyId) {
+    detailContainer.innerHTML = '<p>Selecciona una propiedad desde el catálogo para ver su detalle. <a href="propiedades.html" class="text-link">Ir al catálogo</a></p>';
+    return;
+  }
+
+  const property = properties.find((item) => String(item.id) === propertyId);
 
   if (!property) {
     detailContainer.innerHTML = '<p>Propiedad no encontrada. <a href="propiedades.html" class="text-link">Regresar al catálogo</a></p>';
@@ -295,7 +302,12 @@ function renderPropertyDetail(properties) {
 
   initPropertyGallery(detailContainer);
   renderPropertyDetailMap(property);
-  window.dispatchEvent(new CustomEvent('propertyDetailReady', { detail: { property } }));
+  window.dispatchEvent(new CustomEvent('propertyDetailReady', {
+    detail: {
+      property,
+      propertyId
+    }
+  }));
 }
 
 function initPropertyGallery(scope = document) {
@@ -384,7 +396,7 @@ function renderGlobalMap(properties) {
     L.marker(markerPosition).addTo(map)
       .bindPopup(`
         <strong>${property.titulo}</strong><br>
-        <a href="propiedad.html?id=${property.id}">Ver propiedad</a>
+        <a href="propiedad.html?id=${encodeURIComponent(String(property.id ?? ''))}">Ver propiedad</a>
       `);
   });
 
