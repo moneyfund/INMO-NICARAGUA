@@ -384,6 +384,13 @@ section h2,
   background: #c62828;
 }
 .page-banner h1, .page-banner p { color: var(--white); }
+
+.agent-filter-banner {
+  margin: 0 0 1rem;
+  font-weight: 700;
+  color: #8b0000;
+}
+
 .filter-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr auto; gap: .75rem; margin-bottom: 1.5rem; }
 .empty-state { text-align: center; margin-top: 1rem; color: #ffffff; }
 
@@ -633,6 +640,10 @@ body.dark-mode .badge {
 body.dark-mode .property-meta,
 body.dark-mode .empty-state {
   color: #e9d9d9;
+}
+
+body.dark-mode .agent-filter-banner {
+  color: #ffb6b6;
 }
 
 body.dark-mode button {

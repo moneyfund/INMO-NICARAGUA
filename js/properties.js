@@ -43,6 +43,12 @@ async function loadProperties() {
   return allProperties;
 }
 
+async function loadAgents() {
+  const response = await fetch('data/agents.json');
+  if (!response.ok) throw new Error('No se pudieron cargar los agentes');
+  return response.json();
+}
+
 function propertyCardTemplate(property) {
   const featuredClass = property.featured ? ' is-featured' : '';
   const imageSrc = getPrimaryPropertyImage(property);
@@ -169,8 +175,30 @@ function getInitialFilters() {
   const params = new URLSearchParams(window.location.search);
   return {
     ubicacion: params.get('ubicacion') || '',
-    tipo: params.get('tipo') || ''
+    tipo: params.get('tipo') || '',
+    agent: params.get('agent') || ''
   };
+}
+
+function filterByAgent(properties, agentId) {
+  if (!agentId) return properties;
+  return properties.filter((property) => property.agentId === agentId);
+}
+
+function renderAgentFilterBanner(agentId, agents = []) {
+  const banner = document.getElementById('agentFilterBanner');
+  if (!banner) return;
+
+  if (!agentId) {
+    banner.classList.add('hidden');
+    banner.textContent = '';
+    return;
+  }
+
+  const selectedAgent = agents.find((agent) => agent.id === agentId);
+  const agentName = selectedAgent?.name || 'agente seleccionado';
+  banner.textContent = `Propiedades de ${agentName}`;
+  banner.classList.remove('hidden');
 }
 
 function applyFilters(properties) {
@@ -410,28 +438,32 @@ function renderGlobalMap(properties) {
 (async function initProperties() {
   try {
     const properties = await loadProperties();
+    const agents = await loadAgents().catch(() => []);
+    const initial = getInitialFilters();
+    const agentFiltered = filterByAgent(properties, initial.agent);
+
     renderFeatured(properties);
     renderTerrenos(properties);
     renderAlquileres(properties);
 
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {
-      const initial = getInitialFilters();
       const filterLocation = document.getElementById('filterLocation');
       const filterType = document.getElementById('filterType');
 
       if (filterLocation) filterLocation.value = initial.ubicacion;
       if (filterType) filterType.value = initial.tipo;
 
-      renderPropertyList(applyFilters(properties));
+      renderAgentFilterBanner(initial.agent, agents);
+      renderPropertyList(applyFilters(agentFiltered));
       filterForm.addEventListener('submit', (event) => {
         event.preventDefault();
-        renderPropertyList(applyFilters(properties));
+        renderPropertyList(applyFilters(agentFiltered));
       });
     }
 
     renderPropertyDetail(properties);
-    renderGlobalMap(properties);
+    renderGlobalMap(agentFiltered);
   } catch (error) {
     console.error('Error cargando propiedades:', error);
   }
