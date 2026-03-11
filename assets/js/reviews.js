@@ -190,7 +190,7 @@ function setupLazyLoad(propertyId) {
 }
 
 window.addEventListener('propertyDetailReady', (event) => {
-  const propertyId = String(event.detail?.property?.id || '');
+  const propertyId = String(event.detail?.propertyId || event.detail?.property?.id || '');
   if (!propertyId) return;
 
   initAuth();
