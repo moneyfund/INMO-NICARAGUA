@@ -979,6 +979,25 @@ body.dark-mode .agent-social a {
   color: #ffffff;
 }
 
+
+.review-auth-required {
+  margin-top: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1rem;
+  color: #ffffff;
+}
+
+.review-auth-required p {
+  margin: 0 0 0.75rem;
+}
+
+body.dark-mode .review-auth-required {
+  background: rgba(34, 8, 8, 0.65);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
 .review-form {
   margin-top: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.65);
