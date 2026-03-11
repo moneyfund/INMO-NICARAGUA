@@ -263,10 +263,39 @@ function renderPropertyDetail(properties) {
       <h2>Ubicación de la propiedad</h2>
       <div id="propertyMap" class="property-map"></div>
     </section>
+    <section class="property-reviews-section" id="propertyReviews">
+      <div class="property-reviews-header">
+        <h2>Opiniones de la propiedad</h2>
+        <div class="reviews-auth-controls" data-auth-controls></div>
+      </div>
+      <p class="reviews-firebase-status" data-firebase-status></p>
+      <div class="reviews-summary" data-reviews-summary>
+        <p class="reviews-stars" data-average-stars>☆ ☆ ☆ ☆ ☆</p>
+        <p class="reviews-average" data-average-value>0.0 / 5</p>
+        <p class="reviews-count" data-review-count>(0 reseñas)</p>
+      </div>
+      <div class="reviews-list" data-reviews-list>
+        <p class="reviews-empty">Aún no hay opiniones para esta propiedad.</p>
+      </div>
+      <form class="review-form" data-review-form>
+        <div class="review-form-stars" aria-label="Calificación de estrellas">
+          <button type="button" data-rating-star="1" aria-label="1 estrella">★</button>
+          <button type="button" data-rating-star="2" aria-label="2 estrellas">★</button>
+          <button type="button" data-rating-star="3" aria-label="3 estrellas">★</button>
+          <button type="button" data-rating-star="4" aria-label="4 estrellas">★</button>
+          <button type="button" data-rating-star="5" aria-label="5 estrellas">★</button>
+        </div>
+        <input type="hidden" name="rating" value="0">
+        <textarea name="comment" rows="4" placeholder="Comparte tu opinión sobre esta propiedad..."></textarea>
+        <button type="submit">Publicar reseña</button>
+        <p class="review-form-message" data-review-form-message></p>
+      </form>
+    </section>
   `;
 
   initPropertyGallery(detailContainer);
   renderPropertyDetailMap(property);
+  window.dispatchEvent(new CustomEvent('propertyDetailReady', { detail: { property } }));
 }
 
 function initPropertyGallery(scope = document) {
