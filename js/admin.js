@@ -5,7 +5,8 @@ const DEFAULT_ZOOM = 7;
 const SELECTED_ZOOM = 15;
 
 const state = {
-  properties: []
+  properties: [],
+  agents: []
 };
 
 const form = document.getElementById("propertyForm");
@@ -24,7 +25,8 @@ const fields = {
   type: document.getElementById("propertyType"),
   description: document.getElementById("description"),
   latitude: document.getElementById("latitude"),
-  longitude: document.getElementById("longitude")
+  longitude: document.getElementById("longitude"),
+  agentId: document.getElementById("propertyAgent")
 };
 
 const imagesContainer = document.getElementById("imagesContainer");
@@ -157,6 +159,25 @@ function refreshMapSize() {
   setTimeout(() => locationMap.invalidateSize(), 300);
 }
 
+
+async function loadAgents() {
+  try {
+    const response = await fetch("data/agents.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("No se pudo leer agents.json");
+    const data = await response.json();
+    state.agents = Array.isArray(data) ? data : [];
+  } catch (error) {
+    state.agents = [];
+  }
+
+  if (!fields.agentId) return;
+
+  const options = ['<option value="">Seleccionar agente</option>']
+    .concat(state.agents.map((agent) => `<option value="${agent.id}">${agent.name}</option>`));
+
+  fields.agentId.innerHTML = options.join("");
+}
+
 function getNextId() {
   if (!state.properties.length) return 1;
   return Math.max(...state.properties.map((item) => Number(item.id) || 0)) + 1;
@@ -181,7 +202,8 @@ function buildPropertyFromForm(currentId) {
     latitude,
     longitude,
     lat: latitude,
-    lng: longitude
+    lng: longitude,
+    agentId: fields.agentId.value
   };
 }
 
@@ -266,6 +288,7 @@ function fillForm(property) {
   const images = getImagesFromProperty(property);
   resetImageFields(images.length ? images : [""]);
   fields.description.value = property.descripcion || "";
+  fields.agentId.value = property.agentId || "";
 
   const coordinates = getCoordinates(property);
   if (coordinates) {
@@ -353,6 +376,7 @@ function clearFormState() {
   fields.id.value = "";
   fields.latitude.value = "";
   fields.longitude.value = "";
+  if (fields.agentId) fields.agentId.value = "";
   resetImageFields([""]);
 
   if (locationMap) {
@@ -370,6 +394,7 @@ function clearFormState() {
 document.addEventListener("DOMContentLoaded", () => {
   initAdminMap();
   resetImageFields([""]);
+  loadAgents();
 
   addImageBtn.addEventListener("click", () => {
     addImageField("");

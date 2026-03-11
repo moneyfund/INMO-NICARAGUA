@@ -1,21 +1,7 @@
 async function loadAgents() {
-  const response = await fetch('data/agentes.json');
+  const response = await fetch('data/agents.json');
   if (!response.ok) throw new Error('No se pudieron cargar los agentes');
   return response.json();
-}
-
-async function loadAgentProperties() {
-  const response = await fetch('data/propiedades.json');
-  if (!response.ok) throw new Error('No se pudieron cargar las propiedades');
-  return response.json();
-}
-
-function normalizeName(name) {
-  return String(name || '')
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .trim()
-    .toLowerCase();
 }
 
 function socialLinkTemplate(url, label, icon) {
@@ -28,22 +14,7 @@ function socialLinkTemplate(url, label, icon) {
   `;
 }
 
-function propertyMiniCardTemplate(property) {
-  return `
-    <article class="agent-property-card">
-      <img src="${property.imagen}" alt="${property.titulo}">
-      <div class="agent-property-content">
-        <h4>${property.titulo}</h4>
-        <p>${property.ubicacion}</p>
-        <p class="price">$${property.precio.toLocaleString()}</p>
-      </div>
-    </article>
-  `;
-}
-
-function agentCardTemplate(agent, properties) {
-  const agentProperties = properties.filter((property) => normalizeName(property.agent) === normalizeName(agent.name));
-
+function agentCardTemplate(agent) {
   const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5a4.25 4.25 0 0 0 4.25 4.25h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5a4.25 4.25 0 0 0-4.25-4.25h-8.5Zm8.9 2.35a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg>';
   const facebookIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.7 22v-8.2h2.76l.41-3.2H13.7V8.56c0-.93.26-1.56 1.6-1.56h1.7V4.14A22.8 22.8 0 0 0 14.52 4c-2.45 0-4.14 1.5-4.14 4.24v2.36H7.6v3.2h2.78V22h3.32Z"/></svg>';
   const tiktokIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.1 3c.38 1.96 1.55 3.38 3.43 4.13 1.03.4 1.93.5 2.47.52v3.14a9.26 9.26 0 0 1-4.36-1.14v5.9c0 3.1-2.55 5.45-5.72 5.45S4 18.65 4 15.52c0-3.12 2.55-5.48 5.92-5.48.33 0 .67.03 1 .1v3.2a2.94 2.94 0 0 0-.99-.17c-1.62 0-2.88 1.06-2.88 2.36 0 1.37 1.19 2.33 2.78 2.33 1.82 0 2.76-1.17 2.76-2.87V3h1.5Z"/></svg>';
@@ -54,23 +25,16 @@ function agentCardTemplate(agent, properties) {
       <img class="agent-photo" src="${agent.photo}" alt="${agent.name}">
       <div class="agent-content">
         <h2>${agent.name}</h2>
-        <p class="agent-role">${agent.role}</p>
-        <p>${agent.description}</p>
-        <p><strong>Tel:</strong> <a class="text-link" href="tel:${agent.phone.replace(/\s+/g, '')}">${agent.phone}</a></p>
-        <p><strong>Email:</strong> <a class="text-link" href="mailto:${agent.email}">${agent.email}</a></p>
+        <p>${agent.description || ''}</p>
+        ${agent.phone ? `<p><strong>Tel:</strong> <a class="text-link" href="tel:${String(agent.phone).replace(/\s+/g, '')}">${agent.phone}</a></p>` : ''}
+        ${agent.email ? `<p><strong>Email:</strong> <a class="text-link" href="mailto:${agent.email}">${agent.email}</a></p>` : ''}
         <div class="agent-social" aria-label="Redes sociales de ${agent.name}">
           ${socialLinkTemplate(agent.instagram, 'Instagram', instagramIcon)}
           ${socialLinkTemplate(agent.facebook, 'Facebook', facebookIcon)}
           ${socialLinkTemplate(agent.tiktok, 'TikTok', tiktokIcon)}
           ${socialLinkTemplate(agent.whatsapp, 'WhatsApp', whatsappIcon)}
         </div>
-
-        <section class="agent-properties">
-          <h3>Propiedades de este agente</h3>
-          <div class="agent-properties-grid">
-            ${agentProperties.length ? agentProperties.map(propertyMiniCardTemplate).join('') : '<p class="empty-state">Este agente aún no tiene propiedades asignadas.</p>'}
-          </div>
-        </section>
+        <a class="button-outline" href="propiedades.html?agent=${encodeURIComponent(agent.id)}">Ver propiedades</a>
       </div>
     </article>
   `;
@@ -102,8 +66,8 @@ function applyAgentRevealAnimation(container) {
   if (!grid) return;
 
   try {
-    const [agents, properties] = await Promise.all([loadAgents(), loadAgentProperties()]);
-    grid.innerHTML = agents.map((agent) => agentCardTemplate(agent, properties)).join('');
+    const agents = await loadAgents();
+    grid.innerHTML = agents.map((agent) => agentCardTemplate(agent)).join('');
     applyAgentRevealAnimation(grid);
   } catch (error) {
     console.error('Error cargando agentes:', error);
