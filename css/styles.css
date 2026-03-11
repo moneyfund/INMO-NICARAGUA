@@ -964,6 +964,7 @@ body.dark-mode .agent-social a {
   padding: 0.95rem;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
   animation: reviewFadeIn 0.35s ease;
 }
 
@@ -1022,11 +1023,18 @@ body.dark-mode .review-auth-required {
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   font-size: 1.2rem;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
-.review-form-stars button.is-active {
+.review-form-stars button:hover {
   color: #ffd86b;
   border-color: rgba(255, 216, 107, 0.95);
+  transform: translateY(-1px);
+}
+
+.review-form-stars button.active {
+  color: #ffd700;
+  border-color: rgba(255, 215, 0, 0.95);
 }
 
 .review-form textarea {

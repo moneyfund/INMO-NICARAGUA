@@ -225,7 +225,7 @@ function renderPropertyDetail(properties) {
   const propertyId = params.get('id');
 
   if (!propertyId) {
-    detailContainer.innerHTML = '<p>Selecciona una propiedad desde el catálogo para ver su detalle. <a href="propiedades.html" class="text-link">Ir al catálogo</a></p>';
+    detailContainer.innerHTML = '<p>Propiedad no encontrada. <a href="propiedades.html" class="text-link">Ir al catálogo</a></p>';
     return;
   }
 
@@ -285,8 +285,8 @@ function renderPropertyDetail(properties) {
         <p class="reviews-empty">Aún no hay opiniones para esta propiedad.</p>
       </div>
       <div class="review-auth-required hidden" data-review-auth-required>
-        <p>Debes iniciar sesión con Google para comentar.</p>
-        <button type="button" class="review-auth-btn" data-login-google>Login with Google</button>
+        <p>Debes iniciar sesión con Google para dejar una reseña.</p>
+        <button type="button" class="review-auth-btn" data-login-google>Iniciar sesión con Google</button>
       </div>
       <form class="review-form" data-review-form>
         <div class="review-form-stars" aria-label="Calificación de estrellas">
@@ -298,7 +298,7 @@ function renderPropertyDetail(properties) {
         </div>
         <input type="hidden" name="rating" value="0">
         <textarea name="comment" rows="4" placeholder="Comparte tu opinión sobre esta propiedad..."></textarea>
-        <button type="submit">Publicar reseña</button>
+        <button type="submit">Enviar reseña</button>
         <p class="review-form-message" data-review-form-message></p>
       </form>
     </section>
