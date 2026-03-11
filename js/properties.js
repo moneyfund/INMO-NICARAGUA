@@ -284,6 +284,10 @@ function renderPropertyDetail(properties) {
       <div class="reviews-list" data-reviews-list>
         <p class="reviews-empty">Aún no hay opiniones para esta propiedad.</p>
       </div>
+      <div class="review-auth-required hidden" data-review-auth-required>
+        <p>Debes iniciar sesión con Google para comentar.</p>
+        <button type="button" class="review-auth-btn" data-login-google>Login with Google</button>
+      </div>
       <form class="review-form" data-review-form>
         <div class="review-form-stars" aria-label="Calificación de estrellas">
           <button type="button" data-rating-star="1" aria-label="1 estrella">★</button>

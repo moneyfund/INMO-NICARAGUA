@@ -32,6 +32,17 @@ function createLoggedOutMarkup() {
   return '<button type="button" class="review-auth-btn" data-login-google>Login with Google</button>';
 }
 
+
+async function signInWithGoogle() {
+  if (firebaseError || !auth) return;
+
+  try {
+    await signInWithPopup(auth, googleProvider);
+  } catch (error) {
+    console.error('No fue posible iniciar sesión con Google.', error);
+  }
+}
+
 export function renderAuthControls(container) {
   if (!container) return;
 
@@ -47,11 +58,7 @@ export function renderAuthControls(container) {
   const loginButton = container.querySelector('[data-login-google]');
   if (loginButton) {
     loginButton.addEventListener('click', async () => {
-      try {
-        await signInWithPopup(auth, googleProvider);
-      } catch (error) {
-        console.error('No fue posible iniciar sesión con Google.', error);
-      }
+      await signInWithGoogle();
     });
   }
 
@@ -90,4 +97,8 @@ export function initAuth() {
 
 export function getCurrentUser() {
   return authState.currentUser;
+}
+
+export async function loginWithGoogle() {
+  await signInWithGoogle();
 }

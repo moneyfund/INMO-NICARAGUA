@@ -8,8 +8,10 @@ import {
   where
 } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 
-import { db, firebaseError } from './firebase-config.js';
-import { getCurrentUser, initAuth, renderAuthControls, subscribeToAuth } from './auth.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+
+import { auth, db, firebaseError } from './firebase-config.js';
+import { getCurrentUser, initAuth, loginWithGoogle, renderAuthControls } from './auth.js';
 
 const REVIEWS_COLLECTION = 'property_reviews';
 let reviewsUnsubscribe = null;
@@ -82,6 +84,32 @@ function setupInteractiveStars(form) {
   paintStars(Number(ratingInput.value || 0));
 }
 
+
+function updateReviewAccess(section, form, authContainer, user) {
+  const authRequired = section.querySelector('[data-review-auth-required]');
+  if (!authRequired) return;
+
+  authRequired.classList.toggle('hidden', Boolean(user));
+  form.classList.toggle('hidden', !user);
+
+  const messageElement = form.querySelector('[data-review-form-message]');
+  if (messageElement && !user) {
+    messageElement.textContent = '';
+  }
+
+  const blockedMessage = 'Debes iniciar sesión con Google para comentar.';
+  setFormState(form, Boolean(user), user ? '' : blockedMessage);
+
+  renderAuthControls(authContainer);
+
+  const loginButton = authRequired.querySelector('[data-login-google]');
+  if (loginButton) {
+    loginButton.onclick = async () => {
+      await loginWithGoogle();
+    };
+  }
+}
+
 function setFormState(form, canComment, message) {
   const controls = form.querySelectorAll('textarea, button[data-rating-star], button[type="submit"]');
   controls.forEach((control) => {
@@ -135,15 +163,22 @@ function initReviewsForProperty(propertyId) {
     return;
   }
 
-  renderAuthControls(authContainer);
-  subscribeToAuth((user) => {
-    renderAuthControls(authContainer);
-    const blockedMessage = 'Debes iniciar sesión con Google para comentar.';
-    setFormState(form, Boolean(user), user ? '' : blockedMessage);
-  });
+  updateReviewAccess(section, form, authContainer, null);
+
+  if (auth) {
+    onAuthStateChanged(auth, (user) => {
+      updateReviewAccess(section, form, authContainer, user);
+    });
+  }
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    if (!getCurrentUser()) {
+      setFormState(form, false, 'Debes iniciar sesión con Google para comentar.');
+      return;
+    }
+
     try {
       await saveReview(propertyId, form);
     } catch (error) {
