@@ -1,13 +1,41 @@
 let allProperties = [];
 const PROPERTY_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyCVL7tpUkyQWz_aVr9wFi2hrCBum2pLnPs',
+  authDomain: 'inmo-nicaragua.firebaseapp.com',
+  projectId: 'inmo-nicaragua',
+  storageBucket: 'inmo-nicaragua.firebasestorage.app',
+  messagingSenderId: '735319266898',
+  appId: '1:735319266898:web:124c3b886d0eb32a25b18b',
+  measurementId: 'G-DXTBSYNR95'
+};
 
 
 const FACEBOOK_IMAGE_DOMAINS = ['facebook.com', 'fbcdn.net'];
 const SWIPE_THRESHOLD = 45;
+let modularFirestorePromise;
 
 function getFirestoreDb() {
   const firebaseClient = window.inmoFirebase;
   return firebaseClient?.enabled && firebaseClient.db ? firebaseClient.db : null;
+}
+
+async function getModularFirestore() {
+  if (!modularFirestorePromise) {
+    modularFirestorePromise = (async () => {
+      const [{ initializeApp, getApps, getApp }, { getFirestore, collection, getDocs }] = await Promise.all([
+        import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
+      ]);
+
+      const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
+      const db = getFirestore(app);
+
+      return { collection, getDocs, db };
+    })();
+  }
+
+  return modularFirestorePromise;
 }
 
 function normalizeProperty(property = {}, id = property.id) {
@@ -77,10 +105,9 @@ function normalizePropertyImageUrl(urlString) {
 }
 
 async function loadPropertiesFromFirestore() {
-  const db = getFirestoreDb();
-  if (!db) throw new Error('Firestore no está disponible');
-
-  const snapshot = await db.collection('properties').get();
+  const { db, collection, getDocs } = await getModularFirestore();
+  const snapshot = await getDocs(collection(db, 'properties'));
+  console.log('Propiedades cargadas desde Firestore:', snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
   return snapshot.docs.map((doc) => normalizeProperty(doc.data(), doc.id));
 }
 
@@ -103,22 +130,11 @@ function subscribeToProperties(onUpdate) {
 }
 
 async function loadAgents() {
-  const firebaseClient = window.inmoFirebase;
-
-  if (firebaseClient?.enabled && firebaseClient.db) {
-    try {
-      const snapshot = await firebaseClient.db.collection('agents').get();
-      if (!snapshot.empty) {
-        return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      }
-    } catch (error) {
-      console.warn('No se pudieron cargar agentes desde Firestore.', error);
-    }
-  }
-
-  const response = await fetch('data/agents.json');
-  if (!response.ok) throw new Error('No se pudieron cargar los agentes');
-  return response.json();
+  const { db, collection, getDocs } = await getModularFirestore();
+  const snapshot = await getDocs(collection(db, 'agents'));
+  const agents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  console.log('Agentes cargados desde Firestore:', agents);
+  return agents;
 }
 
 function propertyCardTemplate(property) {
