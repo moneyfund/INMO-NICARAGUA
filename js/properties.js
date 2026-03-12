@@ -37,13 +37,49 @@ function normalizePropertyImageUrl(urlString) {
   return normalized;
 }
 
-async function loadProperties() {
+async function loadPropertiesFromFirestore() {
+  const firebaseClient = window.inmoFirebase;
+  if (!firebaseClient?.enabled || !firebaseClient.db) return [];
+
+  const snapshot = await firebaseClient.db.collection('properties').get();
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}
+
+async function loadPropertiesFromJson() {
   const response = await fetch('data/propiedades.json');
-  allProperties = await response.json();
+  if (!response.ok) throw new Error('No se pudieron cargar propiedades locales');
+  return response.json();
+}
+
+async function loadProperties() {
+  try {
+    const firestoreProperties = await loadPropertiesFromFirestore();
+    if (firestoreProperties.length) {
+      allProperties = firestoreProperties;
+      return allProperties;
+    }
+  } catch (error) {
+    console.warn('No se pudieron cargar propiedades desde Firestore.', error);
+  }
+
+  allProperties = await loadPropertiesFromJson();
   return allProperties;
 }
 
 async function loadAgents() {
+  const firebaseClient = window.inmoFirebase;
+
+  if (firebaseClient?.enabled && firebaseClient.db) {
+    try {
+      const snapshot = await firebaseClient.db.collection('agents').get();
+      if (!snapshot.empty) {
+        return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      }
+    } catch (error) {
+      console.warn('No se pudieron cargar agentes desde Firestore.', error);
+    }
+  }
+
   const response = await fetch('data/agents.json');
   if (!response.ok) throw new Error('No se pudieron cargar los agentes');
   return response.json();
@@ -51,6 +87,7 @@ async function loadAgents() {
 
 function propertyCardTemplate(property) {
   const featuredClass = property.featured ? ' is-featured' : '';
+  const status = (property.status || 'disponible').toLowerCase();
   const imageSrc = getPrimaryPropertyImage(property);
   const imageAlt = property.titulo || 'Imagen de la propiedad';
   const detailUrl = `propiedad.html?id=${encodeURIComponent(String(property.id ?? ''))}`;
@@ -62,7 +99,8 @@ function propertyCardTemplate(property) {
         <p class="badge">${property.tipo}</p>
         <h3>${property.titulo}</h3>
         <p>${property.ubicacion}</p>
-        <p class="price">$${property.precio.toLocaleString()}</p>
+        <p class="price">$${Number(property.precio || 0).toLocaleString()}</p>
+        ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <div class="property-meta">
           <span>${property.habitaciones} hab.</span>
           <span>${property.banos} baños</span>
@@ -207,9 +245,9 @@ function applyFilters(properties) {
   const budgetInput = Number(document.getElementById('filterBudget')?.value || 0);
 
   return properties.filter((property) => {
-    const matchesLocation = !locationInput || property.ubicacion.toLowerCase().includes(locationInput);
+    const matchesLocation = !locationInput || String(property.ubicacion || '').toLowerCase().includes(locationInput);
     const matchesType = !typeInput || property.tipo === typeInput;
-    const matchesBudget = !budgetInput || property.precio <= budgetInput;
+    const matchesBudget = !budgetInput || Number(property.precio || 0) <= budgetInput;
     return matchesLocation && matchesType && matchesBudget;
   });
 }
@@ -265,6 +303,7 @@ function renderPropertyDetail(properties) {
   }
 
   const galleryImages = getPropertyImages(property);
+  const status = String(property.status || 'available').toLowerCase();
 
   const galleryMarkup = galleryImages.length > 1
     ? `
@@ -284,7 +323,8 @@ function renderPropertyDetail(properties) {
         <p class="badge">${property.tipo}</p>
         <h1>${property.titulo}</h1>
         <p>${property.ubicacion}</p>
-        <p class="price">$${property.precio.toLocaleString()}</p>
+        <p class="price">$${Number(property.precio || 0).toLocaleString()}</p>
+        ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <p>${property.descripcion}</p>
         <ul class="checklist">
           <li>${property.habitaciones} habitaciones</li>
@@ -440,11 +480,12 @@ function renderGlobalMap(properties) {
     const properties = await loadProperties();
     const agents = await loadAgents().catch(() => []);
     const initial = getInitialFilters();
-    const agentFiltered = filterByAgent(properties, initial.agent);
+    const marketProperties = properties.filter((property) => String(property.status || 'available').toLowerCase() !== 'sold');
+    const agentFiltered = filterByAgent(marketProperties, initial.agent);
 
-    renderFeatured(properties);
-    renderTerrenos(properties);
-    renderAlquileres(properties);
+    renderFeatured(marketProperties);
+    renderTerrenos(marketProperties);
+    renderAlquileres(marketProperties);
 
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {

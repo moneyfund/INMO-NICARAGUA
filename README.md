@@ -7,16 +7,21 @@ Sitio web inmobiliario profesional desarrollado con HTML, CSS y JavaScript vanil
 - `index.html`
 - `propiedades.html`
 - `propiedad.html`
-- `nosotros.html`
-- `contacto.html`
+- `agentes.html`
+- `agent.html`
+- `agent-dashboard.html`
 - `css/styles.css`
 - `js/main.js`
 - `js/properties.js`
-- `data/propiedades.json`
+- `js/agentes.js`
+- `js/agent-public.js`
+- `js/agent-dashboard.js`
+- `js/firebase-client.js`
+- `firestore.rules`
 
 ## Uso local
 
-Abre `index.html` con un servidor estático para que la carga de JSON funcione correctamente.
+Abre `index.html` con un servidor estático para que la carga de JSON y Firebase funcionen correctamente.
 
 Ejemplo:
 
@@ -26,25 +31,32 @@ python3 -m http.server 8000
 
 Luego visita `http://localhost:8000`.
 
-## GitHub Pages
+## Multi-agente con Firebase
 
-Este proyecto está listo para desplegarse desde la raíz del repositorio usando GitHub Pages.
+Se implementó un sistema multi-agente con Firestore:
 
-## Formato recomendado para imágenes en `data/propiedades.json`
+- Colección `agents` (1 documento por agente con id = `uid`).
+- Colección `properties` (cada propiedad incluye `agentId`, `agentName`, `status`, `images`, `video`, etc.).
+- Dashboard de agente en `agent-dashboard.html` para:
+  - editar su perfil,
+  - agregar propiedades,
+  - editar propiedades propias,
+  - marcar propiedades como vendidas.
+- Perfil público del agente en `agent.html?id=AGENT_UID`.
+- Sitio público (`index.html`, `propiedades.html`, `propiedad.html`, `mapa.html`, `agentes.html`) leyendo primero desde Firestore y usando JSON local solo como fallback.
+
+## Reglas recomendadas de Firestore
+
+Usa el archivo `firestore.rules` para asegurar que cada agente solo pueda escribir su perfil y sus propiedades.
+
+Publicación sugerida:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+## Formato recomendado para imágenes
 
 - Usa enlaces directos que terminen en `.jpg`, `.jpeg`, `.png` o `.webp`.
 - Evita URLs de Facebook (`facebook.com`, `fbcdn.net`), porque suelen bloquear la carga directa de imágenes.
 - El frontend mantiene fallback automático para imágenes inválidas usando `assets/placeholder.svg`.
-
-Ejemplo:
-
-```json
-{
-  "title": "Casa moderna en Managua",
-  "price": "$120,000",
-  "images": [
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c.jpg",
-    "https://images.unsplash.com/photo-1600585154526-990dced4db0d.jpg"
-  ]
-}
-```
