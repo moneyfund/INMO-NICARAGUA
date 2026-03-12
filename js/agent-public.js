@@ -22,6 +22,14 @@ function propertyCard(property) {
   `;
 }
 
+function renderFriendlyMessage(message) {
+  const status = document.getElementById('agentPublicStatus');
+  const container = document.getElementById('agentPublicContent');
+
+  status.textContent = message;
+  container.innerHTML = `<p class="empty-state">${message}</p>`;
+}
+
 function renderAgentProfile(agent, properties) {
   const container = document.getElementById('agentPublicContent');
   const photo = agent.photo || fallbackPhoto;
@@ -44,25 +52,25 @@ function renderAgentProfile(agent, properties) {
   `;
 }
 
-async function init() {
+async function loadAgentProfile() {
   const status = document.getElementById('agentPublicStatus');
   const agentId = new URLSearchParams(window.location.search).get('id');
 
   if (!agentId) {
-    status.textContent = 'No se recibió id del agente.';
+    renderFriendlyMessage('No encontramos el agente solicitado. Revisa el enlace e intenta de nuevo.');
     return;
   }
 
   const client = window.inmoFirebase;
   if (!client?.enabled || !client.db) {
-    status.textContent = 'No se pudo conectar con Firestore.';
+    renderFriendlyMessage('No pudimos conectar con la base de datos en este momento. Intenta nuevamente en unos minutos.');
     return;
   }
 
   try {
     const agentDoc = await client.db.collection('agents').doc(agentId).get();
     if (!agentDoc.exists) {
-      status.textContent = 'Agente no encontrado.';
+      renderFriendlyMessage('El agente solicitado no está disponible o ya no existe.');
       return;
     }
 
@@ -72,9 +80,24 @@ async function init() {
     status.textContent = 'Perfil cargado correctamente.';
     renderAgentProfile(agentDoc.data(), properties);
   } catch (error) {
-    console.error(error);
-    status.textContent = 'Ocurrió un error cargando el perfil.';
+    console.error('Error loading agent profile:', error);
+    renderFriendlyMessage('Tuvimos un problema al cargar el perfil. Por favor, inténtalo más tarde.');
   }
 }
 
-window.addEventListener('DOMContentLoaded', init);
+function initAgentProfilePage() {
+  if (window.inmoFirebase) {
+    loadAgentProfile();
+    return;
+  }
+
+  document.addEventListener('inmo:firebase-ready', loadAgentProfile, { once: true });
+
+  setTimeout(() => {
+    if (!window.inmoFirebase) {
+      renderFriendlyMessage('No fue posible inicializar la conexión con la base de datos.');
+    }
+  }, 3000);
+}
+
+window.addEventListener('DOMContentLoaded', initAgentProfilePage);
