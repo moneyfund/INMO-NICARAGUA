@@ -1,6 +1,8 @@
 const state = {
   user: null,
-  unsubscribeProperties: null
+  unsubscribeProperties: null,
+  map: null,
+  mapMarker: null
 };
 
 const fallbackPhoto = 'assets/placeholder.svg';
@@ -48,6 +50,78 @@ function getProfilePayload(user) {
 function resetPropertyForm() {
   document.getElementById('propertyForm').reset();
   document.getElementById('propertyDocId').value = '';
+  setPropertyCoordinates(NaN, NaN);
+
+  if (state.mapMarker && state.map) {
+    state.map.removeLayer(state.mapMarker);
+    state.mapMarker = null;
+  }
+}
+
+
+
+function updateCoordinatesLabel(lat, lng) {
+  const label = document.getElementById('propertyCoordinatesLabel');
+  if (!label) return;
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    label.textContent = 'Sin coordenadas seleccionadas.';
+    return;
+  }
+
+  label.textContent = `Lat: ${lat.toFixed(6)} | Lng: ${lng.toFixed(6)}`;
+}
+
+function setPropertyCoordinates(lat, lng) {
+  const latInput = document.getElementById('propertyLat');
+  const lngInput = document.getElementById('propertyLng');
+
+  if (!latInput || !lngInput) return;
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    latInput.value = '';
+    lngInput.value = '';
+    updateCoordinatesLabel(NaN, NaN);
+    return;
+  }
+
+  latInput.value = String(lat);
+  lngInput.value = String(lng);
+  updateCoordinatesLabel(lat, lng);
+}
+
+function setPropertyMapMarker(lat, lng) {
+  if (!state.map || typeof L === 'undefined' || !Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+  const point = [lat, lng];
+  if (!state.mapMarker) {
+    state.mapMarker = L.marker(point).addTo(state.map);
+  } else {
+    state.mapMarker.setLatLng(point);
+  }
+
+  state.map.setView(point, 14);
+}
+
+function initPropertyLocationMap() {
+  const mapElement = document.getElementById('propertyLocationMap');
+  if (!mapElement || typeof L === 'undefined') return;
+
+  const defaultPoint = [12.8654, -85.2072];
+  state.map = L.map(mapElement).setView(defaultPoint, 7);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(state.map);
+
+  state.map.on('click', (event) => {
+    const { lat, lng } = event.latlng;
+    setPropertyCoordinates(lat, lng);
+    setPropertyMapMarker(lat, lng);
+  });
+
+  setPropertyCoordinates(NaN, NaN);
 }
 
 function getPropertyPayload(user, profileName) {
@@ -55,6 +129,8 @@ function getPropertyPayload(user, profileName) {
     .split('\n')
     .map((item) => item.trim())
     .filter(Boolean);
+  const lat = Number(document.getElementById('propertyLat').value);
+  const lng = Number(document.getElementById('propertyLng').value);
 
   return {
     title: document.getElementById('propertyTitle').value.trim(),
@@ -75,6 +151,8 @@ function getPropertyPayload(user, profileName) {
     bathrooms: Number(document.getElementById('propertyBathrooms').value || 0),
     banos: Number(document.getElementById('propertyBathrooms').value || 0),
     area: Number(document.getElementById('propertyArea').value || 0),
+    lat: Number.isFinite(lat) ? lat : null,
+    lng: Number.isFinite(lng) ? lng : null,
     agentId: user.uid,
     agentName: profileName,
     status: 'available',
@@ -94,7 +172,17 @@ function fillPropertyForm(property) {
   document.getElementById('propertyArea').value = property.area || 0;
   document.getElementById('propertyVideo').value = property.video || '';
   document.getElementById('propertyImages').value = Array.isArray(property.images) ? property.images.join('\n') : '';
+
+  const lat = Number(property.lat ?? property.latitude);
+  const lng = Number(property.lng ?? property.longitude);
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    setPropertyCoordinates(lat, lng);
+    setPropertyMapMarker(lat, lng);
+  } else {
+    setPropertyCoordinates(NaN, NaN);
+  }
 }
+
 
 function propertyCard(property) {
   const statusLabel = String(property.status || 'available').toLowerCase() === 'sold' ? 'VENDIDA' : 'DISPONIBLE';
@@ -260,6 +348,7 @@ function bindAuthControls() {
 function init() {
   document.getElementById('agentProfileForm')?.addEventListener('submit', saveProfile);
   document.getElementById('propertyForm')?.addEventListener('submit', saveProperty);
+  initPropertyLocationMap();
   bindAuthControls();
 }
 
