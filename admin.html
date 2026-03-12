@@ -17,24 +17,17 @@
     <section id="loginScreen" class="login-screen">
       <div class="login-card">
         <h1>Panel Privado</h1>
-        <p>Ingresa tus credenciales para administrar propiedades.</p>
-        <form id="loginForm" autocomplete="off">
-          <label for="username">Usuario</label>
-          <input type="text" id="username" required />
-
-          <label for="password">Contraseña</label>
-          <input type="password" id="password" required />
-
-          <button type="submit">Ingresar</button>
-          <p id="loginError" class="error-msg" aria-live="polite"></p>
-        </form>
+        <p>Inicia sesión con tu cuenta Google para administrar propiedades.</p>
+        <button type="button" id="googleLoginBtn">Ingresar con Google</button>
+        <p id="loginError" class="error-msg" aria-live="polite"></p>
       </div>
     </section>
 
     <section id="adminPanel" class="admin-panel hidden">
       <header class="panel-header">
         <h1>Administrador de Propiedades</h1>
-        <p>Genera JSON para copiar y pegar en <strong>/data/propiedades.json</strong>.</p>
+        <p>Gestión completa de propiedades desde Firestore.</p>
+        <button type="button" id="logoutBtn" class="ghost">Cerrar sesión</button>
       </header>
 
       <section class="editor-layout">
@@ -128,18 +121,16 @@
 
         <aside class="manager-panel">
           <h2>CURRENT PROPERTIES</h2>
-          <p>Selecciona una propiedad para editarla con el botón <strong>EDIT</strong>.</p>
+          <p>Selecciona una propiedad para editarla o elimínala permanentemente.</p>
           <div class="properties-table-wrapper">
             <table class="properties-table" aria-label="Current properties list">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Title</th>
-                  <th>City</th>
+                  <th>Agent</th>
                   <th>Price</th>
-                  <th>Bedrooms</th>
-                  <th>Bathrooms</th>
-                  <th>Action</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="propertyList"></tbody>
@@ -163,21 +154,28 @@
         </article>
       </section>
 
-      <section class="console-section">
-        <div class="console-header">
-          <h2>JSON Generator</h2>
-          <button type="button" id="copyBtn">COPY JSON</button>
-        </div>
-        <pre id="jsonOutput" class="json-console">[]</pre>
-      </section>
     </section>
   </main>
 
   <script
+    src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"
+    defer
+  ></script>
+  <script
+    src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"
+    defer
+  ></script>
+  <script
+    src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"
+    defer
+  ></script>
+  <script src="js/firebase-client.js" defer></script>
+  <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
+    defer
   ></script>
-  <script src="js/admin.js"></script>
+  <script src="js/admin.js" defer></script>
 </body>
 </html>

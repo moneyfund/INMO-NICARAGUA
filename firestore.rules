@@ -5,6 +5,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/agents/$(request.auth.uid))
+        && get(/databases/$(database)/documents/agents/$(request.auth.uid)).data.role == 'admin';
+    }
+
     match /agents/{agentId} {
       allow read: if true;
       allow create, update: if isSignedIn() && request.auth.uid == agentId;
@@ -13,10 +19,12 @@ service cloud.firestore {
 
     match /properties/{propertyId} {
       allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.agentId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.agentId == request.auth.uid
-                    && request.resource.data.agentId == request.auth.uid;
-      allow delete: if false;
+      allow create: if isSignedIn() && (request.resource.data.agentId == request.auth.uid || isAdmin());
+      allow update: if isSignedIn() && (
+          (resource.data.agentId == request.auth.uid && request.resource.data.agentId == request.auth.uid)
+          || isAdmin()
+        );
+      allow delete: if isAdmin();
     }
 
     match /{document=**} {

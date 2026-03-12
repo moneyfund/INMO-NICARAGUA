@@ -168,6 +168,20 @@ button:hover {
   color: #001227;
   padding: 0.5rem 0.6rem;
   font-size: 0.8rem;
+  width: auto;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: #fff;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.8rem;
+  width: auto;
+}
+
+.action-cell {
+  display: flex;
+  gap: 0.4rem;
 }
 
 .preview-card {
