@@ -19,16 +19,20 @@
       auth: null,
       provider: null
     };
+    document.dispatchEvent(new CustomEvent('inmo:firebase-ready', { detail: window.inmoFirebase }));
     return;
   }
 
   const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+  const authAvailable = typeof firebase.auth === 'function';
 
   window.inmoFirebase = {
     enabled: true,
     app,
     db: firebase.firestore(),
-    auth: firebase.auth(),
-    provider: new firebase.auth.GoogleAuthProvider()
+    auth: authAvailable ? firebase.auth() : null,
+    provider: authAvailable ? new firebase.auth.GoogleAuthProvider() : null
   };
+
+  document.dispatchEvent(new CustomEvent('inmo:firebase-ready', { detail: window.inmoFirebase }));
 })();
