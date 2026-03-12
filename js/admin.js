@@ -1,100 +1,86 @@
-const LOGIN_USER = "admin";
-const LOGIN_PASS = "inm0nic2025";
 const NICARAGUA_CENTER = [12.8654, -85.2072];
 const DEFAULT_ZOOM = 7;
 const SELECTED_ZOOM = 15;
 
 const state = {
+  user: null,
+  agents: [],
   properties: [],
-  agents: []
+  unsubscribeProperties: null
 };
 
-const form = document.getElementById("propertyForm");
-const output = document.getElementById("jsonOutput");
-const list = document.getElementById("propertyList");
+const form = document.getElementById('propertyForm');
+const list = document.getElementById('propertyList');
+const loginScreen = document.getElementById('loginScreen');
+const adminPanel = document.getElementById('adminPanel');
+const loginError = document.getElementById('loginError');
 
 const fields = {
-  id: document.getElementById("propertyId"),
-  title: document.getElementById("title"),
-  price: document.getElementById("price"),
-  city: document.getElementById("city"),
-  address: document.getElementById("address"),
-  bedrooms: document.getElementById("bedrooms"),
-  bathrooms: document.getElementById("bathrooms"),
-  size: document.getElementById("size"),
-  type: document.getElementById("propertyType"),
-  description: document.getElementById("description"),
-  latitude: document.getElementById("latitude"),
-  longitude: document.getElementById("longitude"),
-  agentId: document.getElementById("propertyAgent")
+  id: document.getElementById('propertyId'),
+  title: document.getElementById('title'),
+  price: document.getElementById('price'),
+  city: document.getElementById('city'),
+  address: document.getElementById('address'),
+  bedrooms: document.getElementById('bedrooms'),
+  bathrooms: document.getElementById('bathrooms'),
+  size: document.getElementById('size'),
+  type: document.getElementById('propertyType'),
+  description: document.getElementById('description'),
+  latitude: document.getElementById('latitude'),
+  longitude: document.getElementById('longitude'),
+  agentId: document.getElementById('propertyAgent')
 };
 
-const imagesContainer = document.getElementById("imagesContainer");
-const addImageBtn = document.getElementById("addImageBtn");
+const imagesContainer = document.getElementById('imagesContainer');
+const addImageBtn = document.getElementById('addImageBtn');
 
 const preview = {
-  image: document.getElementById("previewImage"),
-  type: document.getElementById("previewType"),
-  title: document.getElementById("previewTitle"),
-  location: document.getElementById("previewLocation"),
-  price: document.getElementById("previewPrice"),
-  specs: document.getElementById("previewSpecs"),
-  description: document.getElementById("previewDescription")
+  image: document.getElementById('previewImage'),
+  type: document.getElementById('previewType'),
+  title: document.getElementById('previewTitle'),
+  location: document.getElementById('previewLocation'),
+  price: document.getElementById('previewPrice'),
+  specs: document.getElementById('previewSpecs'),
+  description: document.getElementById('previewDescription')
 };
 
 let locationMap;
 let locationMarker;
 
-
-const FACEBOOK_IMAGE_DOMAINS = ["facebook.com", "fbcdn.net"];
-
-function isFacebookImageUrl(urlString) {
-  try {
-    const hostname = new URL(urlString).hostname.toLowerCase();
-    return FACEBOOK_IMAGE_DOMAINS.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
-  } catch (error) {
-    return false;
+function getFirebaseOrNotify() {
+  const client = window.inmoFirebase;
+  if (!client?.enabled || !client.auth || !client.db) {
+    loginError.textContent = 'Firebase no está disponible en este entorno.';
+    return null;
   }
-}
-
-function normalizeImageUrl(urlString) {
-  const normalized = String(urlString || "").trim();
-  if (!normalized) return "";
-
-  if (isFacebookImageUrl(normalized)) {
-    console.warn("Las imágenes de Facebook no pueden ser usadas directamente. Use enlaces de imágenes directos como JPG o PNG.");
-    return "";
-  }
-
-  try {
-    const parsed = new URL(normalized, window.location.origin);
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      console.warn(`Imagen descartada por protocolo no compatible: ${normalized}`);
-      return "";
-    }
-  } catch (error) {
-    console.warn(`Imagen descartada por URL inválida: ${normalized}`);
-    return "";
-  }
-
-  return normalized;
+  return client;
 }
 
 function sanitizePrice(value) {
-  if (typeof value === "number") return value;
-  const clean = String(value).replace(/[^\d.-]/g, "");
+  if (typeof value === 'number') return value;
+  const clean = String(value || '').replace(/[^\d.-]/g, '');
   return Number(clean) || 0;
+}
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat('es-NI', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0
+  }).format(Number(value) || 0);
+}
+
+function formatStatus(value) {
+  const normalized = String(value || 'available').toLowerCase();
+  if (normalized === 'sold') return 'Sold';
+  if (normalized === 'reserved') return 'Reserved';
+  return 'Available';
 }
 
 function getCoordinates(property = {}) {
   const latitude = Number(property.latitude ?? property.lat);
   const longitude = Number(property.longitude ?? property.lng);
-
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-    return null;
-  }
-
-  return { latitude, longitude };
+  return Number.isFinite(latitude) && Number.isFinite(longitude) ? { latitude, longitude } : null;
 }
 
 function formatCoordinate(value) {
@@ -107,11 +93,11 @@ function setCoordinates(latitude, longitude, shouldCenter = false) {
   fields.latitude.value = formatCoordinate(latitude);
   fields.longitude.value = formatCoordinate(longitude);
 
-  if (!locationMap || typeof L === "undefined") return;
+  if (!locationMap || typeof L === 'undefined') return;
 
   if (!locationMarker) {
     locationMarker = L.marker([latitude, longitude], { draggable: true }).addTo(locationMap);
-    locationMarker.on("dragend", (event) => {
+    locationMarker.on('dragend', (event) => {
       const point = event.target.getLatLng();
       setCoordinates(point.lat, point.lng);
     });
@@ -125,14 +111,9 @@ function setCoordinates(latitude, longitude, shouldCenter = false) {
 }
 
 function initAdminMap() {
-  if (locationMap || typeof L === "undefined") {
-    if (typeof L === "undefined") {
-      console.error("Leaflet no está disponible. Verifique que leaflet.js se cargue correctamente.");
-    }
-    return;
-  }
+  if (locationMap || typeof L === 'undefined') return;
 
-  const mapContainer = document.getElementById("admin-map");
+  const mapContainer = document.getElementById('admin-map');
   if (!mapContainer) return;
 
   locationMap = L.map(mapContainer, {
@@ -140,18 +121,16 @@ function initAdminMap() {
     scrollWheelZoom: true
   }).setView(NICARAGUA_CENTER, DEFAULT_ZOOM);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors"
+    attribution: '&copy; OpenStreetMap contributors'
   }).addTo(locationMap);
 
-  locationMap.on("click", (event) => {
+  locationMap.on('click', (event) => {
     setCoordinates(event.latlng.lat, event.latlng.lng);
   });
 
-  setTimeout(() => {
-    locationMap.invalidateSize();
-  }, 300);
+  setTimeout(() => locationMap.invalidateSize(), 300);
 }
 
 function refreshMapSize() {
@@ -159,105 +138,70 @@ function refreshMapSize() {
   setTimeout(() => locationMap.invalidateSize(), 300);
 }
 
+function getAgentNameById(agentId) {
+  if (!agentId) return 'Sin agente';
+  const found = state.agents.find((agent) => agent.id === agentId);
+  return found?.name || 'Agente desconocido';
+}
 
-async function loadAgents() {
-  try {
-    const response = await fetch("data/agents.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("No se pudo leer agents.json");
-    const data = await response.json();
-    state.agents = Array.isArray(data) ? data : [];
-  } catch (error) {
-    state.agents = [];
-  }
-
+function renderAgentOptions() {
   if (!fields.agentId) return;
 
   const options = ['<option value="">Seleccionar agente</option>']
     .concat(state.agents.map((agent) => `<option value="${agent.id}">${agent.name}</option>`));
-
-  fields.agentId.innerHTML = options.join("");
+  fields.agentId.innerHTML = options.join('');
 }
 
-function getNextId() {
-  if (!state.properties.length) return 1;
-  return Math.max(...state.properties.map((item) => Number(item.id) || 0)) + 1;
-}
+async function loadAgents() {
+  const client = getFirebaseOrNotify();
+  if (!client) return;
 
-function buildPropertyFromForm(currentId) {
-  const latitude = Number(fields.latitude.value || 0);
-  const longitude = Number(fields.longitude.value || 0);
-  const images = getImageUrlsFromForm();
-
-  return {
-    id: currentId || getNextId(),
-    titulo: fields.title.value.trim(),
-    ubicacion: `${fields.city.value.trim()}, ${fields.address.value.trim()}`,
-    tipo: fields.type.value,
-    precio: sanitizePrice(fields.price.value),
-    habitaciones: Number(fields.bedrooms.value || 0),
-    banos: Number(fields.bathrooms.value || 0),
-    area: Number(fields.size.value || 0),
-    images,
-    descripcion: fields.description.value.trim(),
-    latitude,
-    longitude,
-    lat: latitude,
-    lng: longitude,
-    agentId: fields.agentId.value
-  };
+  const snapshot = await client.db.collection('agents').get();
+  state.agents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  renderAgentOptions();
 }
 
 function getImagesFromProperty(property) {
-  const arrayImages = Array.isArray(property.images)
-    ? property.images
-    : [];
-
-  const normalized = arrayImages
-    .map(normalizeImageUrl)
-    .filter(Boolean);
-
-  if (normalized.length) return normalized;
-
-  const fallback = normalizeImageUrl(property.image ?? "");
-  return fallback ? [fallback] : [];
+  if (Array.isArray(property.images) && property.images.length) return property.images;
+  return property.image ? [property.image] : [];
 }
 
 function getImageUrlsFromForm() {
-  return Array.from(imagesContainer.querySelectorAll(".image-url-input"))
-    .map((input) => normalizeImageUrl(input.value))
+  return Array.from(imagesContainer.querySelectorAll('.image-url-input'))
+    .map((input) => String(input.value || '').trim())
     .filter(Boolean);
 }
 
 function refreshImageFieldLabels() {
-  const rows = imagesContainer.querySelectorAll(".image-input-row");
+  const rows = imagesContainer.querySelectorAll('.image-input-row');
   rows.forEach((row, index) => {
-    const label = row.querySelector("label");
+    const label = row.querySelector('label');
     if (label) label.textContent = `Imagen ${index + 1}`;
 
-    const removeButton = row.querySelector(".remove-image-btn");
+    const removeButton = row.querySelector('.remove-image-btn');
     if (removeButton) removeButton.disabled = rows.length === 1;
   });
 }
 
-function addImageField(value = "") {
-  const row = document.createElement("div");
-  row.className = "image-input-row";
+function addImageField(value = '') {
+  const row = document.createElement('div');
+  row.className = 'image-input-row';
 
-  const index = imagesContainer.children.length + 1;
   row.innerHTML = `
-    <label>Imagen ${index}</label>
+    <label>Imagen</label>
     <div class="image-input-controls">
       <input type="url" class="image-url-input" placeholder="https://..." required>
       <button type="button" class="ghost remove-image-btn">Quitar</button>
     </div>
   `;
 
-  const input = row.querySelector(".image-url-input");
-  const removeBtn = row.querySelector(".remove-image-btn");
+  const input = row.querySelector('.image-url-input');
+  const removeBtn = row.querySelector('.remove-image-btn');
 
   input.value = value;
-  input.addEventListener("input", updatePreview);
-  removeBtn.addEventListener("click", () => {
+  input.addEventListener('input', updatePreview);
+
+  removeBtn.addEventListener('click', () => {
     if (imagesContainer.children.length === 1) return;
     row.remove();
     refreshImageFieldLabels();
@@ -268,122 +212,106 @@ function addImageField(value = "") {
   refreshImageFieldLabels();
 }
 
-function resetImageFields(values = [""]) {
-  imagesContainer.innerHTML = "";
+function resetImageFields(values = ['']) {
+  imagesContainer.innerHTML = '';
   values.forEach((value) => addImageField(value));
-  refreshImageFieldLabels();
 }
 
 function fillForm(property) {
   fields.id.value = property.id;
-  fields.title.value = property.titulo || "";
-  const [city = "", ...addressParts] = String(property.ubicacion || "").split(",");
+  fields.title.value = property.title || property.titulo || '';
+  fields.type.value = property.type || property.tipo || 'Casa';
+  fields.price.value = property.price || property.precio || '';
+  fields.bedrooms.value = property.bedrooms || property.habitaciones || 0;
+  fields.bathrooms.value = property.bathrooms || property.banos || 0;
+  fields.size.value = property.area || 0;
+
+  const locationValue = property.location || property.ubicacion || '';
+  const [city = '', ...addressParts] = String(locationValue).split(',');
   fields.city.value = city.trim();
-  fields.address.value = addressParts.join(",").trim();
-  fields.type.value = property.tipo || "Casa";
-  fields.price.value = property.precio ?? "";
-  fields.bedrooms.value = property.habitaciones ?? 0;
-  fields.bathrooms.value = property.banos ?? 0;
-  fields.size.value = property.area ?? 0;
+  fields.address.value = addressParts.join(',').trim();
+
+  fields.description.value = property.description || property.descripcion || '';
+  fields.agentId.value = property.agentId || '';
+
   const images = getImagesFromProperty(property);
-  resetImageFields(images.length ? images : [""]);
-  fields.description.value = property.descripcion || "";
-  fields.agentId.value = property.agentId || "";
+  resetImageFields(images.length ? images : ['']);
 
   const coordinates = getCoordinates(property);
   if (coordinates) {
     setCoordinates(coordinates.latitude, coordinates.longitude, true);
   } else {
-    fields.latitude.value = "";
-    fields.longitude.value = "";
+    fields.latitude.value = '';
+    fields.longitude.value = '';
   }
 
   updatePreview();
 }
 
-function formatCurrency(value) {
-  return new Intl.NumberFormat("es-NI", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0
-  }).format(value || 0);
+function buildPropertyPayload(existing = {}) {
+  const latitude = Number(fields.latitude.value || NaN);
+  const longitude = Number(fields.longitude.value || NaN);
+  const title = fields.title.value.trim();
+  const price = sanitizePrice(fields.price.value);
+  const location = `${fields.city.value.trim()}, ${fields.address.value.trim()}`;
+  const description = fields.description.value.trim();
+  const type = fields.type.value;
+  const bedrooms = Number(fields.bedrooms.value || 0);
+  const bathrooms = Number(fields.bathrooms.value || 0);
+  const area = Number(fields.size.value || 0);
+  const images = getImageUrlsFromForm();
+  const selectedAgentId = fields.agentId.value;
+
+  return {
+    ...existing,
+    title,
+    titulo: title,
+    price,
+    precio: price,
+    location,
+    ubicacion: location,
+    description,
+    descripcion: description,
+    type,
+    tipo: type,
+    bedrooms,
+    habitaciones: bedrooms,
+    bathrooms,
+    banos: bathrooms,
+    area,
+    images,
+    image: images[0] || existing.image || 'assets/placeholder.svg',
+    latitude: Number.isFinite(latitude) ? latitude : null,
+    longitude: Number.isFinite(longitude) ? longitude : null,
+    lat: Number.isFinite(latitude) ? latitude : null,
+    lng: Number.isFinite(longitude) ? longitude : null,
+    agentId: selectedAgentId,
+    agentName: getAgentNameById(selectedAgentId),
+    status: String(existing.status || 'available').toLowerCase(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
 }
 
 function updatePreview() {
-  preview.type.textContent = fields.type.value || "Tipo";
-  preview.title.textContent = fields.title.value || "Título de propiedad";
-  preview.location.textContent = `${fields.city.value || "Ciudad"} - ${fields.address.value || "Dirección"}`;
+  preview.type.textContent = fields.type.value || 'Tipo';
+  preview.title.textContent = fields.title.value || 'Título de propiedad';
+  preview.location.textContent = `${fields.city.value || 'Ciudad'} - ${fields.address.value || 'Dirección'}`;
   preview.price.textContent = formatCurrency(sanitizePrice(fields.price.value));
   preview.specs.textContent = `${fields.bedrooms.value || 0} hab • ${fields.bathrooms.value || 0} baños • ${fields.size.value || 0} m²`;
-  preview.description.textContent = fields.description.value || "Descripción de la propiedad...";
-  preview.image.src = getImageUrlsFromForm()[0] || "assets/placeholder.svg";
-}
-
-function refreshOutput() {
-  output.textContent = JSON.stringify(state.properties, null, 2);
-}
-
-function renderList() {
-  list.innerHTML = "";
-
-  if (!state.properties.length) {
-    const row = document.createElement("tr");
-    const cell = document.createElement("td");
-    cell.colSpan = 7;
-    cell.textContent = "No properties found in /data/propiedades.json.";
-    row.appendChild(cell);
-    list.appendChild(row);
-    return;
-  }
-
-  state.properties
-    .sort((a, b) => Number(a.id) - Number(b.id))
-    .forEach((item) => {
-      const row = document.createElement("tr");
-      const [city = ""] = String(item.ubicacion || "").split(",");
-
-      row.innerHTML = `
-        <td>${item.id ?? ""}</td>
-        <td>${item.titulo ?? ""}</td>
-        <td>${city.trim()}</td>
-        <td>${formatCurrency(sanitizePrice(item.precio))}</td>
-        <td>${item.habitaciones ?? 0}</td>
-        <td>${item.banos ?? 0}</td>
-        <td><button type="button" class="edit-btn" data-id="${item.id}">EDIT</button></td>
-      `;
-
-      row.querySelector(".edit-btn").addEventListener("click", () => fillForm(item));
-      list.appendChild(row);
-    });
-}
-
-async function loadProperties() {
-  try {
-    const response = await fetch("data/propiedades.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("No se pudo leer propiedades.json");
-    const data = await response.json();
-    state.properties = Array.isArray(data) ? data : [];
-    renderList();
-    refreshOutput();
-  } catch (error) {
-    state.properties = [];
-    refreshOutput();
-  }
+  preview.description.textContent = fields.description.value || 'Descripción de la propiedad...';
+  preview.image.src = getImageUrlsFromForm()[0] || 'assets/placeholder.svg';
 }
 
 function clearFormState() {
   form.reset();
-  fields.id.value = "";
-  fields.latitude.value = "";
-  fields.longitude.value = "";
-  if (fields.agentId) fields.agentId.value = "";
-  resetImageFields([""]);
+  fields.id.value = '';
+  fields.latitude.value = '';
+  fields.longitude.value = '';
+  if (fields.agentId) fields.agentId.value = '';
+  resetImageFields(['']);
 
-  if (locationMap) {
-    locationMap.setView(NICARAGUA_CENTER, DEFAULT_ZOOM);
-  }
-
-  if (locationMarker) {
+  if (locationMap) locationMap.setView(NICARAGUA_CENTER, DEFAULT_ZOOM);
+  if (locationMarker && locationMap) {
     locationMap.removeLayer(locationMarker);
     locationMarker = null;
   }
@@ -391,84 +319,184 @@ function clearFormState() {
   updatePreview();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function renderList() {
+  list.innerHTML = '';
+
+  if (!state.properties.length) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 5;
+    cell.textContent = 'No properties found in Firestore.';
+    row.appendChild(cell);
+    list.appendChild(row);
+    return;
+  }
+
+  state.properties
+    .slice()
+    .sort((a, b) => String(a.title || a.titulo || '').localeCompare(String(b.title || b.titulo || '')))
+    .forEach((item) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.title || item.titulo || ''}</td>
+        <td>${item.agentName || getAgentNameById(item.agentId)}</td>
+        <td>${formatCurrency(item.price || item.precio)}</td>
+        <td>${formatStatus(item.status)}</td>
+        <td class="action-cell">
+          <button type="button" class="edit-btn" data-id="${item.id}">Edit</button>
+          <button type="button" class="delete-btn" data-id="${item.id}">Delete</button>
+        </td>
+      `;
+
+      row.querySelector('.edit-btn')?.addEventListener('click', () => fillForm(item));
+      row.querySelector('.delete-btn')?.addEventListener('click', () => deleteProperty(item.id));
+      list.appendChild(row);
+    });
+}
+
+function listenAllProperties() {
+  const client = getFirebaseOrNotify();
+  if (!client) return;
+
+  if (state.unsubscribeProperties) state.unsubscribeProperties();
+
+  state.unsubscribeProperties = client.db.collection('properties').onSnapshot((snapshot) => {
+    state.properties = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    renderList();
+  }, (error) => {
+    console.error(error);
+    loginError.textContent = 'No se pudieron cargar las propiedades.';
+  });
+}
+
+async function deleteProperty(propertyId) {
+  const client = getFirebaseOrNotify();
+  if (!client || !propertyId) return;
+
+  const confirmed = window.confirm('¿Seguro que deseas eliminar esta propiedad? Esta acción no se puede deshacer.');
+  if (!confirmed) return;
+
+  await client.db.collection('properties').doc(propertyId).delete();
+
+  if (fields.id.value === propertyId) {
+    clearFormState();
+  }
+}
+
+async function savePropertyUpdate() {
+  if (!form.reportValidity()) return;
+
+  const client = getFirebaseOrNotify();
+  if (!client) return;
+
+  const propertyId = String(fields.id.value || '').trim();
+  if (!propertyId) {
+    alert('Selecciona una propiedad desde la tabla para editarla.');
+    return;
+  }
+
+  const ref = client.db.collection('properties').doc(propertyId);
+  const current = await ref.get();
+
+  if (!current.exists) {
+    alert('No se encontró la propiedad para actualizar.');
+    return;
+  }
+
+  const payload = buildPropertyPayload(current.data());
+  await ref.set(payload, { merge: true });
+  alert('Propiedad actualizada.');
+}
+
+async function isAdmin(user) {
+  const client = getFirebaseOrNotify();
+  if (!client || !user) return false;
+
+  const agentDoc = await client.db.collection('agents').doc(user.uid).get();
+  if (!agentDoc.exists) return false;
+  return String(agentDoc.data().role || '').toLowerCase() === 'admin';
+}
+
+function showAdmin() {
+  loginScreen.classList.add('hidden');
+  adminPanel.classList.remove('hidden');
   initAdminMap();
-  resetImageFields([""]);
-  loadAgents();
+  refreshMapSize();
+}
 
-  addImageBtn.addEventListener("click", () => {
-    addImageField("");
+function hideAdmin(message = '') {
+  adminPanel.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+  loginError.textContent = message;
+
+  if (state.unsubscribeProperties) {
+    state.unsubscribeProperties();
+    state.unsubscribeProperties = null;
+  }
+
+  state.properties = [];
+  renderList();
+}
+
+function bindActions() {
+  addImageBtn.addEventListener('click', () => addImageField(''));
+  form.addEventListener('input', updatePreview);
+
+  document.getElementById('addBtn')?.addEventListener('click', () => {
+    alert('Desde este panel solo se editan propiedades existentes.');
   });
 
-  document.getElementById("addBtn").addEventListener("click", () => {
-    if (!form.reportValidity()) return;
-    const property = buildPropertyFromForm();
-    state.properties.push(property);
-    fields.id.value = property.id;
-    renderList();
-    refreshOutput();
+  document.getElementById('updateBtn')?.addEventListener('click', savePropertyUpdate);
+  document.getElementById('clearBtn')?.addEventListener('click', () => clearFormState());
+
+  document.getElementById('googleLoginBtn')?.addEventListener('click', async () => {
+    const client = getFirebaseOrNotify();
+    if (!client) return;
+    try {
+      await client.auth.signInWithPopup(client.provider);
+    } catch (error) {
+      console.error(error);
+      loginError.textContent = 'No fue posible iniciar sesión con Google.';
+    }
   });
 
-  document.getElementById("updateBtn").addEventListener("click", () => {
-    if (!form.reportValidity()) return;
-    const currentId = Number(fields.id.value);
-    if (!currentId) {
-      alert("Selecciona una propiedad primero desde la lista para actualizarla.");
+  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    const client = getFirebaseOrNotify();
+    if (!client) return;
+    await client.auth.signOut();
+  });
+
+  window.addEventListener('resize', refreshMapSize);
+}
+
+function init() {
+  initAdminMap();
+  resetImageFields(['']);
+  bindActions();
+
+  const client = getFirebaseOrNotify();
+  if (!client) return;
+
+  client.auth.onAuthStateChanged(async (user) => {
+    state.user = user;
+
+    if (!user) {
+      hideAdmin('Inicia sesión como administrador.');
       return;
     }
 
-    const index = state.properties.findIndex((item) => Number(item.id) === currentId);
-    if (index === -1) {
-      alert("No se encontró la propiedad para actualizar.");
+    const adminAllowed = await isAdmin(user);
+    if (!adminAllowed) {
+      hideAdmin('Acceso denegado: solo usuarios con rol admin.');
       return;
     }
 
-    state.properties[index] = buildPropertyFromForm(currentId);
-    renderList();
-    refreshOutput();
-  });
-
-  document.getElementById("clearBtn").addEventListener("click", () => {
+    loginError.textContent = '';
+    showAdmin();
+    await loadAgents();
+    listenAllProperties();
     clearFormState();
   });
+}
 
-  document.getElementById("copyBtn").addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(output.textContent);
-      alert("JSON copiado al portapapeles.");
-    } catch (error) {
-      alert("No se pudo copiar automáticamente. Copia manualmente el texto.");
-    }
-  });
-
-  form.addEventListener("input", updatePreview);
-
-  const loginForm = document.getElementById("loginForm");
-  const loginScreen = document.getElementById("loginScreen");
-  const adminPanel = document.getElementById("adminPanel");
-  const loginError = document.getElementById("loginError");
-
-  loginForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const user = document.getElementById("username").value.trim();
-    const pass = document.getElementById("password").value.trim();
-
-    if (user === LOGIN_USER && pass === LOGIN_PASS) {
-      loginScreen.classList.add("hidden");
-      adminPanel.classList.remove("hidden");
-      initAdminMap();
-      refreshMapSize();
-      await loadProperties();
-      clearFormState();
-      loginError.textContent = "";
-      return;
-    }
-
-    loginError.textContent = "Credenciales incorrectas.";
-    adminPanel.classList.add("hidden");
-  });
-
-  window.addEventListener("resize", refreshMapSize);
-
-  loadProperties();
-});
+window.addEventListener('DOMContentLoaded', init);
