@@ -5,6 +5,45 @@ const PROPERTY_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
 const FACEBOOK_IMAGE_DOMAINS = ['facebook.com', 'fbcdn.net'];
 const SWIPE_THRESHOLD = 45;
 
+function getFirestoreDb() {
+  const firebaseClient = window.inmoFirebase;
+  return firebaseClient?.enabled && firebaseClient.db ? firebaseClient.db : null;
+}
+
+function normalizeProperty(property = {}, id = property.id) {
+  const title = property.title || property.titulo || '';
+  const price = Number(property.price ?? property.precio ?? 0);
+  const city = property.city || property.location || property.ubicacion || '';
+  const image = property.image || (Array.isArray(property.images) ? property.images[0] : '') || '';
+  const bedrooms = Number(property.bedrooms ?? property.habitaciones ?? 0);
+  const bathrooms = Number(property.bathrooms ?? property.banos ?? 0);
+  const area = Number(property.area ?? 0);
+  const type = property.type || property.tipo || '';
+  const description = property.description || property.descripcion || '';
+
+  return {
+    ...property,
+    id,
+    title,
+    titulo: title,
+    price,
+    precio: price,
+    city,
+    location: city,
+    ubicacion: city,
+    image,
+    bedrooms,
+    habitaciones: bedrooms,
+    bathrooms,
+    banos: bathrooms,
+    area,
+    type,
+    tipo: type,
+    description,
+    descripcion: description
+  };
+}
+
 function isFacebookImageUrl(urlString) {
   try {
     const hostname = new URL(urlString).hostname.toLowerCase();
@@ -38,32 +77,29 @@ function normalizePropertyImageUrl(urlString) {
 }
 
 async function loadPropertiesFromFirestore() {
-  const firebaseClient = window.inmoFirebase;
-  if (!firebaseClient?.enabled || !firebaseClient.db) return [];
+  const db = getFirestoreDb();
+  if (!db) throw new Error('Firestore no está disponible');
 
-  const snapshot = await firebaseClient.db.collection('properties').get();
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-}
-
-async function loadPropertiesFromJson() {
-  const response = await fetch('data/propiedades.json');
-  if (!response.ok) throw new Error('No se pudieron cargar propiedades locales');
-  return response.json();
+  const snapshot = await db.collection('properties').get();
+  return snapshot.docs.map((doc) => normalizeProperty(doc.data(), doc.id));
 }
 
 async function loadProperties() {
-  try {
-    const firestoreProperties = await loadPropertiesFromFirestore();
-    if (firestoreProperties.length) {
-      allProperties = firestoreProperties;
-      return allProperties;
-    }
-  } catch (error) {
-    console.warn('No se pudieron cargar propiedades desde Firestore.', error);
-  }
-
-  allProperties = await loadPropertiesFromJson();
+  allProperties = await loadPropertiesFromFirestore();
   return allProperties;
+}
+
+function subscribeToProperties(onUpdate) {
+  const db = getFirestoreDb();
+  if (!db) return () => {};
+
+  return db.collection('properties').onSnapshot((snapshot) => {
+    const properties = snapshot.docs.map((doc) => normalizeProperty(doc.data(), doc.id));
+    allProperties = properties;
+    onUpdate(properties);
+  }, (error) => {
+    console.error('Error escuchando propiedades de Firestore:', error);
+  });
 }
 
 async function loadAgents() {
@@ -89,7 +125,7 @@ function propertyCardTemplate(property) {
   const featuredClass = property.featured ? ' is-featured' : '';
   const status = (property.status || 'disponible').toLowerCase();
   const imageSrc = getPrimaryPropertyImage(property);
-  const imageAlt = property.titulo || 'Imagen de la propiedad';
+  const imageAlt = property.title || property.titulo || 'Imagen de la propiedad';
   const detailUrl = `propiedad.html?id=${encodeURIComponent(String(property.id ?? ''))}`;
 
   return `
@@ -97,13 +133,13 @@ function propertyCardTemplate(property) {
       <img src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
       <div class="property-card-content">
         <p class="badge">${property.tipo}</p>
-        <h3>${property.titulo}</h3>
-        <p>${property.ubicacion}</p>
-        <p class="price">$${Number(property.precio || 0).toLocaleString()}</p>
+        <h3>${property.title || property.titulo}</h3>
+        <p>${property.city || property.ubicacion}</p>
+        <p class="price">$${Number(property.price ?? property.precio ?? 0).toLocaleString()}</p>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <div class="property-meta">
-          <span>${property.habitaciones} hab.</span>
-          <span>${property.banos} baños</span>
+          <span>${property.bedrooms ?? property.habitaciones} hab.</span>
+          <span>${property.bathrooms ?? property.banos} baños</span>
           <span>${property.area} m²</span>
         </div>
         <p><a class="text-link" href="${detailUrl}">Ver detalle</a></p>
@@ -477,34 +513,53 @@ function renderGlobalMap(properties) {
 
 (async function initProperties() {
   try {
-    const properties = await loadProperties();
     const agents = await loadAgents().catch(() => []);
     const initial = getInitialFilters();
-    const marketProperties = properties.filter((property) => String(property.status || 'available').toLowerCase() !== 'sold');
-    const agentFiltered = filterByAgent(marketProperties, initial.agent);
-
-    renderFeatured(marketProperties);
-    renderTerrenos(marketProperties);
-    renderAlquileres(marketProperties);
-
     const filterForm = document.getElementById('filterForm');
+    let hasRenderedGlobalMap = false;
+
     if (filterForm) {
       const filterLocation = document.getElementById('filterLocation');
       const filterType = document.getElementById('filterType');
 
       if (filterLocation) filterLocation.value = initial.ubicacion;
       if (filterType) filterType.value = initial.tipo;
+    }
 
-      renderAgentFilterBanner(initial.agent, agents);
-      renderPropertyList(applyFilters(agentFiltered));
+    const renderCatalogViews = (properties) => {
+      const marketProperties = properties.filter((property) => String(property.status || 'available').toLowerCase() !== 'sold');
+      const agentFiltered = filterByAgent(marketProperties, initial.agent);
+
+      renderFeatured(marketProperties);
+      renderTerrenos(marketProperties);
+      renderAlquileres(marketProperties);
+
+      if (filterForm) {
+        renderAgentFilterBanner(initial.agent, agents);
+        renderPropertyList(applyFilters(agentFiltered));
+      }
+
+      renderPropertyDetail(properties);
+
+      if (!hasRenderedGlobalMap) {
+        renderGlobalMap(agentFiltered);
+        hasRenderedGlobalMap = true;
+      }
+    };
+
+    const properties = await loadProperties();
+    renderCatalogViews(properties);
+
+    if (filterForm) {
       filterForm.addEventListener('submit', (event) => {
         event.preventDefault();
-        renderPropertyList(applyFilters(agentFiltered));
+        renderCatalogViews(allProperties);
       });
     }
 
-    renderPropertyDetail(properties);
-    renderGlobalMap(agentFiltered);
+    subscribeToProperties((updatedProperties) => {
+      renderCatalogViews(updatedProperties);
+    });
   } catch (error) {
     console.error('Error cargando propiedades:', error);
   }
