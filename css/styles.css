@@ -1148,3 +1148,26 @@ body.dark-mode .reviews-summary {
   gap: 1rem;
   align-items: center;
 }
+
+
+.dashboard-property-map {
+  width: 100%;
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(31, 41, 55, 0.15);
+}
+
+.map-picker-hint,
+.map-picker-coordinates {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.map-picker-coordinates {
+  font-weight: 600;
+}
+
+body.dark-mode .dashboard-property-map {
+  border-color: rgba(255, 255, 255, 0.3);
+}
