@@ -1084,3 +1084,67 @@ body.dark-mode .reviews-summary {
   background: rgba(34, 8, 8, 0.65);
   border-color: rgba(255, 255, 255, 0.45);
 }
+
+.property-status-tag {
+  display: inline-block;
+  margin: 0.25rem 0;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #7f1d1d;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.agent-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-auth-box,
+.dashboard-card,
+.agent-public-profile {
+  background: #fff;
+  color: #1f2937;
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-message {
+  font-weight: 600;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.dashboard-form {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.dashboard-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dashboard-user-chip img,
+.agent-public-profile img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.agent-public-profile {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+}
