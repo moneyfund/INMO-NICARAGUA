@@ -887,9 +887,9 @@ body.dark-mode .agent-social a {
 
 .agent-public-profile {
   display: grid;
-  grid-template-columns: minmax(180px, 260px) 1fr minmax(200px, 240px);
+  grid-template-columns: 190px 1fr minmax(200px, 240px);
   gap: 1.2rem;
-  align-items: stretch;
+  align-items: center;
   margin-bottom: 2rem;
   padding: 1rem;
   border-radius: 18px;
@@ -900,12 +900,14 @@ body.dark-mode .agent-social a {
 }
 
 .agent-public-photo {
-  width: 100%;
-  height: 100%;
-  min-height: 250px;
-  max-height: 320px;
-  border-radius: 14px;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
   object-fit: cover;
+  object-position: center;
+  justify-self: center;
+  border: 4px solid rgba(143, 29, 29, 0.12);
+  box-shadow: 0 10px 25px rgba(120, 40, 40, 0.18);
 }
 
 .agent-public-summary p,
@@ -980,10 +982,16 @@ body.dark-mode .agent-public-stats {
 @media (max-width: 980px) {
   .agent-public-profile {
     grid-template-columns: 1fr;
+    text-align: center;
   }
 
   .agent-public-photo {
-    max-height: 280px;
+    width: 160px;
+    height: 160px;
+  }
+
+  .agent-public-social {
+    justify-content: center;
   }
 }
 
@@ -1243,8 +1251,7 @@ body.dark-mode .reviews-summary {
   gap: 0.75rem;
 }
 
-.dashboard-user-chip img,
-.agent-public-profile img {
+.dashboard-user-chip img {
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -1279,4 +1286,112 @@ body.dark-mode .reviews-summary {
 
 body.dark-mode .dashboard-property-map {
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+.seller-hero {
+  text-align: center;
+  padding-top: 2.5rem;
+}
+
+.seller-lead {
+  max-width: 780px;
+  margin: 0.85rem auto 0;
+}
+
+.seller-benefits {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.seller-benefit-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem;
+  border: 1px solid rgba(143, 29, 29, 0.14);
+  text-align: center;
+}
+
+.seller-benefit-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 0.75rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff3f3;
+  color: #8f1d1d;
+  font-size: 1.25rem;
+}
+
+.seller-layout {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.seller-contact-card,
+.seller-form {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(143, 29, 29, 0.14);
+  padding: 1rem;
+}
+
+.seller-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.seller-form .form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.seller-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+.seller-form input,
+.seller-form select,
+.seller-form textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(143, 29, 29, 0.22);
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+}
+
+.seller-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  background: #25d366;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.65rem 1rem;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .seller-benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .seller-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .seller-benefits,
+  .seller-form .form-row {
+    grid-template-columns: 1fr;
+  }
 }
