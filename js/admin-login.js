@@ -1,9 +1,16 @@
+const ALLOWED_ADMIN_EMAIL = 'norvingarcia@gmail.com';
+
 function getFirebaseClient() {
   const client = window.inmoFirebase;
-  if (!client?.enabled || !client.auth || !client.db) {
+  if (!client?.enabled || !client.auth) {
     return null;
   }
   return client;
+}
+
+function hasAllowedAdminEmail(user) {
+  const userEmail = String(user?.email || '').trim().toLowerCase();
+  return userEmail === ALLOWED_ADMIN_EMAIL;
 }
 
 function redirectTo(path) {
@@ -33,11 +40,7 @@ async function loginAsAdmin(client) {
     throw new Error('No authenticated user returned by Google sign-in.');
   }
 
-  const agentDoc = await client.db.collection('agents').doc(user.uid).get();
-  const isAdmin = agentDoc.exists && String(agentDoc.data().role || '').toLowerCase() === 'admin';
-
-  if (!isAdmin) {
-    await client.auth.signOut();
+  if (!hasAllowedAdminEmail(user)) {
     throw new Error('User does not have admin role.');
   }
 
@@ -49,15 +52,11 @@ async function syncExistingSession(client, loginError) {
   if (!user) return;
 
   try {
-    const agentDoc = await client.db.collection('agents').doc(user.uid).get();
-    const isAdmin = agentDoc.exists && String(agentDoc.data().role || '').toLowerCase() === 'admin';
-
-    if (isAdmin) {
+    if (hasAllowedAdminEmail(user)) {
       redirectTo('admin.html');
       return;
     }
 
-    await client.auth.signOut();
     if (loginError) loginError.textContent = 'Tu cuenta no tiene permisos de administrador.';
   } catch (error) {
     console.error('No fue posible validar la sesión actual.', error);
@@ -89,7 +88,7 @@ function initAdminLogin() {
     } catch (error) {
       console.error(error);
       if (loginError) {
-        loginError.textContent = 'Solo administradores pueden iniciar sesión en este panel.';
+        loginError.textContent = 'Access denied. Solo está permitida la cuenta norvingarcia@gmail.com.';
       }
     }
   });
