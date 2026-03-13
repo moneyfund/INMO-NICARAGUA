@@ -12,13 +12,10 @@ import {
   addDoc,
   doc,
   getDoc,
-  query,
-  where,
-  onSnapshot,
+  getDocs,
   serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-const REVIEWS_COLLECTION = 'reviews';
 const PROPERTIES_COLLECTION = 'properties';
 
 const firebaseConfig = {
@@ -42,7 +39,6 @@ const state = {
   hoverRating: 0,
   activePropertyId: null,
   authUnsubscribe: null,
-  reviewsUnsubscribe: null,
   starsBound: false,
   submitBound: false
 };
@@ -191,29 +187,21 @@ async function loadReviews(propertyId) {
   const section = document.getElementById('propertyReviews');
   if (!section) return;
 
-  console.log('Loading reviews for property:', propertyId);
+  console.log('Loading reviews from property:', propertyId);
 
-  if (state.reviewsUnsubscribe) {
-    state.reviewsUnsubscribe();
-    state.reviewsUnsubscribe = null;
-  }
-
-  const reviewsQuery = query(
-    collection(db, 'reviews'),
-    where('propertyId', '==', propertyId)
-  );
-
-  state.reviewsUnsubscribe = onSnapshot(reviewsQuery, (snapshot) => {
+  try {
+    const reviewsRef = collection(db, PROPERTIES_COLLECTION, propertyId, 'reviews');
+    const snapshot = await getDocs(reviewsRef);
     const reviews = snapshot.docs
       .map((item) => ({ id: item.id, ...item.data() }))
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
     updateSummary(section, reviews);
     renderReviewsList(section, reviews);
-  }, (error) => {
+  } catch (error) {
     console.error('No se pudieron cargar las reseñas.', error);
     setStatus(section, 'No se pudieron cargar las reseñas.');
-  });
+  }
 }
 
 function subscribeToReviews(propertyId) {
@@ -251,8 +239,9 @@ function setFormMessage(form, message) {
 }
 
 async function submitReview(propertyId, rating, comment, user) {
-  await addDoc(collection(db, 'reviews'), {
-    propertyId: propertyId,
+  const reviewsRef = collection(db, PROPERTIES_COLLECTION, propertyId, 'reviews');
+
+  await addDoc(reviewsRef, {
     rating: rating,
     comment: comment,
     userName: user.displayName || 'Usuario',
