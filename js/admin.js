@@ -6,12 +6,14 @@ const state = {
   user: null,
   agents: [],
   properties: [],
-  unsubscribeProperties: null
+  unsubscribeProperties: null,
+  authCheckId: 0
 };
 
 const form = document.getElementById('propertyForm');
 const list = document.getElementById('propertyList');
 const adminPanel = document.getElementById('adminPanel');
+const accessDeniedPanel = document.getElementById('accessDeniedPanel');
 
 const fields = {
   id: document.getElementById('propertyId'),
@@ -152,7 +154,10 @@ function renderAgentOptions() {
 
 async function loadAgents() {
   const client = getFirebaseOrNotify();
-  if (!client) return;
+  if (!client) {
+    finishAuthCheck();
+    return;
+  }
 
   const snapshot = await client.db.collection('agents').get();
   state.agents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -354,7 +359,10 @@ function renderList() {
 
 function listenAllProperties() {
   const client = getFirebaseOrNotify();
-  if (!client) return;
+  if (!client) {
+    finishAuthCheck();
+    return;
+  }
 
   if (state.unsubscribeProperties) state.unsubscribeProperties();
 
@@ -385,7 +393,10 @@ async function savePropertyUpdate() {
   if (!form.reportValidity()) return;
 
   const client = getFirebaseOrNotify();
-  if (!client) return;
+  if (!client) {
+    finishAuthCheck();
+    return;
+  }
 
   const propertyId = String(fields.id.value || '').trim();
   if (!propertyId) {
@@ -415,14 +426,27 @@ async function isAdmin(user) {
   return String(agentDoc.data().role || '').toLowerCase() === 'admin';
 }
 
+function finishAuthCheck() {
+  document.body.classList.remove('auth-checking');
+}
+
 function showAdmin() {
+  accessDeniedPanel?.classList.add('hidden');
   adminPanel.classList.remove('hidden');
+  finishAuthCheck();
   initAdminMap();
   refreshMapSize();
 }
 
+function showAccessDenied() {
+  hideAdmin();
+  accessDeniedPanel?.classList.remove('hidden');
+  finishAuthCheck();
+}
+
 function hideAdmin() {
   adminPanel.classList.add('hidden');
+  accessDeniedPanel?.classList.add('hidden');
 
   if (state.unsubscribeProperties) {
     state.unsubscribeProperties();
@@ -434,6 +458,7 @@ function hideAdmin() {
 }
 
 function redirectTo(path) {
+  finishAuthCheck();
   window.location.replace(path);
 }
 
@@ -448,6 +473,10 @@ function bindActions() {
   document.getElementById('updateBtn')?.addEventListener('click', savePropertyUpdate);
   document.getElementById('clearBtn')?.addEventListener('click', () => clearFormState());
 
+
+  document.getElementById('goToLoginBtn')?.addEventListener('click', () => {
+    redirectTo('admin-login.html');
+  });
 
   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     const client = getFirebaseOrNotify();
@@ -464,9 +493,13 @@ function init() {
   bindActions();
 
   const client = getFirebaseOrNotify();
-  if (!client) return;
+  if (!client) {
+    finishAuthCheck();
+    return;
+  }
 
   client.auth.onAuthStateChanged(async (user) => {
+    const authCheckId = ++state.authCheckId;
     state.user = user;
 
     if (!user) {
@@ -475,17 +508,26 @@ function init() {
       return;
     }
 
-    const adminAllowed = await isAdmin(user);
-    if (!adminAllowed) {
-      hideAdmin();
-      redirectTo('access-denied.html');
-      return;
-    }
+    try {
+      const adminAllowed = await isAdmin(user);
+      if (authCheckId !== state.authCheckId) return;
 
-    showAdmin();
-    await loadAgents();
-    listenAllProperties();
-    clearFormState();
+      if (!adminAllowed) {
+        showAccessDenied();
+        return;
+      }
+
+      showAdmin();
+      await loadAgents();
+      if (authCheckId !== state.authCheckId) return;
+      listenAllProperties();
+      clearFormState();
+    } catch (error) {
+      if (authCheckId !== state.authCheckId) return;
+      console.error(error);
+      hideAdmin();
+      redirectTo('admin-login.html');
+    }
   });
 }
 

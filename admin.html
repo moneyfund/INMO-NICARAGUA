@@ -12,8 +12,16 @@
   />
   <link rel="stylesheet" href="css/admin.css" />
 </head>
-<body>
+<body class="auth-checking">
   <main class="admin-wrapper">
+    <section id="accessDeniedPanel" class="login-screen hidden" aria-live="polite">
+      <div class="login-card">
+        <h1>Access denied</h1>
+        <p>No tienes permisos de administrador para acceder a este panel.</p>
+        <button type="button" id="goToLoginBtn" class="ghost">Volver al login</button>
+      </div>
+    </section>
+
     <section id="adminPanel" class="admin-panel hidden">
       <header class="panel-header">
         <h1>Administrador de Propiedades</h1>
