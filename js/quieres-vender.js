@@ -6,6 +6,10 @@ function getFirebaseClient() {
   return window.inmoFirebase || null;
 }
 
+function getCurrentUser() {
+  return window.inmoAuthState?.currentUser || null;
+}
+
 function setAuthMessage(message, isError = false) {
   if (!sellerAuthMessage) return;
 
@@ -21,8 +25,9 @@ function setAuthReadyMessage() {
     return;
   }
 
-  if (client.auth.currentUser) {
-    const displayName = client.auth.currentUser.displayName || 'Usuario';
+  const currentUser = getCurrentUser() || client.auth.currentUser;
+  if (currentUser) {
+    const displayName = currentUser.displayName || 'Usuario';
     setAuthMessage(`Sesión iniciada como ${displayName}. Ya puedes enviar el formulario.`);
     return;
   }
@@ -52,24 +57,20 @@ if (sellerForm) {
       return;
     }
 
-    if (!client.auth.currentUser) {
+    const currentUser = getCurrentUser() || client.auth.currentUser;
+    if (!currentUser) {
       setAuthMessage('Para continuar, inicia sesión con tu cuenta de Google.', true);
       const didSignIn = await requestGoogleSignIn(client);
-      if (!didSignIn || !client.auth.currentUser) return;
+      if (!didSignIn || !(getCurrentUser() || client.auth.currentUser)) return;
     }
 
     setAuthMessage('Gracias por tu información. Nuestro equipo te contactará pronto.');
     sellerForm.reset();
   });
 
-  const client = getFirebaseClient();
-  if (client?.auth) {
-    client.auth.onAuthStateChanged(() => {
-      setAuthReadyMessage();
-    });
-  }
+  document.addEventListener('inmo:auth-state-changed', setAuthReadyMessage);
 
-  if (!client) {
+  if (!window.inmoFirebase) {
     document.addEventListener('inmo:firebase-ready', setAuthReadyMessage, { once: true });
   }
 
