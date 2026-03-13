@@ -10,6 +10,19 @@ function redirectTo(path) {
   window.location.replace(path);
 }
 
+async function resolveAdminRedirect(client, user) {
+  if (!user) return;
+
+  try {
+    const agentDoc = await client.db.collection('agents').doc(user.uid).get();
+    const isAdmin = agentDoc.exists && String(agentDoc.data().role || '').toLowerCase() === 'admin';
+    redirectTo(isAdmin ? 'admin.html' : 'access-denied.html');
+  } catch (error) {
+    console.error(error);
+    redirectTo('access-denied.html');
+  }
+}
+
 function initAdminLogin() {
   const loginError = document.getElementById('loginError');
   const loginBtn = document.getElementById('googleLoginBtn');
@@ -20,9 +33,9 @@ function initAdminLogin() {
     return;
   }
 
-  client.auth.onAuthStateChanged((user) => {
+  client.auth.onAuthStateChanged(async (user) => {
     if (!user) return;
-    redirectTo('admin.html');
+    await resolveAdminRedirect(client, user);
   });
 
   loginBtn?.addEventListener('click', async () => {
