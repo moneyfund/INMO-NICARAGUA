@@ -1,24 +1,6 @@
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  query,
-  serverTimestamp,
-  where
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-import {
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-
-import { auth, provider, db } from './firebase-config.js';
-
 const PROPERTIES_COLLECTION = 'properties';
-const REVIEWS_SUBCOLLECTION = 'reviews';
+const REVIEWS_COLLECTION = 'reviews';
+const COMMENTS_COLLECTION = 'comments';
 
 const state = {
   currentUser: null,
@@ -27,13 +9,13 @@ const state = {
   unsubscribeReviews: null
 };
 
+function getFirebaseClient() {
+  return window.inmoFirebase?.enabled ? window.inmoFirebase : null;
+}
+
 function getPropertyIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get('id') || params.get('propertyId');
-}
-
-function getPropertyReviewsCollection(propertyId) {
-  return collection(db, PROPERTIES_COLLECTION, propertyId, REVIEWS_SUBCOLLECTION);
 }
 
 function escapeHtml(value = '') {
@@ -81,8 +63,10 @@ function renderAuthControls(section) {
     const loginBtn = requiredBox.querySelector('[data-login-google]');
     if (loginBtn) {
       loginBtn.onclick = async () => {
+        const client = getFirebaseClient();
+        if (!client?.auth || !client?.provider) return;
         try {
-          await signInWithPopup(auth, provider);
+          await client.auth.signInWithPopup(client.provider);
         } catch (error) {
           console.error('No fue posible iniciar sesión con Google.', error);
         }
@@ -109,8 +93,10 @@ function renderAuthControls(section) {
   const logoutBtn = controls.querySelector('[data-logout-google]');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
+      const client = getFirebaseClient();
+      if (!client?.auth) return;
       try {
-        await signOut(auth);
+        await client.auth.signOut();
       } catch (error) {
         console.error('No fue posible cerrar sesión.', error);
       }
@@ -198,8 +184,9 @@ async function submitReview(event, propertyId) {
   const form = event.currentTarget;
   const comment = form.querySelector('[name="comment"]').value.trim();
   const rating = Number(form.querySelector('[name="rating"]').value || 0);
+  const client = getFirebaseClient();
 
-  if (!state.currentUser) {
+  if (!state.currentUser || !client?.db) {
     setFormMessage(form, 'Debes iniciar sesión con Google para dejar una reseña.');
     return;
   }
@@ -219,16 +206,21 @@ async function submitReview(event, propertyId) {
     return;
   }
 
+  const reviewPayload = {
+    propertyId,
+    userId: state.currentUser.uid,
+    userName: state.currentUser.displayName || 'Usuario',
+    userPhoto: state.currentUser.photoURL || '',
+    rating,
+    comment,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
   try {
-    await addDoc(getPropertyReviewsCollection(propertyId), {
-      propertyId,
-      userId: state.currentUser.uid,
-      userName: state.currentUser.displayName || 'Usuario',
-      userPhoto: state.currentUser.photoURL || '',
-      rating,
-      comment,
-      createdAt: serverTimestamp()
-    });
+    await Promise.all([
+      client.db.collection(REVIEWS_COLLECTION).add(reviewPayload),
+      client.db.collection(COMMENTS_COLLECTION).add(reviewPayload)
+    ]);
 
     form.reset();
     state.selectedRating = 0;
@@ -241,31 +233,36 @@ async function submitReview(event, propertyId) {
 }
 
 function listenReviews(section, propertyId) {
+  const client = getFirebaseClient();
+  if (!client?.db) return;
+
   if (state.unsubscribeReviews) state.unsubscribeReviews();
 
-  const reviewsQuery = query(getPropertyReviewsCollection(propertyId), where('propertyId', '==', propertyId));
+  state.unsubscribeReviews = client.db.collection(REVIEWS_COLLECTION)
+    .where('propertyId', '==', propertyId)
+    .onSnapshot((snapshot) => {
+      const reviews = snapshot.docs
+        .map((item) => ({ id: item.id, ...item.data() }))
+        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
-  state.unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
-    const reviews = snapshot.docs
-      .map((item) => ({ id: item.id, ...item.data() }))
-      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-    updateSummary(section, reviews);
-    renderReviewsList(section, reviews);
-  }, (error) => {
-    console.error('No se pudieron cargar las reseñas.', error);
-    const status = section.querySelector('[data-firebase-status]');
-    if (status) status.textContent = 'No se pudieron cargar las reseñas.';
-  });
+      updateSummary(section, reviews);
+      renderReviewsList(section, reviews);
+    }, (error) => {
+      console.error('No se pudieron cargar las reseñas.', error);
+      const status = section.querySelector('[data-firebase-status]');
+      if (status) status.textContent = 'No se pudieron cargar las reseñas.';
+    });
 }
 
 async function validateProperty(section, propertyId) {
   if (!propertyId) return false;
 
+  const client = getFirebaseClient();
+  if (!client?.db) return false;
+
   try {
-    const propertyRef = doc(db, PROPERTIES_COLLECTION, propertyId);
-    const propertySnapshot = await getDoc(propertyRef);
-    return propertySnapshot.exists();
+    const propertySnapshot = await client.db.collection(PROPERTIES_COLLECTION).doc(propertyId).get();
+    return propertySnapshot.exists;
   } catch (error) {
     console.error('No se pudo validar la propiedad en Firestore.', error);
     const status = section.querySelector('[data-firebase-status]');
@@ -274,7 +271,7 @@ async function validateProperty(section, propertyId) {
   }
 }
 
-async function init() {
+async function initReviews() {
   const section = document.getElementById('propertyReviews');
   if (!section) return;
 
@@ -284,7 +281,8 @@ async function init() {
     return;
   }
 
-  if (!auth || !provider || !db) {
+  const client = getFirebaseClient();
+  if (!client?.auth || !client?.db) {
     const status = section.querySelector('[data-firebase-status]');
     if (status) status.textContent = 'No se pudieron cargar las reseñas.';
     return;
@@ -298,15 +296,23 @@ async function init() {
 
   const form = section.querySelector('[data-review-form]');
   bindStars(form);
-
   form.addEventListener('submit', (event) => submitReview(event, propertyId));
 
-  onAuthStateChanged(auth, (user) => {
+  client.auth.onAuthStateChanged((user) => {
     state.currentUser = user;
     renderAuthControls(section);
   });
 
   listenReviews(section, propertyId);
+}
+
+function init() {
+  if (window.inmoFirebase) {
+    initReviews();
+    return;
+  }
+
+  document.addEventListener('inmo:firebase-ready', initReviews, { once: true });
 }
 
 window.addEventListener('DOMContentLoaded', init);

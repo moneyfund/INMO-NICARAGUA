@@ -7,6 +7,19 @@ const state = {
 
 const fallbackPhoto = 'assets/placeholder.svg';
 
+function addDoc(collectionRef, payload) {
+  return collectionRef.add(payload);
+}
+
+function updateDoc(docRef, payload) {
+  return docRef.set(payload, { merge: true });
+}
+
+function deleteDoc(docRef) {
+  return docRef.delete();
+}
+
+
 function getFirebaseOrNotify() {
   const client = window.inmoFirebase;
   if (!client?.enabled || !client.auth || !client.db) {
@@ -197,6 +210,7 @@ function propertyCard(property) {
         <div class="agent-actions">
           <button type="button" data-edit-property="${property.id}">Editar</button>
           <button type="button" data-sold-property="${property.id}">Marcar vendida</button>
+          <button type="button" data-delete-property="${property.id}">Eliminar</button>
         </div>
       </div>
     </article>
@@ -228,11 +242,11 @@ async function saveProperty(event) {
       setMessage('No tienes permisos para editar esta propiedad.');
       return;
     }
-    await ref.set(payload, { merge: true });
+    await updateDoc(ref, payload);
     setMessage('Propiedad actualizada.');
   } else {
     payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-    await client.db.collection('properties').add(payload);
+    await addDoc(client.db.collection('properties'), payload);
     setMessage('Propiedad creada.');
   }
 
@@ -251,8 +265,23 @@ async function markPropertyAsSold(propertyId) {
     return;
   }
 
-  await ref.set({ status: 'sold', updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+  await updateDoc(ref, { status: 'sold', updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
   setMessage('Propiedad marcada como vendida.');
+}
+
+async function deleteProperty(propertyId) {
+  const client = getFirebaseOrNotify();
+  if (!client || !state.user || !propertyId) return;
+
+  const ref = client.db.collection('properties').doc(propertyId);
+  const propertyDoc = await ref.get();
+  if (!propertyDoc.exists || propertyDoc.data().agentId !== state.user.uid) {
+    setMessage('No tienes permisos para eliminar esta propiedad.');
+    return;
+  }
+
+  await deleteDoc(ref);
+  setMessage('Propiedad eliminada.');
 }
 
 async function loadProfile(user) {
@@ -300,6 +329,10 @@ function listenOwnProperties(user) {
 
       list.querySelectorAll('[data-sold-property]').forEach((button) => {
         button.addEventListener('click', () => markPropertyAsSold(button.dataset.soldProperty));
+      });
+
+      list.querySelectorAll('[data-delete-property]').forEach((button) => {
+        button.addEventListener('click', () => deleteProperty(button.dataset.deleteProperty));
       });
     });
 }
