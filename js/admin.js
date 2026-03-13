@@ -204,8 +204,21 @@ async function loadReviews() {
   const client = getFirebaseOrNotify();
   if (!client) return;
 
-  const snapshot = await client.db.collection('reviews').get();
-  state.reviews = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+  const propertiesSnapshot = await client.db.collection('properties').get();
+  const reviews = [];
+
+  for (const propertyDoc of propertiesSnapshot.docs) {
+    const reviewsSnapshot = await propertyDoc.ref.collection('reviews').get();
+    reviewsSnapshot.forEach((reviewDoc) => {
+      reviews.push({
+        ...reviewDoc.data(),
+        id: reviewDoc.id,
+        propertyId: propertyDoc.id
+      });
+    });
+  }
+
+  state.reviews = reviews;
   renderReviewsSummary();
 }
 
