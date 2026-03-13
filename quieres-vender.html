@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="INMO NICARAGUA te ayuda a vender tu propiedad con estrategia y asesoría profesional." />
+  <title>INMO NICARAGUA | ¿Quieres vender?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a class="brand" href="index.html">INMO <span>NICARAGUA</span></a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+      <nav id="mainNav" class="site-nav">
+        <a href="index.html">Inicio</a>
+        <a href="propiedades.html">Propiedades</a>
+        <a href="mapa.html">Mapa</a>
+        <a href="nosotros.html">Nosotros</a>
+        <a href="agentes.html">Agentes</a>
+        <a href="quieres-vender.html" class="active">¿Quieres vender?</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+      <button class="theme-toggle" id="themeToggle" aria-label="Activar modo oscuro" type="button">🌙</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-banner seller-hero">
+      <div class="container">
+        <h1>¿Quieres vender tu propiedad?</h1>
+        <p class="seller-lead">En INMO NICARAGUA acompañamos a propietarios que desean vender su casa, apartamento, terreno o finca de forma segura, rápida y con una estrategia comercial efectiva.</p>
+      </div>
+    </section>
+
+    <section class="section container">
+      <h2>¿Por qué vender con nosotros?</h2>
+      <div class="seller-benefits">
+        <article class="seller-benefit-card">
+          <div class="seller-benefit-icon" aria-hidden="true">📣</div>
+          <h3>promoción inmobiliaria</h3>
+        </article>
+        <article class="seller-benefit-card">
+          <div class="seller-benefit-icon" aria-hidden="true">🧭</div>
+          <h3>asesoría profesional</h3>
+        </article>
+        <article class="seller-benefit-card">
+          <div class="seller-benefit-icon" aria-hidden="true">👀</div>
+          <h3>mayor visibilidad</h3>
+        </article>
+        <article class="seller-benefit-card">
+          <div class="seller-benefit-icon" aria-hidden="true">✅</div>
+          <h3>compradores calificados</h3>
+        </article>
+      </div>
+    </section>
+
+    <section class="section container seller-layout">
+      <form class="seller-form" id="sellerForm">
+        <h2>Cuéntanos sobre tu propiedad</h2>
+        <div class="form-row">
+          <label>Nombre
+            <input type="text" name="name" autocomplete="name" required />
+          </label>
+          <label>Teléfono
+            <input type="tel" name="phone" autocomplete="tel" required />
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Email
+            <input type="email" name="email" autocomplete="email" required />
+          </label>
+          <label>Tipo de propiedad
+            <select name="property-type" required>
+              <option value="">Selecciona</option>
+              <option>Casa</option>
+              <option>Apartamento</option>
+              <option>Terreno</option>
+              <option>Finca</option>
+              <option>Local comercial</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Ciudad
+            <input type="text" name="city" required />
+          </label>
+        </div>
+        <label>Mensaje
+          <textarea name="message" rows="4" placeholder="Describe ubicación, estado de la propiedad y precio estimado." required></textarea>
+        </label>
+        <button type="submit">Enviar información</button>
+      </form>
+
+      <aside class="seller-contact-card">
+        <h2>Atención inmediata</h2>
+        <p>Si prefieres una respuesta más rápida, escríbenos directamente por WhatsApp y uno de nuestros asesores te guiará en el proceso de venta.</p>
+        <a class="seller-whatsapp-btn" href="https://wa.me/50588888888" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
+          <span aria-hidden="true">💬</span>
+          Contactar por WhatsApp
+        </a>
+      </aside>
+    </section>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
