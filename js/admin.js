@@ -491,8 +491,18 @@ function showAdmin() {
   refreshMapSize();
 }
 
-function showAccessDenied() {
+async function showAccessDenied() {
+  const client = getFirebaseOrNotify();
   hideAdmin();
+
+  if (client?.auth?.currentUser) {
+    try {
+      await client.auth.signOut();
+    } catch (error) {
+      console.error('No se pudo cerrar la sesión de usuario no autorizado.', error);
+    }
+  }
+
   redirectTo('admin-login.html?error=not-authorized');
 }
 
@@ -565,7 +575,7 @@ function init() {
       if (authCheckId !== state.authCheckId) return;
 
       if (!adminAllowed) {
-        showAccessDenied();
+        await showAccessDenied();
         return;
       }
 

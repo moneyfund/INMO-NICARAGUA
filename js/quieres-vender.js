@@ -64,8 +64,27 @@ if (sellerForm) {
       if (!didSignIn || !(getCurrentUser() || client.auth.currentUser)) return;
     }
 
-    setAuthMessage('Gracias por tu información. Nuestro equipo te contactará pronto.');
-    sellerForm.reset();
+    try {
+      await client.db.collection('sellerRequests').add({
+        userId: (getCurrentUser() || client.auth.currentUser).uid,
+        userName: (getCurrentUser() || client.auth.currentUser).displayName || '',
+        userEmail: (getCurrentUser() || client.auth.currentUser).email || '',
+        name: sellerForm.querySelector('[name="name"]')?.value.trim() || '',
+        phone: sellerForm.querySelector('[name="phone"]')?.value.trim() || '',
+        email: sellerForm.querySelector('[name="email"]')?.value.trim() || '',
+        listingType: sellerForm.querySelector('[name="listing-type"]')?.value || '',
+        propertyType: sellerForm.querySelector('[name="property-type"]')?.value || '',
+        location: sellerForm.querySelector('[name="city"]')?.value.trim() || '',
+        details: sellerForm.querySelector('[name="message"]')?.value.trim() || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      setAuthMessage('Gracias por tu información. Nuestro equipo te contactará pronto.');
+      sellerForm.reset();
+    } catch (error) {
+      console.error('No se pudo guardar la solicitud de venta.', error);
+      setAuthMessage('No se pudo enviar la solicitud. Intenta nuevamente.', true);
+    }
   });
 
   document.addEventListener('inmo:auth-state-changed', setAuthReadyMessage);

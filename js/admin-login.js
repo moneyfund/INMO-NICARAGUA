@@ -44,6 +44,26 @@ async function loginAsAdmin(client) {
   redirectTo('admin.html');
 }
 
+async function syncExistingSession(client, loginError) {
+  const user = client.auth.currentUser;
+  if (!user) return;
+
+  try {
+    const agentDoc = await client.db.collection('agents').doc(user.uid).get();
+    const isAdmin = agentDoc.exists && String(agentDoc.data().role || '').toLowerCase() === 'admin';
+
+    if (isAdmin) {
+      redirectTo('admin.html');
+      return;
+    }
+
+    await client.auth.signOut();
+    if (loginError) loginError.textContent = 'Tu cuenta no tiene permisos de administrador.';
+  } catch (error) {
+    console.error('No fue posible validar la sesión actual.', error);
+  }
+}
+
 function initAdminLogin() {
   const loginError = document.getElementById('loginError');
   const loginBtn = document.getElementById('googleLoginBtn');
@@ -53,6 +73,8 @@ function initAdminLogin() {
     if (loginError) loginError.textContent = 'Firebase no está disponible en este entorno.';
     return;
   }
+
+  syncExistingSession(client, loginError);
 
   const initialError = readLoginError();
   if (loginError && initialError) {

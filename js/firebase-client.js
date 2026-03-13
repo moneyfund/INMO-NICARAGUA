@@ -13,6 +13,7 @@
   };
 
   if (!window.firebase || !firebaseConfig.projectId) {
+    console.warn('[Firebase] SDK compat no disponible o configuración incompleta.');
     window.inmoFirebase = {
       enabled: false,
       db: null,
@@ -25,6 +26,12 @@
 
   const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
   const authAvailable = typeof firebase.auth === 'function';
+
+  console.info(`[Firebase] Inicializado en proyecto: ${firebaseConfig.projectId}`);
+  console.info('[Firebase] Servicios activos:', {
+    auth: authAvailable,
+    firestore: typeof firebase.firestore === 'function'
+  });
 
   window.inmoFirebase = {
     enabled: true,
