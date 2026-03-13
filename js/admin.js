@@ -1,7 +1,7 @@
 const NICARAGUA_CENTER = [12.8654, -85.2072];
 const DEFAULT_ZOOM = 7;
 const SELECTED_ZOOM = 15;
-const ALLOWED_ADMIN_EMAIL = 'norvingarcia@gmail.com';
+const ALLOWED_ADMIN_EMAIL = 'norvingarcia220@gmail.com';
 
 const state = {
   user: null,
@@ -467,6 +467,15 @@ function hasAllowedAdminEmail(user) {
   return userEmail === ALLOWED_ADMIN_EMAIL;
 }
 
+function logAuthDebug(user) {
+  const userEmail = String(user?.email || '').trim().toLowerCase();
+  const adminAllowed = hasAllowedAdminEmail(user);
+
+  console.log('[admin] user email:', userEmail || 'none');
+  console.log('[admin] login state:', Boolean(user));
+  console.log('[admin] admin verification:', adminAllowed);
+}
+
 function finishAuthCheck() {
   document.body.classList.remove('auth-checking');
 }
@@ -491,6 +500,12 @@ function showAdmin() {
 function showAccessDenied() {
   hideAdmin();
   accessDeniedPanel?.classList.remove('hidden');
+
+  const deniedText = accessDeniedPanel?.querySelector('p');
+  if (deniedText) {
+    deniedText.textContent = 'Access denied – Admins only';
+  }
+
   finishAuthCheck();
 }
 
@@ -551,6 +566,7 @@ function init() {
   client.auth.onAuthStateChanged(async (user) => {
     const authCheckId = ++state.authCheckId;
     state.user = user;
+    logAuthDebug(user);
 
     if (!user) {
       hideAdmin();
