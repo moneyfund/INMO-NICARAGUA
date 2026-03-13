@@ -1,6 +1,8 @@
 import {
   addDoc,
   collection,
+  doc,
+  getDoc,
   onSnapshot,
   query,
   serverTimestamp,
@@ -15,7 +17,8 @@ import {
 
 import { auth, provider, db } from './firebase-config.js';
 
-const REVIEWS_COLLECTION = 'property_reviews';
+const PROPERTIES_COLLECTION = 'properties';
+const REVIEWS_SUBCOLLECTION = 'reviews';
 
 const state = {
   currentUser: null,
@@ -26,7 +29,11 @@ const state = {
 
 function getPropertyIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('id');
+  return params.get('id') || params.get('propertyId');
+}
+
+function getPropertyReviewsCollection(propertyId) {
+  return collection(db, PROPERTIES_COLLECTION, propertyId, REVIEWS_SUBCOLLECTION);
 }
 
 function escapeHtml(value = '') {
@@ -197,6 +204,11 @@ async function submitReview(event, propertyId) {
     return;
   }
 
+  if (!propertyId) {
+    setFormMessage(form, 'No se encontró la propiedad para registrar la reseña.');
+    return;
+  }
+
   if (!rating) {
     setFormMessage(form, 'Selecciona una calificación de estrellas.');
     return;
@@ -208,7 +220,7 @@ async function submitReview(event, propertyId) {
   }
 
   try {
-    await addDoc(collection(db, REVIEWS_COLLECTION), {
+    await addDoc(getPropertyReviewsCollection(propertyId), {
       propertyId,
       userId: state.currentUser.uid,
       userName: state.currentUser.displayName || 'Usuario',
@@ -231,7 +243,7 @@ async function submitReview(event, propertyId) {
 function listenReviews(section, propertyId) {
   if (state.unsubscribeReviews) state.unsubscribeReviews();
 
-  const reviewsQuery = query(collection(db, REVIEWS_COLLECTION), where('propertyId', '==', propertyId));
+  const reviewsQuery = query(getPropertyReviewsCollection(propertyId), where('propertyId', '==', propertyId));
 
   state.unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
     const reviews = snapshot.docs
@@ -247,7 +259,22 @@ function listenReviews(section, propertyId) {
   });
 }
 
-function init() {
+async function validateProperty(section, propertyId) {
+  if (!propertyId) return false;
+
+  try {
+    const propertyRef = doc(db, PROPERTIES_COLLECTION, propertyId);
+    const propertySnapshot = await getDoc(propertyRef);
+    return propertySnapshot.exists();
+  } catch (error) {
+    console.error('No se pudo validar la propiedad en Firestore.', error);
+    const status = section.querySelector('[data-firebase-status]');
+    if (status) status.textContent = 'No se pudo validar la propiedad.';
+    return false;
+  }
+}
+
+async function init() {
   const section = document.getElementById('propertyReviews');
   if (!section) return;
 
@@ -260,6 +287,12 @@ function init() {
   if (!auth || !provider || !db) {
     const status = section.querySelector('[data-firebase-status]');
     if (status) status.textContent = 'No se pudieron cargar las reseñas.';
+    return;
+  }
+
+  const propertyExists = await validateProperty(section, propertyId);
+  if (!propertyExists) {
+    renderNoPropertyMessage(section);
     return;
   }
 

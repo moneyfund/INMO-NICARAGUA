@@ -141,3 +141,88 @@ if (whatsappFloat) {
 
   window.addEventListener('resize', keepWhatsappInViewport);
 }
+
+const globalAuthState = {
+  currentUser: null,
+  initialized: false
+};
+
+function getFirebaseClient() {
+  if (typeof window === 'undefined') return null;
+  return window.inmoFirebase || null;
+}
+
+function dispatchAuthStateChanged() {
+  document.dispatchEvent(new CustomEvent('inmo:auth-state-changed', {
+    detail: {
+      user: globalAuthState.currentUser,
+      initialized: globalAuthState.initialized
+    }
+  }));
+}
+
+function renderNavbarAuthButton() {
+  if (!mainNav) return;
+
+  let actionButton = mainNav.querySelector('[data-nav-auth-action]');
+  if (!actionButton) {
+    actionButton = document.createElement('button');
+    actionButton.type = 'button';
+    actionButton.className = 'review-auth-btn review-auth-btn-outline nav-auth-action';
+    actionButton.dataset.navAuthAction = 'true';
+    mainNav.appendChild(actionButton);
+  }
+
+  if (globalAuthState.currentUser) {
+    actionButton.textContent = 'Cerrar sesión';
+    actionButton.onclick = async () => {
+      const client = getFirebaseClient();
+      if (!client?.auth) return;
+
+      try {
+        await client.auth.signOut();
+      } catch (error) {
+        console.error('No fue posible cerrar sesión.', error);
+      }
+    };
+    return;
+  }
+
+  actionButton.textContent = 'Iniciar sesión';
+  actionButton.onclick = async () => {
+    const client = getFirebaseClient();
+    if (!client?.auth || !client?.provider) return;
+
+    try {
+      await client.auth.signInWithPopup(client.provider);
+    } catch (error) {
+      console.error('No fue posible iniciar sesión con Google.', error);
+    }
+  };
+}
+
+function attachGlobalAuthListener() {
+  const client = getFirebaseClient();
+  if (!client?.enabled || !client?.auth) {
+    globalAuthState.initialized = true;
+    globalAuthState.currentUser = null;
+    renderNavbarAuthButton();
+    dispatchAuthStateChanged();
+    return;
+  }
+
+  client.auth.onAuthStateChanged((user) => {
+    globalAuthState.currentUser = user;
+    globalAuthState.initialized = true;
+    renderNavbarAuthButton();
+    dispatchAuthStateChanged();
+  });
+}
+
+window.inmoAuthState = globalAuthState;
+
+if (window.inmoFirebase) {
+  attachGlobalAuthListener();
+} else {
+  document.addEventListener('inmo:firebase-ready', attachGlobalAuthListener, { once: true });
+}
