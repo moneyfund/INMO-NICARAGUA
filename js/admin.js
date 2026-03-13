@@ -493,7 +493,7 @@ function showAdmin() {
 
 function showAccessDenied() {
   hideAdmin();
-  redirectTo('access-denied.html');
+  redirectTo('admin-login.html?error=not-authorized');
 }
 
 function hideAdmin() {
@@ -578,7 +578,7 @@ function init() {
       if (authCheckId !== state.authCheckId) return;
       console.error(error);
       hideAdmin();
-      redirectTo('admin-login.html');
+      redirectTo('admin-login.html?error=auth-failed');
     }
   });
 }

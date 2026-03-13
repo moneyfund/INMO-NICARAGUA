@@ -10,17 +10,38 @@ function redirectTo(path) {
   window.location.replace(path);
 }
 
-async function resolveAdminRedirect(client, user) {
-  if (!user) return;
+function readLoginError() {
+  const params = new URLSearchParams(window.location.search);
+  const reason = params.get('error');
 
-  try {
-    const agentDoc = await client.db.collection('agents').doc(user.uid).get();
-    const isAdmin = agentDoc.exists && String(agentDoc.data().role || '').toLowerCase() === 'admin';
-    redirectTo(isAdmin ? 'admin.html' : 'access-denied.html');
-  } catch (error) {
-    console.error(error);
-    redirectTo('access-denied.html');
+  if (reason === 'not-authorized') {
+    return 'Tu cuenta no tiene permisos de administrador.';
   }
+
+  if (reason === 'auth-failed') {
+    return 'No fue posible validar la sesión. Inténtalo nuevamente.';
+  }
+
+  return '';
+}
+
+async function loginAsAdmin(client) {
+  const result = await client.auth.signInWithPopup(client.provider);
+  const user = result?.user;
+
+  if (!user) {
+    throw new Error('No authenticated user returned by Google sign-in.');
+  }
+
+  const agentDoc = await client.db.collection('agents').doc(user.uid).get();
+  const isAdmin = agentDoc.exists && String(agentDoc.data().role || '').toLowerCase() === 'admin';
+
+  if (!isAdmin) {
+    await client.auth.signOut();
+    throw new Error('User does not have admin role.');
+  }
+
+  redirectTo('admin.html');
 }
 
 function initAdminLogin() {
@@ -33,17 +54,21 @@ function initAdminLogin() {
     return;
   }
 
-  client.auth.onAuthStateChanged(async (user) => {
-    if (!user) return;
-    await resolveAdminRedirect(client, user);
-  });
+  const initialError = readLoginError();
+  if (loginError && initialError) {
+    loginError.textContent = initialError;
+  }
 
   loginBtn?.addEventListener('click', async () => {
+    if (loginError) loginError.textContent = '';
+
     try {
-      await client.auth.signInWithPopup(client.provider);
+      await loginAsAdmin(client);
     } catch (error) {
       console.error(error);
-      if (loginError) loginError.textContent = 'No fue posible iniciar sesión con Google.';
+      if (loginError) {
+        loginError.textContent = 'Solo administradores pueden iniciar sesión en este panel.';
+      }
     }
   });
 }
