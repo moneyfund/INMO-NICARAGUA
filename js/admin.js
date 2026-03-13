@@ -1,6 +1,7 @@
 const NICARAGUA_CENTER = [12.8654, -85.2072];
 const DEFAULT_ZOOM = 7;
 const SELECTED_ZOOM = 15;
+const ALLOWED_ADMIN_EMAIL = 'norvingarcia@gmail.com';
 
 const state = {
   user: null,
@@ -461,13 +462,9 @@ async function savePropertyUpdate() {
   alert('Propiedad actualizada.');
 }
 
-async function isAdmin(user) {
-  const client = getFirebaseOrNotify();
-  if (!client || !user) return false;
-
-  const agentDoc = await client.db.collection('agents').doc(user.uid).get();
-  if (!agentDoc.exists) return false;
-  return String(agentDoc.data().role || '').toLowerCase() === 'admin';
+function hasAllowedAdminEmail(user) {
+  const userEmail = String(user?.email || '').trim().toLowerCase();
+  return userEmail === ALLOWED_ADMIN_EMAIL;
 }
 
 function finishAuthCheck() {
@@ -491,19 +488,10 @@ function showAdmin() {
   refreshMapSize();
 }
 
-async function showAccessDenied() {
-  const client = getFirebaseOrNotify();
+function showAccessDenied() {
   hideAdmin();
-
-  if (client?.auth?.currentUser) {
-    try {
-      await client.auth.signOut();
-    } catch (error) {
-      console.error('No se pudo cerrar la sesión de usuario no autorizado.', error);
-    }
-  }
-
-  redirectTo('admin-login.html?error=not-authorized');
+  accessDeniedPanel?.classList.remove('hidden');
+  finishAuthCheck();
 }
 
 function hideAdmin() {
@@ -571,11 +559,11 @@ function init() {
     }
 
     try {
-      const adminAllowed = await isAdmin(user);
+      const adminAllowed = hasAllowedAdminEmail(user);
       if (authCheckId !== state.authCheckId) return;
 
       if (!adminAllowed) {
-        await showAccessDenied();
+        showAccessDenied();
         return;
       }
 
