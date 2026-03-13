@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INMO Nicaragua | Access Denied</title>
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+  <main class="admin-wrapper">
+    <section class="login-screen">
+      <div class="login-card">
+        <h1>Access denied</h1>
+        <p>No tienes permisos para acceder al panel de administración.</p>
+        <button type="button" id="goLoginBtn">Ir a admin login</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById('goLoginBtn')?.addEventListener('click', () => {
+      window.location.href = 'admin-login.html';
+    });
+  </script>
+</body>
+</html>

@@ -11,9 +11,7 @@ const state = {
 
 const form = document.getElementById('propertyForm');
 const list = document.getElementById('propertyList');
-const loginScreen = document.getElementById('loginScreen');
 const adminPanel = document.getElementById('adminPanel');
-const loginError = document.getElementById('loginError');
 
 const fields = {
   id: document.getElementById('propertyId'),
@@ -50,7 +48,7 @@ let locationMarker;
 function getFirebaseOrNotify() {
   const client = window.inmoFirebase;
   if (!client?.enabled || !client.auth || !client.db) {
-    loginError.textContent = 'Firebase no está disponible en este entorno.';
+    console.error('Firebase no está disponible en este entorno.');
     return null;
   }
   return client;
@@ -365,7 +363,7 @@ function listenAllProperties() {
     renderList();
   }, (error) => {
     console.error(error);
-    loginError.textContent = 'No se pudieron cargar las propiedades.';
+    console.error('No se pudieron cargar las propiedades.');
   });
 }
 
@@ -418,16 +416,13 @@ async function isAdmin(user) {
 }
 
 function showAdmin() {
-  loginScreen.classList.add('hidden');
   adminPanel.classList.remove('hidden');
   initAdminMap();
   refreshMapSize();
 }
 
-function hideAdmin(message = '') {
+function hideAdmin() {
   adminPanel.classList.add('hidden');
-  loginScreen.classList.remove('hidden');
-  loginError.textContent = message;
 
   if (state.unsubscribeProperties) {
     state.unsubscribeProperties();
@@ -436,6 +431,10 @@ function hideAdmin(message = '') {
 
   state.properties = [];
   renderList();
+}
+
+function redirectTo(path) {
+  window.location.replace(path);
 }
 
 function bindActions() {
@@ -449,16 +448,6 @@ function bindActions() {
   document.getElementById('updateBtn')?.addEventListener('click', savePropertyUpdate);
   document.getElementById('clearBtn')?.addEventListener('click', () => clearFormState());
 
-  document.getElementById('googleLoginBtn')?.addEventListener('click', async () => {
-    const client = getFirebaseOrNotify();
-    if (!client) return;
-    try {
-      await client.auth.signInWithPopup(client.provider);
-    } catch (error) {
-      console.error(error);
-      loginError.textContent = 'No fue posible iniciar sesión con Google.';
-    }
-  });
 
   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     const client = getFirebaseOrNotify();
@@ -481,17 +470,18 @@ function init() {
     state.user = user;
 
     if (!user) {
-      hideAdmin('Inicia sesión como administrador.');
+      hideAdmin();
+      redirectTo('admin-login.html');
       return;
     }
 
     const adminAllowed = await isAdmin(user);
     if (!adminAllowed) {
-      hideAdmin('Acceso denegado: solo usuarios con rol admin.');
+      hideAdmin();
+      redirectTo('access-denied.html');
       return;
     }
 
-    loginError.textContent = '';
     showAdmin();
     await loadAgents();
     listenAllProperties();

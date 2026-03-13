@@ -14,15 +14,6 @@
 </head>
 <body>
   <main class="admin-wrapper">
-    <section id="loginScreen" class="login-screen">
-      <div class="login-card">
-        <h1>Panel Privado</h1>
-        <p>Inicia sesión con tu cuenta Google para administrar propiedades.</p>
-        <button type="button" id="googleLoginBtn">Ingresar con Google</button>
-        <p id="loginError" class="error-msg" aria-live="polite"></p>
-      </div>
-    </section>
-
     <section id="adminPanel" class="admin-panel hidden">
       <header class="panel-header">
         <h1>Administrador de Propiedades</h1>
@@ -153,22 +144,12 @@
           </div>
         </article>
       </section>
-
     </section>
   </main>
 
-  <script
-    src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"
-    defer
-  ></script>
-  <script
-    src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"
-    defer
-  ></script>
-  <script
-    src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"
-    defer
-  ></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
   <script src="js/firebase-client.js" defer></script>
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
