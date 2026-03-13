@@ -109,7 +109,12 @@
       <aside class="seller-contact-card">
         <h2>Atención inmediata</h2>
         <p>Si prefieres una respuesta más rápida, escríbenos directamente por WhatsApp y uno de nuestros asesores te guiará en el proceso de venta.</p>
-        <a class="seller-whatsapp-btn" href="https://wa.me/50588888888" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
+        <label class="seller-agent-label" for="sellerAgentSelect">Selecciona un asesor</label>
+        <select id="sellerAgentSelect" class="seller-agent-select" aria-label="Selecciona un asesor para contactar por WhatsApp">
+          <option value="">Cargando asesores...</option>
+        </select>
+        <p class="seller-agent-message" id="sellerAgentMessage" aria-live="polite"></p>
+        <a class="seller-whatsapp-btn" id="sellerWhatsappBtn" href="https://wa.me/50588888888" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
           <span aria-hidden="true">💬</span>
           Contactar por WhatsApp
         </a>
