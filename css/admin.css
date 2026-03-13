@@ -20,6 +20,10 @@ body {
   min-height: 100vh;
 }
 
+body.auth-checking {
+  visibility: hidden;
+}
+
 .admin-wrapper {
   width: min(1200px, 94%);
   margin: 2rem auto;

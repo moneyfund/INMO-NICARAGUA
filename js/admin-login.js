@@ -6,13 +6,6 @@ function getFirebaseClient() {
   return client;
 }
 
-async function isAdminUser(client, user) {
-  if (!user) return false;
-  const agentDoc = await client.db.collection('agents').doc(user.uid).get();
-  if (!agentDoc.exists) return false;
-  return String(agentDoc.data().role || '').toLowerCase() === 'admin';
-}
-
 function redirectTo(path) {
   window.location.replace(path);
 }
@@ -27,21 +20,9 @@ function initAdminLogin() {
     return;
   }
 
-  client.auth.onAuthStateChanged(async (user) => {
+  client.auth.onAuthStateChanged((user) => {
     if (!user) return;
-
-    try {
-      const allowed = await isAdminUser(client, user);
-      if (allowed) {
-        redirectTo('admin.html');
-        return;
-      }
-
-      redirectTo('access-denied.html');
-    } catch (error) {
-      console.error(error);
-      if (loginError) loginError.textContent = 'No se pudo validar tu rol de acceso.';
-    }
+    redirectTo('admin.html');
   });
 
   loginBtn?.addEventListener('click', async () => {
