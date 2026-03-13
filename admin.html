@@ -11,6 +11,11 @@
     crossorigin=""
   />
   <link rel="stylesheet" href="css/admin.css" />
+  <style>
+    body.auth-checking main {
+      display: none;
+    }
+  </style>
 </head>
 <body class="auth-checking">
   <main class="admin-wrapper">
@@ -135,6 +140,24 @@
               <tbody id="propertyList"></tbody>
             </table>
           </div>
+
+          <h2>AGENTS</h2>
+          <p>Listado de agentes registrados en Firestore.</p>
+          <div class="properties-table-wrapper">
+            <table class="properties-table" aria-label="Agents list">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody id="agentList"></tbody>
+            </table>
+          </div>
+
+          <h2>REVIEWS</h2>
+          <p id="reviewsSummary">Cargando reseñas...</p>
         </aside>
       </section>
 

@@ -6,12 +6,16 @@ const state = {
   user: null,
   agents: [],
   properties: [],
+  reviews: [],
   unsubscribeProperties: null,
-  authCheckId: 0
+  authCheckId: 0,
+  uiReady: false
 };
 
 const form = document.getElementById('propertyForm');
 const list = document.getElementById('propertyList');
+const agentList = document.getElementById('agentList');
+const reviewsSummary = document.getElementById('reviewsSummary');
 const adminPanel = document.getElementById('adminPanel');
 const accessDeniedPanel = document.getElementById('accessDeniedPanel');
 
@@ -152,16 +156,56 @@ function renderAgentOptions() {
   fields.agentId.innerHTML = options.join('');
 }
 
-async function loadAgents() {
-  const client = getFirebaseOrNotify();
-  if (!client) {
-    finishAuthCheck();
+function renderAgentsTable() {
+  if (!agentList) return;
+
+  agentList.innerHTML = '';
+  if (!state.agents.length) {
+    const row = document.createElement('tr');
+    row.innerHTML = '<td colspan="3">No agents found in Firestore.</td>';
+    agentList.appendChild(row);
     return;
   }
+
+  state.agents
+    .slice()
+    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
+    .forEach((agent) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${agent.name || 'Sin nombre'}</td>
+        <td>${agent.email || 'Sin correo'}</td>
+        <td>${String(agent.role || 'agent')}</td>
+      `;
+      agentList.appendChild(row);
+    });
+}
+
+function renderReviewsSummary() {
+  if (!reviewsSummary) return;
+  const count = state.reviews.length;
+  reviewsSummary.textContent = count
+    ? `Reseñas cargadas desde Firestore: ${count}`
+    : 'No reviews found in Firestore.';
+}
+
+async function loadAgents() {
+  const client = getFirebaseOrNotify();
+  if (!client) return;
 
   const snapshot = await client.db.collection('agents').get();
   state.agents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   renderAgentOptions();
+  renderAgentsTable();
+}
+
+async function loadReviews() {
+  const client = getFirebaseOrNotify();
+  if (!client) return;
+
+  const snapshot = await client.db.collection('reviews').get();
+  state.reviews = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  renderReviewsSummary();
 }
 
 function getImagesFromProperty(property) {
@@ -430,7 +474,16 @@ function finishAuthCheck() {
   document.body.classList.remove('auth-checking');
 }
 
+function prepareAdminUI() {
+  if (state.uiReady) return;
+  resetImageFields(['']);
+  bindActions();
+  updatePreview();
+  state.uiReady = true;
+}
+
 function showAdmin() {
+  prepareAdminUI();
   accessDeniedPanel?.classList.add('hidden');
   adminPanel.classList.remove('hidden');
   finishAuthCheck();
@@ -440,8 +493,7 @@ function showAdmin() {
 
 function showAccessDenied() {
   hideAdmin();
-  accessDeniedPanel?.classList.remove('hidden');
-  finishAuthCheck();
+  redirectTo('access-denied.html');
 }
 
 function hideAdmin() {
@@ -454,7 +506,11 @@ function hideAdmin() {
   }
 
   state.properties = [];
+  state.agents = [];
+  state.reviews = [];
   renderList();
+  renderAgentsTable();
+  renderReviewsSummary();
 }
 
 function redirectTo(path) {
@@ -488,10 +544,6 @@ function bindActions() {
 }
 
 function init() {
-  initAdminMap();
-  resetImageFields(['']);
-  bindActions();
-
   const client = getFirebaseOrNotify();
   if (!client) {
     finishAuthCheck();
@@ -518,7 +570,7 @@ function init() {
       }
 
       showAdmin();
-      await loadAgents();
+      await Promise.all([loadAgents(), loadReviews()]);
       if (authCheckId !== state.authCheckId) return;
       listenAllProperties();
       clearFormState();
