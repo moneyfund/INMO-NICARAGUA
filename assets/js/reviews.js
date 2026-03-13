@@ -1,4 +1,3 @@
-const PROPERTIES_COLLECTION = 'properties';
 const REVIEWS_COLLECTION = 'reviews';
 
 const state = {
@@ -6,7 +5,8 @@ const state = {
   selectedRating: 0,
   hoverRating: 0,
   unsubscribeReviews: null,
-  initializedPropertyId: null
+  initializedPropertyId: null,
+  authUnsubscribe: null
 };
 
 function getFirebaseClient() {
@@ -14,12 +14,9 @@ function getFirebaseClient() {
 }
 
 function getPropertyIdFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get('id');
-  const propertyId = params.get('propertyId');
-  const resolved = id || propertyId;
-  console.log('[Reviews] URLSearchParams propertyId:', { id, propertyId, resolved });
-  return resolved;
+  const propertyId = new URLSearchParams(window.location.search).get('id');
+  console.log('[Reviews] propertyId from URL:', propertyId);
+  return propertyId;
 }
 
 function escapeHtml(value = '') {
@@ -195,7 +192,7 @@ async function submitReview(event, propertyId) {
       hasUser: Boolean(state.currentUser),
       hasDb: Boolean(client?.db)
     });
-    setFormMessage(form, 'Debes iniciar sesión con Google para dejar una reseña.');
+    setFormMessage(form, 'You must sign in to leave a review');
     return;
   }
 
@@ -216,18 +213,18 @@ async function submitReview(event, propertyId) {
 
   const reviewPayload = {
     propertyId,
-    userId: state.currentUser.uid,
     rating,
     comment,
+    userName: state.currentUser.displayName || 'Usuario',
+    userEmail: state.currentUser.email || '',
+    userPhoto: state.currentUser.photoURL || '',
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
   try {
     console.log('[Reviews] Guardando reseña en Firestore...', reviewPayload);
     await client.db.collection(REVIEWS_COLLECTION).add(reviewPayload);
-    console.log('[Reviews] Reseña guardada correctamente. Recargando listado...');
-
-    listenReviews(document.getElementById('propertyReviews'), propertyId);
+    console.log('[Reviews] review submission result: success');
 
     form.reset();
     state.selectedRating = 0;
@@ -235,6 +232,7 @@ async function submitReview(event, propertyId) {
     setFormMessage(form, 'Reseña enviada correctamente.');
   } catch (error) {
     console.error('No se pudo guardar la reseña.', error);
+    console.log('[Reviews] review submission result: error');
     setFormMessage(form, 'No se pudo guardar la reseña.');
   }
 }
@@ -245,8 +243,10 @@ function listenReviews(section, propertyId) {
 
   if (state.unsubscribeReviews) state.unsubscribeReviews();
 
-  state.unsubscribeReviews = client.db.collection(REVIEWS_COLLECTION)
-    .where('propertyId', '==', propertyId)
+  const reviewsQuery = client.db.collection(REVIEWS_COLLECTION)
+    .where('propertyId', '==', propertyId);
+
+  state.unsubscribeReviews = reviewsQuery
     .onSnapshot((snapshot) => {
       console.log('[Reviews] Snapshot recibido para propiedad:', propertyId, 'cantidad:', snapshot.size);
       const reviews = snapshot.docs
@@ -260,23 +260,6 @@ function listenReviews(section, propertyId) {
       const status = section.querySelector('[data-firebase-status]');
       if (status) status.textContent = 'No se pudieron cargar las reseñas.';
     });
-}
-
-async function validateProperty(section, propertyId) {
-  if (!propertyId) return false;
-
-  const client = getFirebaseClient();
-  if (!client?.db) return false;
-
-  try {
-    const propertySnapshot = await client.db.collection(PROPERTIES_COLLECTION).doc(propertyId).get();
-    return propertySnapshot.exists;
-  } catch (error) {
-    console.error('No se pudo validar la propiedad en Firestore.', error);
-    const status = section.querySelector('[data-firebase-status]');
-    if (status) status.textContent = 'No se pudo validar la propiedad.';
-    return false;
-  }
 }
 
 async function initReviews(forcedPropertyId = null) {
@@ -304,20 +287,21 @@ async function initReviews(forcedPropertyId = null) {
     return;
   }
 
-  const propertyExists = await validateProperty(section, propertyId);
-  if (!propertyExists) {
-    renderNoPropertyMessage(section);
-    return;
-  }
-
   const form = section.querySelector('[data-review-form]');
+  if (!form) return;
+
   bindStars(form);
   form.addEventListener('submit', (event) => submitReview(event, propertyId));
 
-  client.auth.onAuthStateChanged((user) => {
-    state.currentUser = user;
+  if (!state.authUnsubscribe) {
+    state.authUnsubscribe = client.auth.onAuthStateChanged((user) => {
+      state.currentUser = user;
+      console.log('[Reviews] user login state:', user ? { uid: user.uid, email: user.email } : null);
+      renderAuthControls(section);
+    });
+  } else {
     renderAuthControls(section);
-  });
+  }
 
   listenReviews(section, propertyId);
 }

@@ -340,14 +340,15 @@ function renderPropertyDetail(properties) {
   if (!detailContainer) return;
 
   const params = new URLSearchParams(window.location.search);
-  const propertyId = params.get('id');
+  const propertyId = String(params.get('id') || '').trim();
+  console.log('[Properties] propertyId from URL:', propertyId);
 
   if (!propertyId) {
     detailContainer.innerHTML = '<p>Propiedad no encontrada. <a href="propiedades.html" class="text-link">Ir al catálogo</a></p>';
     return;
   }
 
-  const property = properties.find((item) => String(item.id) === propertyId);
+  const property = properties.find((item) => String(item.id).trim() === propertyId);
 
   if (!property) {
     detailContainer.innerHTML = '<p>Propiedad no encontrada. <a href="propiedades.html" class="text-link">Regresar al catálogo</a></p>';

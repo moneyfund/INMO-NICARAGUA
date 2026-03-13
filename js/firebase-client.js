@@ -38,8 +38,17 @@
     app,
     db: firebase.firestore(),
     auth: authAvailable ? firebase.auth() : null,
-    provider: authAvailable ? new firebase.auth.GoogleAuthProvider() : null
+    provider: authAvailable ? new firebase.auth.GoogleAuthProvider() : null,
+    currentUser: null
   };
+
+  if (window.inmoFirebase.auth) {
+    window.inmoFirebase.auth.onAuthStateChanged((user) => {
+      window.inmoFirebase.currentUser = user;
+      console.log('[Firebase] user login state:', user ? { uid: user.uid, email: user.email } : null);
+      document.dispatchEvent(new CustomEvent('inmo:auth-changed', { detail: { user } }));
+    });
+  }
 
   document.dispatchEvent(new CustomEvent('inmo:firebase-ready', { detail: window.inmoFirebase }));
 })();
