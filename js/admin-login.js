@@ -1,4 +1,9 @@
-const ALLOWED_ADMIN_EMAIL = 'norvingarcia@gmail.com';
+const ALLOWED_ADMIN_EMAIL = 'norvingarcia220@gmail.com';
+
+const loginState = {
+  authListenerAttached: false,
+  signingIn: false
+};
 
 function getFirebaseClient() {
   const client = window.inmoFirebase;
@@ -8,9 +13,12 @@ function getFirebaseClient() {
   return client;
 }
 
+function getUserEmail(user) {
+  return String(user?.email || '').trim().toLowerCase();
+}
+
 function hasAllowedAdminEmail(user) {
-  const userEmail = String(user?.email || '').trim().toLowerCase();
-  return userEmail === ALLOWED_ADMIN_EMAIL;
+  return getUserEmail(user) === ALLOWED_ADMIN_EMAIL;
 }
 
 function redirectTo(path) {
@@ -22,7 +30,7 @@ function readLoginError() {
   const reason = params.get('error');
 
   if (reason === 'not-authorized') {
-    return 'Tu cuenta no tiene permisos de administrador.';
+    return 'Access denied – Admins only';
   }
 
   if (reason === 'auth-failed') {
@@ -32,34 +40,53 @@ function readLoginError() {
   return '';
 }
 
-async function loginAsAdmin(client) {
-  const result = await client.auth.signInWithPopup(client.provider);
-  const user = result?.user;
-
-  if (!user) {
-    throw new Error('No authenticated user returned by Google sign-in.');
-  }
-
-  if (!hasAllowedAdminEmail(user)) {
-    throw new Error('User does not have admin role.');
-  }
-
-  redirectTo('admin.html');
+function setLoginMessage(loginError, message = '') {
+  if (!loginError) return;
+  loginError.textContent = message;
 }
 
-async function syncExistingSession(client, loginError) {
-  const user = client.auth.currentUser;
-  if (!user) return;
+function verifyCurrentUser(user, loginError) {
+  const email = getUserEmail(user);
+  const adminAllowed = hasAllowedAdminEmail(user);
+
+  console.log('[admin-login] user email:', email || 'none');
+  console.log('[admin-login] login state:', Boolean(user));
+  console.log('[admin-login] admin verification:', adminAllowed);
+
+  if (!user) {
+    return;
+  }
+
+  if (adminAllowed) {
+    redirectTo('admin.html');
+    return;
+  }
+
+  setLoginMessage(loginError, 'Access denied – Admins only');
+}
+
+async function loginAsAdmin(client, loginError) {
+  if (loginState.signingIn) return;
+
+  loginState.signingIn = true;
+  setLoginMessage(loginError, '');
 
   try {
-    if (hasAllowedAdminEmail(user)) {
-      redirectTo('admin.html');
-      return;
+    const GoogleAuthProvider = firebase.auth.GoogleAuthProvider;
+    const signInWithPopup = (auth, provider) => auth.signInWithPopup(provider);
+    const result = await signInWithPopup(client.auth, new GoogleAuthProvider());
+    const user = result?.user;
+
+    if (!user) {
+      throw new Error('No authenticated user returned by Google sign-in.');
     }
 
-    if (loginError) loginError.textContent = 'Tu cuenta no tiene permisos de administrador.';
+    verifyCurrentUser(user, loginError);
   } catch (error) {
-    console.error('No fue posible validar la sesión actual.', error);
+    console.error('[admin-login] sign in failed:', error);
+    setLoginMessage(loginError, 'No fue posible iniciar sesión con Google. Inténtalo de nuevo.');
+  } finally {
+    loginState.signingIn = false;
   }
 }
 
@@ -69,28 +96,26 @@ function initAdminLogin() {
   const client = getFirebaseClient();
 
   if (!client) {
-    if (loginError) loginError.textContent = 'Firebase no está disponible en este entorno.';
+    setLoginMessage(loginError, 'Firebase no está disponible en este entorno.');
     return;
   }
 
-  syncExistingSession(client, loginError);
-
   const initialError = readLoginError();
-  if (loginError && initialError) {
-    loginError.textContent = initialError;
+  if (initialError) {
+    setLoginMessage(loginError, initialError);
+  }
+
+  if (!loginState.authListenerAttached) {
+    loginState.authListenerAttached = true;
+
+    client.auth.onAuthStateChanged((user) => {
+      if (loginState.signingIn) return;
+      verifyCurrentUser(user, loginError);
+    });
   }
 
   loginBtn?.addEventListener('click', async () => {
-    if (loginError) loginError.textContent = '';
-
-    try {
-      await loginAsAdmin(client);
-    } catch (error) {
-      console.error(error);
-      if (loginError) {
-        loginError.textContent = 'Access denied. Solo está permitida la cuenta norvingarcia@gmail.com.';
-      }
-    }
+    await loginAsAdmin(client, loginError);
   });
 }
 
