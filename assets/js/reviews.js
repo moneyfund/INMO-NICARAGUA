@@ -1,21 +1,53 @@
+import { initializeApp, getApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
 const REVIEWS_COLLECTION = 'reviews';
+const PROPERTIES_COLLECTION = 'properties';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyCVL7tpUkyQWz_aVr9wFi2hrCBum2pLnPs',
+  authDomain: 'inmo-nicaragua.firebaseapp.com',
+  projectId: 'inmo-nicaragua',
+  storageBucket: 'inmo-nicaragua.firebasestorage.app',
+  messagingSenderId: '735319266898',
+  appId: '1:735319266898:web:124c3b886d0eb32a25b18b',
+  measurementId: 'G-DXTBSYNR95'
+};
+
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
 
 const state = {
   currentUser: null,
   selectedRating: 0,
   hoverRating: 0,
-  unsubscribeReviews: null,
   initializedPropertyId: null,
   authUnsubscribe: null
 };
 
-function getFirebaseClient() {
-  return window.inmoFirebase?.enabled ? window.inmoFirebase : null;
-}
-
 function getPropertyIdFromUrl() {
-  const propertyId = new URLSearchParams(window.location.search).get('id');
-  console.log("PropertyId:", propertyId);
+  const params = new URLSearchParams(window.location.search);
+  const propertyId = params.get('id');
+  console.log('Property ID:', propertyId);
   return propertyId;
 }
 
@@ -41,17 +73,17 @@ function renderNoPropertyMessage(section) {
   section.innerHTML = '<p class="reviews-firebase-status">No se encontró un identificador de propiedad válido.</p>';
 }
 
-function getActiveUser() {
-  const client = getFirebaseClient();
-  return state.currentUser || client?.currentUser || client?.auth?.currentUser || null;
-}
-
 function paintRatingStars(form, value) {
   const stars = form.querySelectorAll('[data-rating-star]');
   stars.forEach((star) => {
     const starValue = Number(star.dataset.ratingStar);
     star.classList.toggle('active', starValue <= value);
   });
+}
+
+function setStatus(section, message) {
+  const status = section.querySelector('[data-firebase-status]');
+  if (status) status.textContent = message;
 }
 
 function renderAuthControls(section) {
@@ -65,14 +97,13 @@ function renderAuthControls(section) {
     controls.innerHTML = '';
     requiredBox.classList.remove('hidden');
     form.classList.add('hidden');
+    setStatus(section, 'Please sign in to leave a review');
 
     const loginBtn = requiredBox.querySelector('[data-login-google]');
     if (loginBtn) {
       loginBtn.onclick = async () => {
-        const client = getFirebaseClient();
-        if (!client?.auth || !client?.provider) return;
         try {
-          await client.auth.signInWithPopup(client.provider);
+          await signInWithPopup(auth, googleProvider);
         } catch (error) {
           console.error('No fue posible iniciar sesión con Google.', error);
         }
@@ -84,6 +115,7 @@ function renderAuthControls(section) {
 
   requiredBox.classList.add('hidden');
   form.classList.remove('hidden');
+  setStatus(section, '');
 
   const name = escapeHtml(state.currentUser.displayName || 'Usuario');
   const photo = escapeHtml(state.currentUser.photoURL || 'assets/placeholder.svg');
@@ -99,10 +131,8 @@ function renderAuthControls(section) {
   const logoutBtn = controls.querySelector('[data-logout-google]');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      const client = getFirebaseClient();
-      if (!client?.auth) return;
       try {
-        await client.auth.signOut();
+        await signOut(auth);
       } catch (error) {
         console.error('No fue posible cerrar sesión.', error);
       }
@@ -154,6 +184,22 @@ function renderReviewsList(section, reviews) {
   }).join('');
 }
 
+async function loadReviews(section, propertyId) {
+  try {
+    const reviewsQuery = query(collection(db, REVIEWS_COLLECTION), where('propertyId', '==', propertyId));
+    const snapshot = await getDocs(reviewsQuery);
+    const reviews = snapshot.docs
+      .map((item) => ({ id: item.id, ...item.data() }))
+      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+    updateSummary(section, reviews);
+    renderReviewsList(section, reviews);
+  } catch (error) {
+    console.error('No se pudieron cargar las reseñas.', error);
+    setStatus(section, 'No se pudieron cargar las reseñas.');
+  }
+}
+
 function bindStars(form) {
   const stars = form.querySelectorAll('[data-rating-star]');
   const ratingInput = form.querySelector('[name="rating"]');
@@ -184,35 +230,25 @@ function setFormMessage(form, message) {
   if (messageElement) messageElement.textContent = message;
 }
 
-async function submitReview(event, propertyId) {
+async function submitReview(event, propertyId, section) {
   event.preventDefault();
 
   const form = event.currentTarget;
-  const comment = form.querySelector('[name="comment"]').value.trim();
+  const commentText = form.querySelector('[name="comment"]').value.trim();
   const rawRating = Number(form.querySelector('[name="rating"]').value || 0);
-  const rating = Math.min(5, Math.max(1, rawRating));
-  const client = getFirebaseClient();
-  const user = getActiveUser();
+  const ratingValue = Math.min(5, Math.max(1, rawRating));
+  const user = state.currentUser;
 
-  console.log("User:", user);
-  console.log("PropertyId:", propertyId);
+  console.log('User:', user);
+  console.log('Property ID:', propertyId);
 
   if (!user) {
     setFormMessage(form, 'Please sign in to leave a review');
     return;
   }
 
-  if (!client?.db) {
-    console.warn('[Reviews] Submit bloqueado: usuario no autenticado o Firestore no disponible.', {
-      hasUser: Boolean(user),
-      hasDb: Boolean(client?.db)
-    });
-    setFormMessage(form, 'No se pudo conectar con Firestore.');
-    return;
-  }
-
   if (!propertyId) {
-    setFormMessage(form, 'No se encontró la propiedad para registrar la reseña.');
+    setFormMessage(form, 'Property not found');
     return;
   }
 
@@ -221,61 +257,40 @@ async function submitReview(event, propertyId) {
     return;
   }
 
-  if (!comment) {
+  if (!commentText) {
     setFormMessage(form, 'Escribe un comentario para continuar.');
     return;
   }
 
-  const reviewPayload = {
-    propertyId,
-    rating,
-    comment,
-    userName: user.displayName || 'Usuario',
-    userEmail: user.email || '',
-    userPhoto: user.photoURL || '',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
-
   try {
-    console.log("Submitting review...");
-    console.log('[Reviews] Guardando reseña en Firestore...', reviewPayload);
-    await client.db.collection(REVIEWS_COLLECTION).add(reviewPayload);
-    console.log('[Reviews] review submission result: success');
+    const propertyRef = doc(db, PROPERTIES_COLLECTION, propertyId);
+    const propertySnap = await getDoc(propertyRef);
+
+    if (!propertySnap.exists()) {
+      setFormMessage(form, 'Property not found');
+      return;
+    }
+
+    console.log('Submitting review');
+    await addDoc(collection(db, REVIEWS_COLLECTION), {
+      propertyId: propertyId,
+      rating: ratingValue,
+      comment: commentText,
+      userName: user.displayName || 'Usuario',
+      userEmail: user.email || '',
+      userPhoto: user.photoURL || '',
+      createdAt: serverTimestamp()
+    });
 
     form.reset();
     state.selectedRating = 0;
     paintRatingStars(form, 0);
     setFormMessage(form, 'Reseña enviada correctamente.');
+    await loadReviews(section, propertyId);
   } catch (error) {
     console.error('No se pudo guardar la reseña.', error);
-    console.log('[Reviews] review submission result: error');
     setFormMessage(form, 'No se pudo guardar la reseña.');
   }
-}
-
-function listenReviews(section, propertyId) {
-  const client = getFirebaseClient();
-  if (!client?.db) return;
-
-  if (state.unsubscribeReviews) state.unsubscribeReviews();
-
-  const reviewsQuery = client.db.collection(REVIEWS_COLLECTION)
-    .where('propertyId', '==', propertyId);
-
-  state.unsubscribeReviews = reviewsQuery
-    .onSnapshot((snapshot) => {
-      console.log('[Reviews] Snapshot recibido para propiedad:', propertyId, 'cantidad:', snapshot.size);
-      const reviews = snapshot.docs
-        .map((item) => ({ id: item.id, ...item.data() }))
-        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-      updateSummary(section, reviews);
-      renderReviewsList(section, reviews);
-    }, (error) => {
-      console.error('No se pudieron cargar las reseñas.', error);
-      const status = section.querySelector('[data-firebase-status]');
-      if (status) status.textContent = 'No se pudieron cargar las reseñas.';
-    });
 }
 
 async function initReviews(forcedPropertyId = null) {
@@ -289,17 +304,15 @@ async function initReviews(forcedPropertyId = null) {
   }
 
   if (state.initializedPropertyId === propertyId) {
-    console.log('[Reviews] Ya inicializado para esta propiedad.');
     return;
   }
 
   state.initializedPropertyId = propertyId;
-  console.log('[Reviews] Inicializando módulo para propiedad:', propertyId);
+  const propertyRef = doc(db, PROPERTIES_COLLECTION, propertyId);
+  const propertySnap = await getDoc(propertyRef);
 
-  const client = getFirebaseClient();
-  if (!client?.auth || !client?.db) {
-    const status = section.querySelector('[data-firebase-status]');
-    if (status) status.textContent = 'No se pudieron cargar las reseñas.';
+  if (!propertySnap.exists()) {
+    setStatus(section, 'Property not found');
     return;
   }
 
@@ -307,21 +320,19 @@ async function initReviews(forcedPropertyId = null) {
   if (!form) return;
 
   bindStars(form);
-  form.addEventListener('submit', (event) => submitReview(event, propertyId));
+  form.addEventListener('submit', (event) => submitReview(event, propertyId, section));
 
   if (!state.authUnsubscribe) {
-    state.authUnsubscribe = client.auth.onAuthStateChanged((user) => {
+    state.authUnsubscribe = onAuthStateChanged(auth, (user) => {
       state.currentUser = user;
-      if (client) client.currentUser = user;
-      console.log("User:", user);
-      console.log('[Reviews] user login state:', user ? { uid: user.uid, email: user.email } : null);
+      console.log('User:', user);
       renderAuthControls(section);
     });
   } else {
     renderAuthControls(section);
   }
 
-  listenReviews(section, propertyId);
+  await loadReviews(section, propertyId);
 }
 
 function init() {
@@ -333,10 +344,6 @@ function init() {
   if (document.getElementById('propertyReviews')) {
     initReviews();
   }
-
-  document.addEventListener('inmo:firebase-ready', () => {
-    if (document.getElementById('propertyReviews')) initReviews();
-  });
 }
 
 window.addEventListener('DOMContentLoaded', init);

@@ -344,14 +344,14 @@ function renderPropertyDetail(properties) {
   console.log('[Properties] propertyId from URL:', propertyId);
 
   if (!propertyId) {
-    detailContainer.innerHTML = '<p>Propiedad no encontrada. <a href="propiedades.html" class="text-link">Ir al catálogo</a></p>';
+    detailContainer.innerHTML = '<p>Property not found. <a href="propiedades.html" class="text-link">Ver propiedades</a></p>';
     return;
   }
 
   const property = properties.find((item) => String(item.id).trim() === propertyId);
 
   if (!property) {
-    detailContainer.innerHTML = '<p>Propiedad no encontrada. <a href="propiedades.html" class="text-link">Regresar al catálogo</a></p>';
+    detailContainer.innerHTML = '<p>Property not found. <a href="propiedades.html" class="text-link">Ver propiedades</a></p>';
     return;
   }
 
