@@ -15,7 +15,7 @@ function getFirebaseClient() {
 
 function getPropertyIdFromUrl() {
   const propertyId = new URLSearchParams(window.location.search).get('id');
-  console.log('[Reviews] propertyId from URL:', propertyId);
+  console.log("PropertyId:", propertyId);
   return propertyId;
 }
 
@@ -38,7 +38,12 @@ function formatDate(value) {
 }
 
 function renderNoPropertyMessage(section) {
-  section.innerHTML = '<p class="reviews-firebase-status">Propiedad no encontrada</p>';
+  section.innerHTML = '<p class="reviews-firebase-status">No se encontró un identificador de propiedad válido.</p>';
+}
+
+function getActiveUser() {
+  const client = getFirebaseClient();
+  return state.currentUser || client?.currentUser || client?.auth?.currentUser || null;
 }
 
 function paintRatingStars(form, value) {
@@ -184,15 +189,25 @@ async function submitReview(event, propertyId) {
 
   const form = event.currentTarget;
   const comment = form.querySelector('[name="comment"]').value.trim();
-  const rating = Number(form.querySelector('[name="rating"]').value || 0);
+  const rawRating = Number(form.querySelector('[name="rating"]').value || 0);
+  const rating = Math.min(5, Math.max(1, rawRating));
   const client = getFirebaseClient();
+  const user = getActiveUser();
 
-  if (!state.currentUser || !client?.db) {
+  console.log("User:", user);
+  console.log("PropertyId:", propertyId);
+
+  if (!user) {
+    setFormMessage(form, 'Please sign in to leave a review');
+    return;
+  }
+
+  if (!client?.db) {
     console.warn('[Reviews] Submit bloqueado: usuario no autenticado o Firestore no disponible.', {
-      hasUser: Boolean(state.currentUser),
+      hasUser: Boolean(user),
       hasDb: Boolean(client?.db)
     });
-    setFormMessage(form, 'You must sign in to leave a review');
+    setFormMessage(form, 'No se pudo conectar con Firestore.');
     return;
   }
 
@@ -201,7 +216,7 @@ async function submitReview(event, propertyId) {
     return;
   }
 
-  if (!rating) {
+  if (!rawRating || rawRating < 1 || rawRating > 5) {
     setFormMessage(form, 'Selecciona una calificación de estrellas.');
     return;
   }
@@ -215,13 +230,14 @@ async function submitReview(event, propertyId) {
     propertyId,
     rating,
     comment,
-    userName: state.currentUser.displayName || 'Usuario',
-    userEmail: state.currentUser.email || '',
-    userPhoto: state.currentUser.photoURL || '',
+    userName: user.displayName || 'Usuario',
+    userEmail: user.email || '',
+    userPhoto: user.photoURL || '',
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
   try {
+    console.log("Submitting review...");
     console.log('[Reviews] Guardando reseña en Firestore...', reviewPayload);
     await client.db.collection(REVIEWS_COLLECTION).add(reviewPayload);
     console.log('[Reviews] review submission result: success');
@@ -296,6 +312,8 @@ async function initReviews(forcedPropertyId = null) {
   if (!state.authUnsubscribe) {
     state.authUnsubscribe = client.auth.onAuthStateChanged((user) => {
       state.currentUser = user;
+      if (client) client.currentUser = user;
+      console.log("User:", user);
       console.log('[Reviews] user login state:', user ? { uid: user.uid, email: user.email } : null);
       renderAuthControls(section);
     });
