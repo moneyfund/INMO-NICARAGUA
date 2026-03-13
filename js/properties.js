@@ -23,7 +23,7 @@ function getFirestoreDb() {
 async function getModularFirestore() {
   if (!modularFirestorePromise) {
     modularFirestorePromise = (async () => {
-      const [{ initializeApp, getApps, getApp }, { getFirestore, collection, getDocs }] = await Promise.all([
+      const [{ initializeApp, getApps, getApp }, { getFirestore, collection, getDocs, doc, getDoc }] = await Promise.all([
         import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
         import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
       ]);
@@ -31,7 +31,7 @@ async function getModularFirestore() {
       const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
       const db = getFirestore(app);
 
-      return { collection, getDocs, db };
+      return { collection, getDocs, doc, getDoc, db };
     })();
   }
 
@@ -343,7 +343,20 @@ function renderPropertyDetailMap(property) {
     .openPopup();
 }
 
-function renderPropertyDetail(properties) {
+async function loadPropertyDetailFromFirestore(propertyId) {
+  const { db, doc, getDoc } = await getModularFirestore();
+  const propertyRef = doc(db, 'properties', propertyId);
+  const propertySnap = await getDoc(propertyRef);
+
+  if (!propertySnap.exists()) {
+    console.error('Property not found:', propertyId);
+    return null;
+  }
+
+  return normalizeProperty(propertySnap.data(), propertySnap.id);
+}
+
+async function renderPropertyDetail() {
   const detailContainer = document.getElementById('propertyDetail');
   if (!detailContainer) return;
 
@@ -357,7 +370,7 @@ function renderPropertyDetail(properties) {
   }
 
   const normalizedPropertyId = propertyId.trim();
-  const property = properties.find((item) => String(item.id).trim() === normalizedPropertyId);
+  const property = await loadPropertyDetailFromFirestore(normalizedPropertyId);
 
   if (!property) {
     detailContainer.innerHTML = '<p>Property not found. <a href="propiedades.html" class="text-link">Ver propiedades</a></p>';
@@ -565,7 +578,7 @@ function renderGlobalMap(properties) {
         renderPropertyList(applyFilters(agentFiltered));
       }
 
-      renderPropertyDetail(properties);
+      renderPropertyDetail();
 
       if (!hasRenderedGlobalMap) {
         renderGlobalMap(agentFiltered);

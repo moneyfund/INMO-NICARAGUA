@@ -187,7 +187,12 @@ function renderReviewsList(section, reviews) {
   }).join('');
 }
 
-function subscribeToReviews(section, propertyId) {
+async function loadReviews(propertyId) {
+  const section = document.getElementById('propertyReviews');
+  if (!section) return;
+
+  console.log('Loading reviews for property:', propertyId);
+
   if (state.reviewsUnsubscribe) {
     state.reviewsUnsubscribe();
     state.reviewsUnsubscribe = null;
@@ -209,6 +214,10 @@ function subscribeToReviews(section, propertyId) {
     console.error('No se pudieron cargar las reseñas.', error);
     setStatus(section, 'No se pudieron cargar las reseñas.');
   });
+}
+
+function subscribeToReviews(propertyId) {
+  void loadReviews(propertyId);
 }
 
 function bindStars(form) {
@@ -241,7 +250,7 @@ function setFormMessage(form, message) {
   if (messageElement) messageElement.textContent = message;
 }
 
-async function submitReview(event, propertyId, section) {
+async function submitReview(event, propertyId) {
   event.preventDefault();
 
   const form = event.currentTarget;
@@ -251,7 +260,7 @@ async function submitReview(event, propertyId, section) {
   const user = state.currentUser;
 
   console.log('User:', user);
-  console.log('Submitting review for property:', propertyId);
+  console.log('Saving review for property:', propertyId);
 
   if (!user) {
     setFormMessage(form, 'Please sign in to leave a review');
@@ -296,6 +305,7 @@ async function submitReview(event, propertyId, section) {
     state.selectedRating = 0;
     paintRatingStars(form, 0);
     setFormMessage(form, 'Reseña enviada correctamente.');
+    await loadReviews(propertyId);
   } catch (error) {
     console.error('No se pudo guardar la reseña.', error);
     setFormMessage(form, 'No se pudo guardar la reseña.');
@@ -334,7 +344,7 @@ async function initReviews() {
   }
 
   if (!state.submitBound) {
-    form.addEventListener('submit', (event) => submitReview(event, state.activePropertyId, section));
+    form.addEventListener('submit', (event) => submitReview(event, state.activePropertyId));
     state.submitBound = true;
   }
 
@@ -348,7 +358,7 @@ async function initReviews() {
     renderAuthControls(section);
   }
 
-  subscribeToReviews(section, propertyId);
+  subscribeToReviews(propertyId);
 }
 
 function init() {
