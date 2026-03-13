@@ -13,10 +13,13 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
+  where,
   serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const PROPERTIES_COLLECTION = 'properties';
+const REVIEWS_COLLECTION = 'reviews';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCVL7tpUkyQWz_aVr9wFi2hrCBum2pLnPs',
@@ -88,7 +91,7 @@ function setStatus(section, message) {
 function renderAuthControls(section) {
   const controls = section.querySelector('[data-auth-controls]');
   const requiredBox = section.querySelector('[data-review-auth-required]');
-  const form = section.querySelector('[data-review-form]');
+  const form = document.getElementById('review-form');
 
   if (!controls || !requiredBox || !form) return;
 
@@ -190,8 +193,9 @@ async function loadReviews(propertyId) {
   console.log('Loading reviews from property:', propertyId);
 
   try {
-    const reviewsRef = collection(db, PROPERTIES_COLLECTION, propertyId, 'reviews');
-    const snapshot = await getDocs(reviewsRef);
+    const reviewsRef = collection(db, REVIEWS_COLLECTION);
+    const reviewsQuery = query(reviewsRef, where('propertyId', '==', propertyId));
+    const snapshot = await getDocs(reviewsQuery);
     const reviews = snapshot.docs
       .map((item) => ({ id: item.id, ...item.data() }))
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
@@ -239,9 +243,10 @@ function setFormMessage(form, message) {
 }
 
 async function submitReview(propertyId, rating, comment, user) {
-  const reviewsRef = collection(db, PROPERTIES_COLLECTION, propertyId, 'reviews');
+  const reviewsRef = collection(db, REVIEWS_COLLECTION);
 
   await addDoc(reviewsRef, {
+    propertyId: propertyId,
     rating: rating,
     comment: comment,
     userName: user.displayName || 'Usuario',
@@ -257,7 +262,7 @@ async function handleReviewSubmit(event, propertyId) {
   event.preventDefault();
 
   const form = event.currentTarget;
-  const commentText = form.querySelector('[name="comment"]').value.trim();
+  const commentText = document.getElementById('comment')?.value.trim() || '';
   const rawRating = Number(form.querySelector('[name="rating"]').value || 0);
   const ratingValue = Math.min(5, Math.max(1, rawRating));
   const user = state.currentUser;
@@ -330,7 +335,7 @@ async function initReviews() {
     return;
   }
 
-  const form = section.querySelector('[data-review-form]');
+  const form = document.getElementById('review-form');
   if (!form) return;
 
   if (!state.starsBound) {
@@ -339,7 +344,14 @@ async function initReviews() {
   }
 
   if (!state.submitBound) {
-    form.addEventListener('submit', (event) => handleReviewSubmit(event, state.activePropertyId));
+    document.getElementById('review-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const params = new URLSearchParams(window.location.search);
+      const currentPropertyId = params.get('id');
+
+      await handleReviewSubmit(event, currentPropertyId);
+    });
     state.submitBound = true;
   }
 
