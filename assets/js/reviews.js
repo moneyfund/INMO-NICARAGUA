@@ -199,7 +199,7 @@ async function loadReviews(propertyId) {
   }
 
   const reviewsQuery = query(
-    collection(db, REVIEWS_COLLECTION),
+    collection(db, 'reviews'),
     where('propertyId', '==', propertyId)
   );
 
@@ -250,7 +250,21 @@ function setFormMessage(form, message) {
   if (messageElement) messageElement.textContent = message;
 }
 
-async function submitReview(event, propertyId) {
+async function submitReview(propertyId, rating, comment, user) {
+  await addDoc(collection(db, 'reviews'), {
+    propertyId: propertyId,
+    rating: rating,
+    comment: comment,
+    userName: user.displayName || 'Usuario',
+    userEmail: user.email || '',
+    userPhoto: user.photoURL || '',
+    createdAt: serverTimestamp()
+  });
+
+  console.log('Review saved for property:', propertyId);
+}
+
+async function handleReviewSubmit(event, propertyId) {
   event.preventDefault();
 
   const form = event.currentTarget;
@@ -291,15 +305,7 @@ async function submitReview(event, propertyId) {
       return;
     }
 
-    await addDoc(collection(db, REVIEWS_COLLECTION), {
-      propertyId: propertyId,
-      rating: ratingValue,
-      comment: commentText,
-      userName: user.displayName || 'Usuario',
-      userEmail: user.email || '',
-      userPhoto: user.photoURL || '',
-      createdAt: serverTimestamp()
-    });
+    await submitReview(propertyId, ratingValue, commentText, user);
 
     form.reset();
     state.selectedRating = 0;
@@ -344,7 +350,7 @@ async function initReviews() {
   }
 
   if (!state.submitBound) {
-    form.addEventListener('submit', (event) => submitReview(event, state.activePropertyId));
+    form.addEventListener('submit', (event) => handleReviewSubmit(event, state.activePropertyId));
     state.submitBound = true;
   }
 
