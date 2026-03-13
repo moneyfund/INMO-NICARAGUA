@@ -195,7 +195,7 @@ async function loadAgents() {
   if (!client) return;
 
   const snapshot = await client.db.collection('agents').get();
-  state.agents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  state.agents = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
   renderAgentOptions();
   renderAgentsTable();
 }
@@ -205,7 +205,7 @@ async function loadReviews() {
   if (!client) return;
 
   const snapshot = await client.db.collection('reviews').get();
-  state.reviews = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  state.reviews = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
   renderReviewsSummary();
 }
 
@@ -412,7 +412,7 @@ function listenAllProperties() {
   if (state.unsubscribeProperties) state.unsubscribeProperties();
 
   state.unsubscribeProperties = client.db.collection('properties').onSnapshot((snapshot) => {
-    state.properties = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    state.properties = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     renderList();
   }, (error) => {
     console.error(error);
