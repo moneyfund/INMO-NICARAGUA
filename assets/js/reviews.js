@@ -1,12 +1,12 @@
 const PROPERTIES_COLLECTION = 'properties';
 const REVIEWS_COLLECTION = 'reviews';
-const COMMENTS_COLLECTION = 'comments';
 
 const state = {
   currentUser: null,
   selectedRating: 0,
   hoverRating: 0,
-  unsubscribeReviews: null
+  unsubscribeReviews: null,
+  initializedPropertyId: null
 };
 
 function getFirebaseClient() {
@@ -15,7 +15,11 @@ function getFirebaseClient() {
 
 function getPropertyIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('id') || params.get('propertyId');
+  const id = params.get('id');
+  const propertyId = params.get('propertyId');
+  const resolved = id || propertyId;
+  console.log('[Reviews] URLSearchParams propertyId:', { id, propertyId, resolved });
+  return resolved;
 }
 
 function escapeHtml(value = '') {
@@ -187,6 +191,10 @@ async function submitReview(event, propertyId) {
   const client = getFirebaseClient();
 
   if (!state.currentUser || !client?.db) {
+    console.warn('[Reviews] Submit bloqueado: usuario no autenticado o Firestore no disponible.', {
+      hasUser: Boolean(state.currentUser),
+      hasDb: Boolean(client?.db)
+    });
     setFormMessage(form, 'Debes iniciar sesión con Google para dejar una reseña.');
     return;
   }
@@ -209,18 +217,17 @@ async function submitReview(event, propertyId) {
   const reviewPayload = {
     propertyId,
     userId: state.currentUser.uid,
-    userName: state.currentUser.displayName || 'Usuario',
-    userPhoto: state.currentUser.photoURL || '',
     rating,
     comment,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
   try {
-    await Promise.all([
-      client.db.collection(REVIEWS_COLLECTION).add(reviewPayload),
-      client.db.collection(COMMENTS_COLLECTION).add(reviewPayload)
-    ]);
+    console.log('[Reviews] Guardando reseña en Firestore...', reviewPayload);
+    await client.db.collection(REVIEWS_COLLECTION).add(reviewPayload);
+    console.log('[Reviews] Reseña guardada correctamente. Recargando listado...');
+
+    listenReviews(document.getElementById('propertyReviews'), propertyId);
 
     form.reset();
     state.selectedRating = 0;
@@ -241,6 +248,7 @@ function listenReviews(section, propertyId) {
   state.unsubscribeReviews = client.db.collection(REVIEWS_COLLECTION)
     .where('propertyId', '==', propertyId)
     .onSnapshot((snapshot) => {
+      console.log('[Reviews] Snapshot recibido para propiedad:', propertyId, 'cantidad:', snapshot.size);
       const reviews = snapshot.docs
         .map((item) => ({ id: item.id, ...item.data() }))
         .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
@@ -271,15 +279,23 @@ async function validateProperty(section, propertyId) {
   }
 }
 
-async function initReviews() {
+async function initReviews(forcedPropertyId = null) {
   const section = document.getElementById('propertyReviews');
   if (!section) return;
 
-  const propertyId = getPropertyIdFromUrl();
+  const propertyId = forcedPropertyId || getPropertyIdFromUrl();
   if (!propertyId) {
     renderNoPropertyMessage(section);
     return;
   }
+
+  if (state.initializedPropertyId === propertyId) {
+    console.log('[Reviews] Ya inicializado para esta propiedad.');
+    return;
+  }
+
+  state.initializedPropertyId = propertyId;
+  console.log('[Reviews] Inicializando módulo para propiedad:', propertyId);
 
   const client = getFirebaseClient();
   if (!client?.auth || !client?.db) {
@@ -307,12 +323,18 @@ async function initReviews() {
 }
 
 function init() {
-  if (window.inmoFirebase) {
+  window.addEventListener('propertyDetailReady', (event) => {
+    const propertyId = event?.detail?.propertyId || getPropertyIdFromUrl();
+    initReviews(propertyId);
+  });
+
+  if (document.getElementById('propertyReviews')) {
     initReviews();
-    return;
   }
 
-  document.addEventListener('inmo:firebase-ready', initReviews, { once: true });
+  document.addEventListener('inmo:firebase-ready', () => {
+    if (document.getElementById('propertyReviews')) initReviews();
+  });
 }
 
 window.addEventListener('DOMContentLoaded', init);
