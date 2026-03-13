@@ -283,7 +283,7 @@ async function submitReview(event, propertyId, section) {
     }
 
     await addDoc(collection(db, REVIEWS_COLLECTION), {
-      propertyId,
+      propertyId: propertyId,
       rating: ratingValue,
       comment: commentText,
       userName: user.displayName || 'Usuario',

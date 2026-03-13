@@ -38,7 +38,7 @@ async function getModularFirestore() {
   return modularFirestorePromise;
 }
 
-function normalizeProperty(property = {}, id = property.id) {
+function normalizeProperty(property = {}, id = '') {
   const title = property.title || property.titulo || '';
   const price = Number(property.price ?? property.precio ?? 0);
   const city = property.city || property.location || property.ubicacion || '';
@@ -107,8 +107,16 @@ function normalizePropertyImageUrl(urlString) {
 async function loadPropertiesFromFirestore() {
   const { db, collection, getDocs } = await getModularFirestore();
   const snapshot = await getDocs(collection(db, 'properties'));
-  console.log('Propiedades cargadas desde Firestore:', snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-  return snapshot.docs.map((doc) => normalizeProperty(doc.data(), doc.id));
+  const properties = [];
+
+  snapshot.forEach((doc) => {
+    const property = doc.data();
+    const propertyId = doc.id;
+    properties.push(normalizeProperty(property, propertyId));
+  });
+
+  console.log('Propiedades cargadas desde Firestore:', properties);
+  return properties;
 }
 
 async function loadProperties() {
@@ -132,7 +140,7 @@ function subscribeToProperties(onUpdate) {
 async function loadAgents() {
   const { db, collection, getDocs } = await getModularFirestore();
   const snapshot = await getDocs(collection(db, 'agents'));
-  const agents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const agents = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
   console.log('Agentes cargados desde Firestore:', agents);
   return agents;
 }

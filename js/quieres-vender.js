@@ -111,7 +111,7 @@ async function loadSellerAgents() {
   try {
     const snapshot = await client.db.collection('agents').get();
     const agents = snapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .map((doc) => ({ ...doc.data(), id: doc.id }))
       .filter((agent) => agent.name && getAgentWhatsappNumber(agent));
 
     sellerAgentState.agents = agents;

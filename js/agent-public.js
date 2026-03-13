@@ -168,7 +168,7 @@ async function loadAgentProfile() {
     }
 
     const propertiesSnapshot = await client.db.collection('properties').where('agentId', '==', agentId).get();
-    const properties = propertiesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const properties = propertiesSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 
     status.textContent = 'Perfil cargado correctamente.';
     renderAgentProfile(agentDoc.data(), properties);

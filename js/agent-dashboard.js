@@ -311,7 +311,7 @@ function listenOwnProperties(user) {
   state.unsubscribeProperties = client.db.collection('properties')
     .where('agentId', '==', user.uid)
     .onSnapshot((snapshot) => {
-      const properties = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const properties = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
       const list = document.getElementById('agentPropertiesList');
       const card = document.getElementById('agentPropertiesCard');
 

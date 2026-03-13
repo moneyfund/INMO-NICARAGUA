@@ -31,7 +31,7 @@ async function getModularFirestore() {
 async function loadAgents() {
   const { db, collection, getDocs } = await getModularFirestore();
   const snapshot = await getDocs(collection(db, 'agents'));
-  const agents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const agents = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
   console.log('Agentes cargados desde Firestore:', agents);
   return agents;
 }

@@ -21,7 +21,7 @@ Sitio web inmobiliario profesional desarrollado con HTML, CSS y JavaScript vanil
 
 ## Uso local
 
-Abre `index.html` con un servidor estático para que la carga de JSON y Firebase funcionen correctamente.
+Abre `index.html` con un servidor estático para que la carga de Firebase funcione correctamente.
 
 Ejemplo:
 
@@ -43,7 +43,7 @@ Se implementó un sistema multi-agente con Firestore:
   - editar propiedades propias,
   - marcar propiedades como vendidas.
 - Perfil público del agente en `agent.html?id=AGENT_UID`.
-- Sitio público (`index.html`, `propiedades.html`, `propiedad.html`, `mapa.html`, `agentes.html`) leyendo primero desde Firestore y usando JSON local solo como fallback.
+- Sitio público (`index.html`, `propiedades.html`, `propiedad.html`, `mapa.html`, `agentes.html`) leyendo datos desde Firestore.
 
 ## Reglas recomendadas de Firestore
 
