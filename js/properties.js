@@ -340,15 +340,16 @@ function renderPropertyDetail(properties) {
   if (!detailContainer) return;
 
   const params = new URLSearchParams(window.location.search);
-  const propertyId = String(params.get('id') || '').trim();
-  console.log('[Properties] propertyId from URL:', propertyId);
+  const propertyId = params.get('id');
+  console.log('Property ID from URL:', propertyId);
 
-  if (!propertyId) {
+  if (!propertyId || !propertyId.trim()) {
     detailContainer.innerHTML = '<p>Property not found. <a href="propiedades.html" class="text-link">Ver propiedades</a></p>';
     return;
   }
 
-  const property = properties.find((item) => String(item.id).trim() === propertyId);
+  const normalizedPropertyId = propertyId.trim();
+  const property = properties.find((item) => String(item.id).trim() === normalizedPropertyId);
 
   if (!property) {
     detailContainer.innerHTML = '<p>Property not found. <a href="propiedades.html" class="text-link">Ver propiedades</a></p>';
@@ -430,7 +431,7 @@ function renderPropertyDetail(properties) {
   window.dispatchEvent(new CustomEvent('propertyDetailReady', {
     detail: {
       property,
-      propertyId
+      propertyId: normalizedPropertyId
     }
   }));
 }

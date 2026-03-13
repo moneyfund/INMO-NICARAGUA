@@ -12,9 +12,9 @@ import {
   addDoc,
   doc,
   getDoc,
-  getDocs,
   query,
   where,
+  onSnapshot,
   serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -40,14 +40,17 @@ const state = {
   currentUser: null,
   selectedRating: 0,
   hoverRating: 0,
-  initializedPropertyId: null,
-  authUnsubscribe: null
+  activePropertyId: null,
+  authUnsubscribe: null,
+  reviewsUnsubscribe: null,
+  starsBound: false,
+  submitBound: false
 };
 
 function getPropertyIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const propertyId = params.get('id');
-  console.log('Property ID:', propertyId);
+  console.log('Property ID from URL:', propertyId);
   return propertyId;
 }
 
@@ -184,20 +187,28 @@ function renderReviewsList(section, reviews) {
   }).join('');
 }
 
-async function loadReviews(section, propertyId) {
-  try {
-    const reviewsQuery = query(collection(db, REVIEWS_COLLECTION), where('propertyId', '==', propertyId));
-    const snapshot = await getDocs(reviewsQuery);
+function subscribeToReviews(section, propertyId) {
+  if (state.reviewsUnsubscribe) {
+    state.reviewsUnsubscribe();
+    state.reviewsUnsubscribe = null;
+  }
+
+  const reviewsQuery = query(
+    collection(db, REVIEWS_COLLECTION),
+    where('propertyId', '==', propertyId)
+  );
+
+  state.reviewsUnsubscribe = onSnapshot(reviewsQuery, (snapshot) => {
     const reviews = snapshot.docs
       .map((item) => ({ id: item.id, ...item.data() }))
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
     updateSummary(section, reviews);
     renderReviewsList(section, reviews);
-  } catch (error) {
+  }, (error) => {
     console.error('No se pudieron cargar las reseñas.', error);
     setStatus(section, 'No se pudieron cargar las reseñas.');
-  }
+  });
 }
 
 function bindStars(form) {
@@ -240,7 +251,7 @@ async function submitReview(event, propertyId, section) {
   const user = state.currentUser;
 
   console.log('User:', user);
-  console.log('Property ID:', propertyId);
+  console.log('Submitting review for property:', propertyId);
 
   if (!user) {
     setFormMessage(form, 'Please sign in to leave a review');
@@ -271,9 +282,8 @@ async function submitReview(event, propertyId, section) {
       return;
     }
 
-    console.log('Submitting review');
     await addDoc(collection(db, REVIEWS_COLLECTION), {
-      propertyId: propertyId,
+      propertyId,
       rating: ratingValue,
       comment: commentText,
       userName: user.displayName || 'Usuario',
@@ -286,28 +296,27 @@ async function submitReview(event, propertyId, section) {
     state.selectedRating = 0;
     paintRatingStars(form, 0);
     setFormMessage(form, 'Reseña enviada correctamente.');
-    await loadReviews(section, propertyId);
   } catch (error) {
     console.error('No se pudo guardar la reseña.', error);
     setFormMessage(form, 'No se pudo guardar la reseña.');
   }
 }
 
-async function initReviews(forcedPropertyId = null) {
+async function initReviews() {
   const section = document.getElementById('propertyReviews');
   if (!section) return;
 
-  const propertyId = forcedPropertyId || getPropertyIdFromUrl();
+  const propertyId = String(getPropertyIdFromUrl() || '').trim();
   if (!propertyId) {
     renderNoPropertyMessage(section);
     return;
   }
 
-  if (state.initializedPropertyId === propertyId) {
+  if (state.activePropertyId === propertyId) {
     return;
   }
 
-  state.initializedPropertyId = propertyId;
+  state.activePropertyId = propertyId;
   const propertyRef = doc(db, PROPERTIES_COLLECTION, propertyId);
   const propertySnap = await getDoc(propertyRef);
 
@@ -319,8 +328,15 @@ async function initReviews(forcedPropertyId = null) {
   const form = section.querySelector('[data-review-form]');
   if (!form) return;
 
-  bindStars(form);
-  form.addEventListener('submit', (event) => submitReview(event, propertyId, section));
+  if (!state.starsBound) {
+    bindStars(form);
+    state.starsBound = true;
+  }
+
+  if (!state.submitBound) {
+    form.addEventListener('submit', (event) => submitReview(event, state.activePropertyId, section));
+    state.submitBound = true;
+  }
 
   if (!state.authUnsubscribe) {
     state.authUnsubscribe = onAuthStateChanged(auth, (user) => {
@@ -332,13 +348,12 @@ async function initReviews(forcedPropertyId = null) {
     renderAuthControls(section);
   }
 
-  await loadReviews(section, propertyId);
+  subscribeToReviews(section, propertyId);
 }
 
 function init() {
-  window.addEventListener('propertyDetailReady', (event) => {
-    const propertyId = event?.detail?.propertyId || getPropertyIdFromUrl();
-    initReviews(propertyId);
+  window.addEventListener('propertyDetailReady', () => {
+    initReviews();
   });
 
   if (document.getElementById('propertyReviews')) {
