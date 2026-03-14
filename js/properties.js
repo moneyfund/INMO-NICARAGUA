@@ -1,5 +1,6 @@
 let allProperties = [];
 const PROPERTY_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
+const AGENT_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyCVL7tpUkyQWz_aVr9wFi2hrCBum2pLnPs',
   authDomain: 'inmo-nicaragua.firebaseapp.com',
@@ -23,7 +24,18 @@ function getFirestoreDb() {
 async function getModularFirestore() {
   if (!modularFirestorePromise) {
     modularFirestorePromise = (async () => {
-      const [{ initializeApp, getApps, getApp }, { getFirestore, collection, getDocs, doc, getDoc }] = await Promise.all([
+      const [{ initializeApp, getApps, getApp }, {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        getDoc,
+        query,
+        where,
+        addDoc,
+        deleteDoc,
+        serverTimestamp
+      }] = await Promise.all([
         import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
         import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
       ]);
@@ -31,7 +43,18 @@ async function getModularFirestore() {
       const app = getApps().length ? getApp() : initializeApp(FIREBASE_CONFIG);
       const db = getFirestore(app);
 
-      return { collection, getDocs, doc, getDoc, db };
+      return {
+        collection,
+        getDocs,
+        doc,
+        getDoc,
+        query,
+        where,
+        addDoc,
+        deleteDoc,
+        serverTimestamp,
+        db
+      };
     })();
   }
 
@@ -356,6 +379,150 @@ async function loadPropertyDetailFromFirestore(propertyId) {
   return normalizeProperty(propertySnap.data(), propertySnap.id);
 }
 
+async function loadAgentById(agentId) {
+  if (!agentId) return null;
+
+  const { db, doc, getDoc } = await getModularFirestore();
+  const agentRef = doc(db, 'agents', agentId);
+  const agentSnap = await getDoc(agentRef);
+
+  if (!agentSnap.exists()) return null;
+  return { id: agentSnap.id, ...agentSnap.data() };
+}
+
+function getCurrentUser() {
+  if (window.inmoAuthState?.currentUser) return window.inmoAuthState.currentUser;
+  if (window.inmoFirebase?.currentUser) return window.inmoFirebase.currentUser;
+  return null;
+}
+
+function buildContactAgentUrl(agent, property) {
+  const params = new URLSearchParams();
+  params.set('agentId', String(agent.id || property.agentId || ''));
+  params.set('agentName', agent.name || 'Agente inmobiliario');
+  params.set('propertyId', String(property.id || ''));
+  params.set('propertyTitle', property.titulo || property.title || 'Propiedad');
+  return `contacto.html?${params.toString()}`;
+}
+
+function createAgentCardTemplate(agent, property) {
+  if (!agent || !agent.id) return '';
+
+  const agentPhoto = normalizePropertyImageUrl(agent.photo || agent.image || agent.avatar || '') || AGENT_IMAGE_PLACEHOLDER;
+  const contactUrl = buildContactAgentUrl(agent, property);
+  const moreByAgentUrl = `propiedades.html?agent=${encodeURIComponent(agent.id)}`;
+
+  return `
+    <section class="agent-card-section" aria-label="Agente de la propiedad">
+      <h2>Agente de esta propiedad</h2>
+      <article class="agent-card">
+        <img src="${agentPhoto}" alt="Foto de ${agent.name || 'agente'}" loading="lazy" onerror="this.onerror=null;this.src='${AGENT_IMAGE_PLACEHOLDER}'">
+        <div class="agent-card-content">
+          <h3>${agent.name || 'Agente inmobiliario'}</h3>
+          <p>Agente inmobiliario</p>
+          <div class="agent-card-actions">
+            <a class="button-outline" href="${contactUrl}">Contactar agente</a>
+            <a class="button-outline" href="${moreByAgentUrl}">Ver más propiedades</a>
+          </div>
+        </div>
+      </article>
+    </section>
+  `;
+}
+
+async function findFavorite(propertyId, userId) {
+  if (!propertyId || !userId) return null;
+
+  const { db, collection, query, where, getDocs } = await getModularFirestore();
+  const favoritesRef = collection(db, 'favorites');
+  const favoriteQuery = query(
+    favoritesRef,
+    where('userId', '==', userId),
+    where('propertyId', '==', propertyId)
+  );
+  const favoriteSnapshot = await getDocs(favoriteQuery);
+  const favoriteDoc = favoriteSnapshot.docs[0];
+  return favoriteDoc ? { id: favoriteDoc.id, ...favoriteDoc.data() } : null;
+}
+
+async function createFavorite(propertyId, userId) {
+  const { db, collection, addDoc, serverTimestamp } = await getModularFirestore();
+  const favoritesRef = collection(db, 'favorites');
+  const created = await addDoc(favoritesRef, {
+    userId,
+    propertyId,
+    createdAt: serverTimestamp()
+  });
+  return created.id;
+}
+
+async function removeFavorite(favoriteId) {
+  if (!favoriteId) return;
+  const { db, doc, deleteDoc } = await getModularFirestore();
+  await deleteDoc(doc(db, 'favorites', favoriteId));
+}
+
+async function initFavoriteButton(propertyId) {
+  const favoriteButton = document.getElementById('favoritePropertyButton');
+  if (!favoriteButton) return;
+
+  let favoriteRecord = null;
+  let pending = false;
+
+  const updateFavoriteUi = (isFavorite) => {
+    favoriteButton.textContent = isFavorite ? '❤️ Guardada' : '🤍 Guardar';
+    favoriteButton.setAttribute('aria-pressed', isFavorite ? 'true' : 'false');
+  };
+
+  const syncFavoriteState = async () => {
+    const currentUser = getCurrentUser();
+    if (!currentUser?.uid) {
+      favoriteRecord = null;
+      favoriteButton.disabled = true;
+      favoriteButton.textContent = '🤍 Inicia sesión para guardar';
+      favoriteButton.setAttribute('aria-pressed', 'false');
+      return;
+    }
+
+    favoriteButton.disabled = false;
+    favoriteRecord = await findFavorite(propertyId, currentUser.uid);
+    updateFavoriteUi(Boolean(favoriteRecord));
+  };
+
+  favoriteButton.addEventListener('click', async () => {
+    const currentUser = getCurrentUser();
+    if (!currentUser?.uid || pending) return;
+
+    pending = true;
+    favoriteButton.disabled = true;
+
+    try {
+      if (favoriteRecord?.id) {
+        await removeFavorite(favoriteRecord.id);
+        favoriteRecord = null;
+        updateFavoriteUi(false);
+      } else {
+        const favoriteId = await createFavorite(propertyId, currentUser.uid);
+        favoriteRecord = { id: favoriteId, userId: currentUser.uid, propertyId };
+        updateFavoriteUi(true);
+      }
+    } catch (error) {
+      console.error('No fue posible actualizar favorito:', error);
+    } finally {
+      pending = false;
+      favoriteButton.disabled = false;
+    }
+  });
+
+  document.addEventListener('inmo:auth-state-changed', () => {
+    syncFavoriteState().catch((error) => {
+      console.error('No fue posible sincronizar favoritos:', error);
+    });
+  });
+
+  await syncFavoriteState();
+}
+
 async function renderPropertyDetail() {
   const detailContainer = document.getElementById('propertyDetail');
   if (!detailContainer) return;
@@ -377,7 +544,10 @@ async function renderPropertyDetail() {
     return;
   }
 
-  const galleryImages = getPropertyImages(property);
+  const [agent, galleryImages] = await Promise.all([
+    loadAgentById(property.agentId).catch(() => null),
+    Promise.resolve(getPropertyImages(property))
+  ]);
   const status = String(property.status || 'available').toLowerCase();
 
   const galleryMarkup = galleryImages.length > 1
@@ -399,6 +569,7 @@ async function renderPropertyDetail() {
         <h1>${property.titulo}</h1>
         <p>${property.ubicacion}</p>
         <p class="price">$${Number(property.precio || 0).toLocaleString()}</p>
+        <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <p>${property.descripcion}</p>
         <ul class="checklist">
@@ -413,11 +584,13 @@ async function renderPropertyDetail() {
       <h2>Ubicación de la propiedad</h2>
       <div id="propertyMap" class="property-map"></div>
     </section>
+    ${createAgentCardTemplate(agent, property)}
     <section class="property-reviews-section" id="propertyReviews"></section>
   `;
 
   initPropertyGallery(detailContainer);
   renderPropertyDetailMap(property);
+  await initFavoriteButton(normalizedPropertyId);
   window.dispatchEvent(new CustomEvent('propertyDetailReady', {
     detail: {
       property,

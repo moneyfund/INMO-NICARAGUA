@@ -534,6 +534,64 @@ section h2,
   margin-top: 2rem;
 }
 
+.favorite-property-button {
+  margin-top: .6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: .45rem .8rem;
+  background: #fff;
+  color: #8f1d1d;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.favorite-property-button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.agent-card-section {
+  margin-top: 2rem;
+}
+
+.agent-card {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fff;
+  align-items: center;
+}
+
+.agent-card img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+
+.agent-card-content h3,
+.agent-card-content p {
+  margin: 0;
+}
+
+.agent-card-content p {
+  margin-top: .35rem;
+}
+
+.agent-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin-top: .9rem;
+}
+
 .property-map {
   width: 100%;
   min-height: 360px;
@@ -686,12 +744,27 @@ body.dark-mode .properties-map-full {
   border-color: rgba(160, 88, 88, 0.5);
 }
 
+body.dark-mode .favorite-property-button,
+body.dark-mode .agent-card {
+  background: rgba(42, 13, 13, 0.72);
+  border-color: rgba(160, 88, 88, 0.5);
+}
+
 body.dark-mode .site-nav {
   background: rgba(42, 13, 13, 0.88);
   border-color: rgba(160, 88, 88, 0.45);
 }
 @media (max-width: 900px) {
   .search-form, .filter-grid, .split-grid, .detail-grid { grid-template-columns: 1fr; }
+  .agent-card {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-card img {
+    width: 100%;
+    max-width: 220px;
+    height: auto;
+  }
 }
 
 @media (max-width: 720px) {
