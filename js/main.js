@@ -63,6 +63,21 @@ if (heroSearchForm) {
 
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
+  const contactParams = new URLSearchParams(window.location.search);
+  const agentName = contactParams.get('agentName') || '';
+  const propertyTitle = contactParams.get('propertyTitle') || '';
+  const messageField = document.getElementById('mensaje');
+
+  if (messageField && (agentName || propertyTitle)) {
+    const prefilledMessage = [
+      'Hola, me interesa esta propiedad y deseo más información.',
+      agentName ? `Agente: ${agentName}` : '',
+      propertyTitle ? `Propiedad: ${propertyTitle}` : ''
+    ].filter(Boolean).join('\n');
+
+    messageField.value = prefilledMessage;
+  }
+
   contactForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const message = document.getElementById('formMessage');
