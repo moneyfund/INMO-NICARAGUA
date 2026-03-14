@@ -431,7 +431,7 @@ async function renderPropertyDetail() {
         <p>Debes iniciar sesión con Google para dejar una reseña.</p>
         <button type="button" class="review-auth-btn" data-login-google>Iniciar sesión con Google</button>
       </div>
-      <form class="review-form" id="review-form" data-review-form>
+      <form class="review-form" id="review-form" data-review-form method="post">
         <div class="review-form-stars" aria-label="Calificación de estrellas">
           <button type="button" data-rating-star="1" aria-label="1 estrella">★</button>
           <button type="button" data-rating-star="2" aria-label="2 estrellas">★</button>

@@ -47,8 +47,8 @@ const state = {
 };
 
 function getPropertyIdFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const propertyId = params.get('id');
+  const urlParams = new URLSearchParams(window.location.search);
+  const propertyId = urlParams.get("id");
   console.log('Property ID from URL:', propertyId);
   return propertyId;
 }
@@ -258,10 +258,11 @@ async function submitReview(propertyId, rating, comment, user) {
   console.log('Review saved for property:', propertyId);
 }
 
-async function handleReviewSubmit(event, propertyId) {
+async function handleReviewSubmit(event) {
   event.preventDefault();
 
   const form = event.currentTarget;
+  const propertyId = getPropertyIdFromUrl();
   const commentText = document.getElementById('comment')?.value.trim() || '';
   const rawRating = Number(form.querySelector('[name="rating"]').value || 0);
   const ratingValue = Math.min(5, Math.max(1, rawRating));
@@ -346,11 +347,7 @@ async function initReviews() {
   if (!state.submitBound) {
     document.getElementById('review-form').addEventListener('submit', async (event) => {
       event.preventDefault();
-
-      const params = new URLSearchParams(window.location.search);
-      const currentPropertyId = params.get('id');
-
-      await handleReviewSubmit(event, currentPropertyId);
+      await handleReviewSubmit(event);
     });
     state.submitBound = true;
   }
