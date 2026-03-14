@@ -396,20 +396,16 @@ function getCurrentUser() {
   return null;
 }
 
-function buildContactAgentUrl(agent, property) {
-  const params = new URLSearchParams();
-  params.set('agentId', String(agent.id || property.agentId || ''));
-  params.set('agentName', agent.name || 'Agente inmobiliario');
-  params.set('propertyId', String(property.id || ''));
-  params.set('propertyTitle', property.titulo || property.title || 'Propiedad');
-  return `contacto.html?${params.toString()}`;
+function buildAgentProfileUrl(agentId) {
+  if (!agentId) return 'agentes.html';
+  return `agente.html?id=${encodeURIComponent(agentId)}`;
 }
 
 function createAgentCardTemplate(agent, property) {
   if (!agent || !agent.id) return '';
 
   const agentPhoto = normalizePropertyImageUrl(agent.photo || agent.image || agent.avatar || '') || AGENT_IMAGE_PLACEHOLDER;
-  const contactUrl = buildContactAgentUrl(agent, property);
+  const profileUrl = buildAgentProfileUrl(agent.id);
   const moreByAgentUrl = `propiedades.html?agent=${encodeURIComponent(agent.id)}`;
 
   return `
@@ -421,7 +417,7 @@ function createAgentCardTemplate(agent, property) {
           <h3>${agent.name || 'Agente inmobiliario'}</h3>
           <p>Agente inmobiliario</p>
           <div class="agent-card-actions">
-            <a class="button-outline" href="${contactUrl}">Contactar agente</a>
+            <a class="button-outline" href="${profileUrl}">Ver perfil del agente</a>
             <a class="button-outline" href="${moreByAgentUrl}">Ver más propiedades</a>
           </div>
         </div>
@@ -548,6 +544,8 @@ async function renderPropertyDetail() {
     loadAgentById(property.agentId).catch(() => null),
     Promise.resolve(getPropertyImages(property))
   ]);
+  const publishedByName = agent?.name || property.agentName || 'Agente inmobiliario';
+  const agentProfileUrl = buildAgentProfileUrl(agent?.id || property.agentId);
   const status = String(property.status || 'available').toLowerCase();
 
   const galleryMarkup = galleryImages.length > 1
@@ -577,7 +575,8 @@ async function renderPropertyDetail() {
           <li>${property.banos} baños</li>
           <li>${property.area} m² de construcción</li>
         </ul>
-        <a class="button-outline" href="contacto.html">Solicitar visita privada</a>
+        <p><strong>Publicado por</strong><br>${publishedByName}</p>
+        <a class="button-outline" href="${agentProfileUrl}">Para más información aquí</a>
       </div>
     </div>
     <section class="detail-map-section">
