@@ -7,7 +7,6 @@ const state = {
   user: null,
   agents: [],
   properties: [],
-  reviews: [],
   unsubscribeProperties: null,
   authCheckId: 0,
   uiReady: false
@@ -16,7 +15,6 @@ const state = {
 const form = document.getElementById('propertyForm');
 const list = document.getElementById('propertyList');
 const agentList = document.getElementById('agentList');
-const reviewsSummary = document.getElementById('reviewsSummary');
 const adminPanel = document.getElementById('adminPanel');
 const accessDeniedPanel = document.getElementById('accessDeniedPanel');
 
@@ -182,14 +180,6 @@ function renderAgentsTable() {
     });
 }
 
-function renderReviewsSummary() {
-  if (!reviewsSummary) return;
-  const count = state.reviews.length;
-  reviewsSummary.textContent = count
-    ? `Reseñas cargadas desde Firestore: ${count}`
-    : 'No reviews found in Firestore.';
-}
-
 async function loadAgents() {
   const client = getFirebaseOrNotify();
   if (!client) return;
@@ -198,28 +188,6 @@ async function loadAgents() {
   state.agents = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
   renderAgentOptions();
   renderAgentsTable();
-}
-
-async function loadReviews() {
-  const client = getFirebaseOrNotify();
-  if (!client) return;
-
-  const propertiesSnapshot = await client.db.collection('properties').get();
-  const reviews = [];
-
-  for (const propertyDoc of propertiesSnapshot.docs) {
-    const reviewsSnapshot = await propertyDoc.ref.collection('reviews').get();
-    reviewsSnapshot.forEach((reviewDoc) => {
-      reviews.push({
-        ...reviewDoc.data(),
-        id: reviewDoc.id,
-        propertyId: propertyDoc.id
-      });
-    });
-  }
-
-  state.reviews = reviews;
-  renderReviewsSummary();
 }
 
 function getImagesFromProperty(property) {
@@ -533,10 +501,8 @@ function hideAdmin() {
 
   state.properties = [];
   state.agents = [];
-  state.reviews = [];
   renderList();
   renderAgentsTable();
-  renderReviewsSummary();
 }
 
 function redirectTo(path) {
@@ -597,7 +563,7 @@ function init() {
       }
 
       showAdmin();
-      await Promise.all([loadAgents(), loadReviews()]);
+      await loadAgents();
       if (authCheckId !== state.authCheckId) return;
       listenAllProperties();
       clearFormState();
