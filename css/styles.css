@@ -2123,9 +2123,9 @@ body.dark-mode .review-auth-btn {
 
 /* Unified color system */
 :root {
-  --bg-main: #fdf2f2;
-  --bg-secondary: rgba(255, 255, 255, 0.58);
-  --bg-card: rgba(255, 255, 255, 0.62);
+  --bg-main: #fef2f2;
+  --bg-secondary: rgba(255, 255, 255, 0.28);
+  --bg-card: rgba(255, 255, 255, 0.35);
   --primary: #b91c1c;
   --primary-soft: rgba(254, 202, 202, 0.7);
   --text-main: #1f2937;
@@ -2137,7 +2137,7 @@ body.dark-mode .review-auth-btn {
   --header-border: rgba(255, 255, 255, 0.35);
   --header-scrolled: rgba(253, 242, 242, 0.3);
   --nav-mobile-bg: rgba(255, 255, 255, 0.2);
-  --input-bg: rgba(255, 255, 255, 0.72);
+  --input-bg: rgba(255, 255, 255, 0.56);
 }
 
 [data-theme="dark"],
@@ -2548,4 +2548,26 @@ body.dark-mode .site-header.is-scrolled {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
+}
+
+
+/* Final light-mode enforcement to prevent legacy white backgrounds */
+body:not(.dark):not(.dark-mode),
+body:not(.dark):not(.dark-mode) main,
+body:not(.dark):not(.dark-mode) .section,
+body:not(.dark):not(.dark-mode) .container,
+body:not(.dark):not(.dark-mode) .section-properties,
+body:not(.dark):not(.dark-mode) .agent-card-section,
+body:not(.dark):not(.dark-mode) .map-page-main,
+body:not(.dark):not(.dark-mode) .map-page-section,
+body:not(.dark):not(.dark-mode) .site-footer {
+  background: var(--bg-main);
+}
+
+body:not(.dark):not(.dark-mode) .property-card,
+body:not(.dark):not(.dark-mode) .agent-card,
+body:not(.dark):not(.dark-mode) .card {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
