@@ -2551,123 +2551,85 @@ body.dark-mode .site-header.is-scrolled {
 }
 
 
-/* Final light-mode enforcement to prevent legacy white backgrounds */
+/* Professional light-mode redesign without altering dark mode */
+body:not(.dark):not(.dark-mode) {
+  --bg-main: #e53935;
+  --bg-section: transparent;
+  --card-bg: #d32f2f;
+  --footer-bg: #d32f2f;
+  --text-main: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  --text-inverse: #ffffff;
+  --text-strong: #ffffff;
+  --text-accent: rgba(255, 255, 255, 0.85);
+  --accent: #ff6f61;
+  --accent-primary: #ff6f61;
+  --accent-strong: #ff6f61;
+  --accent-strong-hover: #ff8a80;
+  --accent-soft: rgba(255, 255, 255, 0.1);
+  --accent-softest: rgba(255, 255, 255, 0.18);
+  --bg-soft: rgba(255, 255, 255, 0.08);
+  --bg-muted: transparent;
+  --bg-card: var(--card-bg);
+  --bg-input: rgba(255, 255, 255, 0.12);
+  --border-default: rgba(255, 255, 255, 0.2);
+  --border-muted: rgba(255, 255, 255, 0.12);
+  --border-soft: rgba(255, 255, 255, 0.15);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --overlay-dark: rgba(0, 0, 0, 0.35);
+  --header-border: rgba(255, 255, 255, 0.1);
+  --header-border-strong: rgba(255, 255, 255, 0.12);
+  --header-scrolled: transparent;
+  --glass-card: rgba(255, 255, 255, 0.08);
+  --glass-card-strong: rgba(255, 255, 255, 0.12);
+  --glass-muted: rgba(255, 255, 255, 0.12);
+  --glass-subtle: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-border-strong: rgba(255, 255, 255, 0.24);
+  --glass-shadow: rgba(0, 0, 0, 0.18);
+  --card-shadow: rgba(0, 0, 0, 0.2);
+  --card-shadow-hover: rgba(0, 0, 0, 0.24);
+  --accent-shadow: rgba(0, 0, 0, 0.18);
+  --accent-shadow-strong: rgba(0, 0, 0, 0.24);
+  --button-bg: var(--accent);
+  --button-hover: #ff8a80;
+  --button-text: #ffffff;
+  --nav-mobile-bg: rgba(211, 47, 47, 0.94);
+  --section-banner: transparent;
+  --announcement-bg: rgba(255, 255, 255, 0.08);
+  --surface-overlay: rgba(255, 255, 255, 0.08);
+  --surface-overlay-strong: rgba(255, 255, 255, 0.16);
+  --surface-border: rgba(255, 255, 255, 0.16);
+  --surface-border-strong: rgba(255, 255, 255, 0.24);
+  --surface-shadow: rgba(0, 0, 0, 0.2);
+}
+
 body:not(.dark):not(.dark-mode),
 body:not(.dark):not(.dark-mode) main,
 body:not(.dark):not(.dark-mode) .section,
-body:not(.dark):not(.dark-mode) .container,
-body:not(.dark):not(.dark-mode) .section-properties,
-body:not(.dark):not(.dark-mode) .agent-card-section,
-body:not(.dark):not(.dark-mode) .map-page-main,
-body:not(.dark):not(.dark-mode) .map-page-section,
-body:not(.dark):not(.dark-mode) .site-footer {
-  background: var(--bg-main);
-}
-
-body:not(.dark):not(.dark-mode) .property-card,
-body:not(.dark):not(.dark-mode) .agent-card,
-body:not(.dark):not(.dark-mode) .card {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Light mode professional real-estate refresh */
-:root {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
-  --card-bg: #ffffff;
-  --card-border: #e5e7eb;
-  --card-red: #e53935;
-  --card-red-soft: #ef5350;
-  --text-on-red: #ffffff;
-  --footer-bg: #ef5350;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --accent: #dc2626;
-  --accent-hover: #b91c1c;
-  --hero-overlay: rgba(0, 0, 0, 0.35);
-}
-
-body:not(.dark):not(.dark-mode) {
-  --bg-main: var(--bg-primary);
-  --bg-secondary: #ffffff;
-  --bg-card: var(--card-bg);
-  --text-main: var(--text-primary);
-  --text-inverse: #ffffff;
-  --text-strong: var(--text-primary);
-  --text-accent: var(--text-secondary);
-  --accent-primary: var(--accent);
-  --accent-strong: var(--accent-hover);
-  --accent-strong-hover: #991b1b;
-  --accent-soft: rgba(220, 38, 38, 0.08);
-  --accent-softest: rgba(220, 38, 38, 0.12);
-  --bg-soft: var(--bg-secondary);
-  --bg-muted: #eef2f7;
-  --bg-input: #ffffff;
-  --border-default: rgba(15, 23, 42, 0.12);
-  --border-muted: rgba(15, 23, 42, 0.08);
-  --border-soft: rgba(15, 23, 42, 0.12);
-  --border-strong: rgba(15, 23, 42, 0.16);
-  --overlay-dark: var(--hero-overlay);
-  --header-border: rgba(255, 255, 255, 0.24);
-  --header-border-strong: rgba(148, 163, 184, 0.22);
-  --header-scrolled: rgba(248, 250, 252, 0.84);
-  --glass-card: rgba(255, 255, 255, 0.94);
-  --glass-card-strong: rgba(255, 255, 255, 0.98);
-  --glass-muted: rgba(255, 255, 255, 0.75);
-  --glass-subtle: rgba(255, 255, 255, 0.4);
-  --glass-border: rgba(226, 232, 240, 0.8);
-  --glass-border-strong: rgba(226, 232, 240, 0.96);
-  --glass-shadow: rgba(15, 23, 42, 0.08);
-  --card-shadow: rgba(15, 23, 42, 0.08);
-  --card-shadow-hover: rgba(15, 23, 42, 0.12);
-  --accent-shadow: rgba(220, 38, 38, 0.16);
-  --accent-shadow-strong: rgba(220, 38, 38, 0.22);
-  --button-bg: var(--accent);
-  --button-hover: var(--accent-hover);
-  --button-text: #ffffff;
-  --nav-mobile-bg: rgba(255, 255, 255, 0.96);
-  --section-banner: linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
-  --announcement-bg: linear-gradient(90deg, #fff5f5, #ffffff);
-  --surface-overlay: rgba(248, 250, 252, 0.8);
-  --surface-overlay-strong: rgba(226, 232, 240, 0.88);
-  --surface-border: rgba(226, 232, 240, 0.94);
-  --surface-border-strong: rgba(203, 213, 225, 0.96);
-  --surface-shadow: rgba(15, 23, 42, 0.1);
-}
-
-body:not(.dark):not(.dark-mode),
-body:not(.dark):not(.dark-mode) main {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-}
-
-body:not(.dark):not(.dark-mode) .section {
-  background: var(--bg-secondary);
-}
-
 body:not(.dark):not(.dark-mode) .section-alt,
 body:not(.dark):not(.dark-mode) .section-properties,
 body:not(.dark):not(.dark-mode) .section-dark,
 body:not(.dark):not(.dark-mode) .advisory-section,
 body:not(.dark):not(.dark-mode) .page-banner,
-body:not(.dark):not(.dark-mode) .site-footer,
 body:not(.dark):not(.dark-mode) .agent-card-section,
+body:not(.dark):not(.dark-mode) .map-page-main,
 body:not(.dark):not(.dark-mode) .map-page-section,
 body:not(.dark):not(.dark-mode) .seller-hero {
-  background: var(--bg-secondary);
+  background: var(--bg-main);
+  color: var(--text-main);
 }
 
-body:not(.dark):not(.dark-mode) .announcement-bar {
-  background: var(--announcement-bg);
-  color: var(--text-primary);
-  border-top: 1px solid rgba(226, 232, 240, 0.9);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
-}
-
-body:not(.dark):not(.dark-mode) .section-properties:nth-of-type(even) {
-  background: var(--bg-secondary);
+body:not(.dark):not(.dark-mode) .section,
+body:not(.dark):not(.dark-mode) .section-properties,
+body:not(.dark):not(.dark-mode) .section-dark,
+body:not(.dark):not(.dark-mode) .advisory-section,
+body:not(.dark):not(.dark-mode) .page-banner,
+body:not(.dark):not(.dark-mode) .agent-card-section,
+body:not(.dark):not(.dark-mode) .map-page-section,
+body:not(.dark):not(.dark-mode) .seller-hero,
+body:not(.dark):not(.dark-mode) .highlight-card {
+  background: var(--bg-section);
 }
 
 body:not(.dark):not(.dark-mode) h1,
@@ -2678,38 +2640,96 @@ body:not(.dark):not(.dark-mode) h5,
 body:not(.dark):not(.dark-mode) h6,
 body:not(.dark):not(.dark-mode) .section-title,
 body:not(.dark):not(.dark-mode) .section-header h2,
-body:not(.dark):not(.dark-mode) .property-card h1,
-body:not(.dark):not(.dark-mode) .property-card h2,
-body:not(.dark):not(.dark-mode) .property-card h3,
-body:not(.dark):not(.dark-mode) .agent-card h1,
-body:not(.dark):not(.dark-mode) .agent-card h2,
-body:not(.dark):not(.dark-mode) .agent-card h3,
-body:not(.dark):not(.dark-mode) .highlight-card h3,
-body:not(.dark):not(.dark-mode) .seller-contact-card h2,
-body:not(.dark):not(.dark-mode) .seller-benefit-card h3 {
-  color: var(--text-primary);
+body:not(.dark):not(.dark-mode) .brand,
+body:not(.dark):not(.dark-mode) .menu-toggle,
+body:not(.dark):not(.dark-mode) .footer-text,
+body:not(.dark):not(.dark-mode) .text-link,
+body:not(.dark):not(.dark-mode) .price,
+body:not(.dark):not(.dark-mode) .badge {
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) p,
 body:not(.dark):not(.dark-mode) li,
 body:not(.dark):not(.dark-mode) label,
 body:not(.dark):not(.dark-mode) .property-meta,
-body:not(.dark):not(.dark-mode) .property-card p,
-body:not(.dark):not(.dark-mode) .agent-card p,
-body:not(.dark):not(.dark-mode) .highlight-card p,
-body:not(.dark):not(.dark-mode) .seller-contact-card p,
-body:not(.dark):not(.dark-mode) .seller-agent-message,
-body:not(.dark):not(.dark-mode) .footer-text {
+body:not(.dark):not(.dark-mode) .seller-agent-message {
   color: var(--text-secondary);
 }
 
-body:not(.dark):not(.dark-mode) .text-link,
-body:not(.dark):not(.dark-mode) .price,
-body:not(.dark):not(.dark-mode) .badge,
-body:not(.dark):not(.dark-mode) .brand span,
+body:not(.dark):not(.dark-mode) .site-header,
+body:not(.dark):not(.dark-mode) .site-header.scrolled,
+body:not(.dark):not(.dark-mode) .site-header.is-scrolled,
+body:not(.dark):not(.dark-mode) .navbar,
+body:not(.dark):not(.dark-mode) .navbar-light {
+  background: transparent;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+body:not(.dark):not(.dark-mode) .site-nav a {
+  color: #ffffff;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+}
+
+body:not(.dark):not(.dark-mode) .site-nav a::after {
+  display: none;
+}
+
 body:not(.dark):not(.dark-mode) .site-nav a:hover,
 body:not(.dark):not(.dark-mode) .site-nav a.active {
-  color: var(--accent);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body:not(.dark):not(.dark-mode) .brand span {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+body:not(.dark):not(.dark-mode) .theme-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+body:not(.dark):not(.dark-mode) .theme-toggle:hover,
+body:not(.dark):not(.dark-mode) .theme-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+body:not(.dark):not(.dark-mode) .hero {
+  background: transparent;
+  isolation: isolate;
+}
+
+body:not(.dark):not(.dark-mode) .hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: -1;
+}
+
+body:not(.dark):not(.dark-mode) .hero-overlay {
+  display: none;
+}
+
+body:not(.dark):not(.dark-mode) .hero-content {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: #ffffff;
+}
+
+body:not(.dark):not(.dark-mode) .hero h1,
+body:not(.dark):not(.dark-mode) .hero p,
+body:not(.dark):not(.dark-mode) .hero .eyebrow {
+  color: #ffffff;
 }
 
 body:not(.dark):not(.dark-mode) button,
@@ -2728,133 +2748,45 @@ body:not(.dark):not(.dark-mode) .search-form button:hover,
 body:not(.dark):not(.dark-mode) .filter-grid button:hover,
 body:not(.dark):not(.dark-mode) .contact-form button:hover,
 body:not(.dark):not(.dark-mode) .nav-auth-action:hover {
-  background: var(--accent-hover);
-}
-
-body:not(.dark):not(.dark-mode) .button-outline {
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  background: transparent;
-}
-
-body:not(.dark):not(.dark-mode) .button-outline:hover {
-  background: var(--accent);
-  color: #ffffff;
-}
-
-body:not(.dark):not(.dark-mode) .site-header,
-body:not(.dark):not(.dark-mode) .navbar,
-body:not(.dark):not(.dark-mode) .navbar-light {
-  background: transparent;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: none;
-}
-
-body:not(.dark):not(.dark-mode) .site-header.scrolled,
-body:not(.dark):not(.dark-mode) .site-header.is-scrolled {
-  background: transparent;
-  border-bottom-color: rgba(0, 0, 0, 0.05);
-  box-shadow: none;
-}
-
-body:not(.dark):not(.dark-mode) .brand,
-body:not(.dark):not(.dark-mode) .site-nav a,
-body:not(.dark):not(.dark-mode) .menu-toggle {
-  color: #ffffff;
-}
-
-body:not(.dark):not(.dark-mode) .site-header.scrolled .brand,
-body:not(.dark):not(.dark-mode) .site-header.scrolled .site-nav a,
-body:not(.dark):not(.dark-mode) .site-header.is-scrolled .brand,
-body:not(.dark):not(.dark-mode) .site-header.is-scrolled .site-nav a,
-body:not(.dark):not(.dark-mode) .site-header.scrolled .menu-toggle,
-body:not(.dark):not(.dark-mode) .site-header.is-scrolled .menu-toggle {
-  color: var(--text-primary);
-}
-
-body:not(.dark):not(.dark-mode) .theme-toggle {
-  background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-}
-
-body:not(.dark):not(.dark-mode) .site-header.scrolled .theme-toggle,
-body:not(.dark):not(.dark-mode) .site-header.is-scrolled .theme-toggle {
-  background: #ffffff;
-  color: var(--accent);
-  border-color: rgba(226, 232, 240, 0.9);
-}
-
-body:not(.dark):not(.dark-mode) .hero {
-  position: relative;
-  background: transparent;
-  isolation: isolate;
-}
-
-body:not(.dark):not(.dark-mode) .hero video,
-body:not(.dark):not(.dark-mode) .hero .hero-video {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 1;
-}
-
-body:not(.dark):not(.dark-mode) .hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--hero-overlay);
-  z-index: 2;
-}
-
-body:not(.dark):not(.dark-mode) .hero-overlay {
-  display: none;
-}
-
-body:not(.dark):not(.dark-mode) .hero-content {
-  position: relative;
-  z-index: 3;
-  background: transparent;
-  color: white;
-}
-
-body:not(.dark):not(.dark-mode) .hero h1,
-body:not(.dark):not(.dark-mode) .hero p,
-body:not(.dark):not(.dark-mode) .hero .eyebrow {
-  color: #ffffff;
+  background: #ff8a80;
 }
 
 body:not(.dark):not(.dark-mode) .property-card,
 body:not(.dark):not(.dark-mode) .agent-card,
 body:not(.dark):not(.dark-mode) .agent-property-card,
-body:not(.dark):not(.dark-mode) .highlight-card,
 body:not(.dark):not(.dark-mode) .seller-benefit-card,
 body:not(.dark):not(.dark-mode) .seller-contact-card,
 body:not(.dark):not(.dark-mode) .contact-form,
 body:not(.dark):not(.dark-mode) .review-card,
 body:not(.dark):not(.dark-mode) .dashboard-card,
-body:not(.dark):not(.dark-mode) .favorite-property-button {
+body:not(.dark):not(.dark-mode) .favorite-property-button,
+body:not(.dark):not(.dark-mode) .agent-public-profile,
+body:not(.dark):not(.dark-mode) .agent-public-stats,
+body:not(.dark):not(.dark-mode) .reviews-summary,
+body:not(.dark):not(.dark-mode) .review-form {
   background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  color: #ffffff;
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-body:not(.dark):not(.dark-mode) .property-card {
-  background: var(--card-red);
-  color: var(--text-on-red);
-  border-radius: 16px;
-  border: none;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+body:not(.dark):not(.dark-mode) .property-card:hover,
+body:not(.dark):not(.dark-mode) .agent-card:hover,
+body:not(.dark):not(.dark-mode) .seller-benefit-card:hover,
+body:not(.dark):not(.dark-mode) .seller-contact-card:hover,
+body:not(.dark):not(.dark-mode) .agent-property-card:hover,
+body:not(.dark):not(.dark-mode) .review-card:hover {
+  transform: translateY(-5px);
+  background: #c62828;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
 }
 
-body:not(.dark):not(.dark-mode) .property-card::after {
-  border-color: rgba(255, 255, 255, 0.16);
+body:not(.dark):not(.dark-mode) .property-card::after,
+body:not(.dark):not(.dark-mode) .agent-card::after,
+body:not(.dark):not(.dark-mode) .agent-property-card::after {
+  border-color: var(--border-soft);
 }
 
 body:not(.dark):not(.dark-mode) .property-card h1,
@@ -2863,26 +2795,25 @@ body:not(.dark):not(.dark-mode) .property-card h3,
 body:not(.dark):not(.dark-mode) .property-card p,
 body:not(.dark):not(.dark-mode) .property-card span,
 body:not(.dark):not(.dark-mode) .property-card .property-meta,
-body:not(.dark):not(.dark-mode) .property-card .text-link {
-  color: var(--text-on-red);
+body:not(.dark):not(.dark-mode) .property-card .text-link,
+body:not(.dark):not(.dark-mode) .agent-card h1,
+body:not(.dark):not(.dark-mode) .agent-card h2,
+body:not(.dark):not(.dark-mode) .agent-card h3,
+body:not(.dark):not(.dark-mode) .agent-card p,
+body:not(.dark):not(.dark-mode) .agent-property-card h4,
+body:not(.dark):not(.dark-mode) .agent-property-card p,
+body:not(.dark):not(.dark-mode) .seller-benefit-card h3,
+body:not(.dark):not(.dark-mode) .seller-benefit-card p,
+body:not(.dark):not(.dark-mode) .seller-contact-card h2,
+body:not(.dark):not(.dark-mode) .seller-contact-card p,
+body:not(.dark):not(.dark-mode) .review-card p,
+body:not(.dark):not(.dark-mode) .review-card strong,
+body:not(.dark):not(.dark-mode) .review-card small {
+  color: #ffffff;
 }
 
 body:not(.dark):not(.dark-mode) .property-card .price {
-  color: #ffe5e5;
-  font-weight: 700;
-}
-
-body:not(.dark):not(.dark-mode) .property-card:hover {
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2);
-}
-
-body:not(.dark):not(.dark-mode) .agent-card::after,
-body:not(.dark):not(.dark-mode) .agent-property-card::after {
-  border-color: var(--card-border);
-}
-
-body:not(.dark):not(.dark-mode) .highlight-card {
-  background: linear-gradient(180deg, #ffffff, #fef2f2);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 body:not(.dark):not(.dark-mode) .search-form input,
@@ -2895,47 +2826,41 @@ body:not(.dark):not(.dark-mode) .seller-form input,
 body:not(.dark):not(.dark-mode) .seller-form select,
 body:not(.dark):not(.dark-mode) .seller-form textarea,
 body:not(.dark):not(.dark-mode) .seller-agent-select {
-  background: #ffffff;
-  color: var(--text-primary);
-  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 body:not(.dark):not(.dark-mode) input::placeholder,
 body:not(.dark):not(.dark-mode) textarea::placeholder {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.72);
 }
 
-body:not(.dark):not(.dark-mode) .badge {
-  background: rgba(220, 38, 38, 0.08);
-  border-color: rgba(220, 38, 38, 0.16);
-}
-
-body:not(.dark):not(.dark-mode) .site-footer {
+body:not(.dark):not(.dark-mode) .site-footer,
+body:not(.dark):not(.dark-mode) .footer-social {
   background: var(--footer-bg);
   color: #ffffff;
-  border-top: none;
 }
 
-body:not(.dark):not(.dark-mode) .footer-text {
-  color: rgba(255, 255, 255, 0.9);
+body:not(.dark):not(.dark-mode) .footer-content {
+  justify-items: center;
+  text-align: center;
 }
 
-body:not(.dark):not(.dark-mode) .footer-social a {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  border-radius: 50%;
-  padding: 10px;
+body:not(.dark):not(.dark-mode) .footer-social a,
+body:not(.dark):not(.dark-mode) .social-icon {
+  background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
+  border-radius: 50%;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-body:not(.dark):not(.dark-mode) .footer-social a:hover {
-  background: rgba(255, 255, 255, 0.25);
+body:not(.dark):not(.dark-mode) .footer-social a:hover,
+body:not(.dark):not(.dark-mode) .social-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: none;
 }
 
 body:not(.dark):not(.dark-mode) .footer-social svg {
@@ -2944,11 +2869,11 @@ body:not(.dark):not(.dark-mode) .footer-social svg {
 
 @media (max-width: 720px) {
   body:not(.dark):not(.dark-mode) .site-nav {
-    background: rgba(255, 255, 255, 0.96);
-    border: 1px solid var(--card-border);
+    background: rgba(211, 47, 47, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   body:not(.dark):not(.dark-mode) .site-nav a {
-    color: var(--text-primary);
+    color: #ffffff;
   }
 }
