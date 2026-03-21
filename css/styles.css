@@ -2578,6 +2578,10 @@ body:not(.dark):not(.dark-mode) .card {
   --bg-secondary: #ffffff;
   --card-bg: #ffffff;
   --card-border: #e5e7eb;
+  --card-red: #e53935;
+  --card-red-soft: #ef5350;
+  --text-on-red: #ffffff;
+  --footer-bg: #ef5350;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --accent: #dc2626;
@@ -2640,7 +2644,7 @@ body:not(.dark):not(.dark-mode) main {
 }
 
 body:not(.dark):not(.dark-mode) .section {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
 }
 
 body:not(.dark):not(.dark-mode) .section-alt,
@@ -2744,13 +2748,15 @@ body:not(.dark):not(.dark-mode) .navbar-light {
   background: transparent;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 body:not(.dark):not(.dark-mode) .site-header.scrolled,
 body:not(.dark):not(.dark-mode) .site-header.is-scrolled {
-  background: var(--header-scrolled);
-  border-bottom-color: var(--header-border-strong);
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  background: transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 body:not(.dark):not(.dark-mode) .brand,
@@ -2839,14 +2845,40 @@ body:not(.dark):not(.dark-mode) .favorite-property-button {
   -webkit-backdrop-filter: none;
 }
 
-body:not(.dark):not(.dark-mode) .property-card::after,
+body:not(.dark):not(.dark-mode) .property-card {
+  background: var(--card-red);
+  color: var(--text-on-red);
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+body:not(.dark):not(.dark-mode) .property-card::after {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+body:not(.dark):not(.dark-mode) .property-card h1,
+body:not(.dark):not(.dark-mode) .property-card h2,
+body:not(.dark):not(.dark-mode) .property-card h3,
+body:not(.dark):not(.dark-mode) .property-card p,
+body:not(.dark):not(.dark-mode) .property-card span,
+body:not(.dark):not(.dark-mode) .property-card .property-meta,
+body:not(.dark):not(.dark-mode) .property-card .text-link {
+  color: var(--text-on-red);
+}
+
+body:not(.dark):not(.dark-mode) .property-card .price {
+  color: #ffe5e5;
+  font-weight: 700;
+}
+
+body:not(.dark):not(.dark-mode) .property-card:hover {
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2);
+}
+
 body:not(.dark):not(.dark-mode) .agent-card::after,
 body:not(.dark):not(.dark-mode) .agent-property-card::after {
   border-color: var(--card-border);
-}
-
-body:not(.dark):not(.dark-mode) .property-card .text-link {
-  color: var(--accent);
 }
 
 body:not(.dark):not(.dark-mode) .highlight-card {
@@ -2879,18 +2911,35 @@ body:not(.dark):not(.dark-mode) .badge {
 }
 
 body:not(.dark):not(.dark-mode) .site-footer {
-  border-top: 1px solid var(--card-border);
+  background: var(--footer-bg);
+  color: #ffffff;
+  border-top: none;
+}
+
+body:not(.dark):not(.dark-mode) .footer-text {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 body:not(.dark):not(.dark-mode) .footer-social a {
-  background: #ffffff;
-  border-color: var(--card-border);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
 }
 
 body:not(.dark):not(.dark-mode) .footer-social a:hover {
-  color: var(--accent);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: none;
+}
+
+body:not(.dark):not(.dark-mode) .footer-social svg {
+  fill: #ffffff;
 }
 
 @media (max-width: 720px) {
