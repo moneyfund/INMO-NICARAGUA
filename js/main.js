@@ -23,12 +23,18 @@ window.addEventListener('scroll', updateHeaderOnScroll, { passive: true });
 
 function applyTheme(theme) {
   const isDarkMode = theme === 'dark';
+  document.body.classList.toggle('dark', isDarkMode);
   document.body.classList.toggle('dark-mode', isDarkMode);
 
   if (themeToggle) {
     themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
     themeToggle.setAttribute('aria-label', isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro');
   }
+}
+
+function initializeLucideIcons() {
+  if (typeof window === 'undefined' || !window.lucide || typeof window.lucide.createIcons !== 'function') return;
+  window.lucide.createIcons();
 }
 
 applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
@@ -241,3 +247,5 @@ if (window.inmoFirebase) {
 } else {
   document.addEventListener('inmo:firebase-ready', attachGlobalAuthListener, { once: true });
 }
+
+initializeLucideIcons();
