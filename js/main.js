@@ -25,6 +25,7 @@ function applyTheme(theme) {
   const isDarkMode = theme === 'dark';
   document.body.classList.toggle('dark', isDarkMode);
   document.body.classList.toggle('dark-mode', isDarkMode);
+  document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
 
   if (themeToggle) {
     themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
