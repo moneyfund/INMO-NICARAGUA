@@ -2497,11 +2497,11 @@ body.dark-mode {
 }
 
 .site-header {
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: relative;
+  top: auto;
+  left: auto;
   width: 100%;
-  z-index: 1000;
+  z-index: 10;
   background: transparent;
   border-bottom: 1px solid var(--header-border);
   backdrop-filter: blur(10px);
@@ -2510,7 +2510,7 @@ body.dark-mode {
 }
 
 :root {
-  --header-offset: 84px;
+  --header-offset: 0px;
 }
 
 @media (max-width: 720px) {
@@ -3076,4 +3076,23 @@ body.dark-mode .property-dropzone,
 body.dark .image-preview-card,
 body.dark-mode .image-preview-card {
   border-color: var(--border-soft);
+}
+
+
+main {
+  padding-top: 0;
+}
+
+.hero {
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.hero-video,
+.hero video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
