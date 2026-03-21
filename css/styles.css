@@ -2123,20 +2123,21 @@ body.dark-mode .review-auth-btn {
 
 /* Unified color system */
 :root {
-  --bg-main: #fdf2f2;
-  --bg-card: #ffffff;
+  --bg-main: #fef2f2;
+  --bg-soft: #fee2e2;
+  --bg-card: rgba(255, 255, 255, 0.35);
   --primary: #b91c1c;
   --primary-soft: #fecaca;
-  --text-main: #1f2937;
-  --text-secondary: #6b7280;
+  --text-main: #3f1d1d;
+  --text-secondary: #7f1d1d;
   --text-inverse: #ffffff;
-  --border-subtle: rgba(31, 41, 55, 0.08);
-  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-card-hover: 0 14px 28px rgba(0, 0, 0, 0.14);
-  --header-border: rgba(0, 0, 0, 0.05);
-  --header-scrolled: rgba(253, 242, 242, 0.88);
-  --nav-mobile-bg: rgba(253, 242, 242, 0.96);
-  --input-bg: var(--bg-card);
+  --border-subtle: rgba(255, 255, 255, 0.4);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 12px 30px rgba(0, 0, 0, 0.12);
+  --header-border: rgba(255, 255, 255, 0.18);
+  --header-scrolled: rgba(254, 242, 242, 0.72);
+  --nav-mobile-bg: rgba(254, 242, 242, 0.92);
+  --input-bg: rgba(255, 255, 255, 0.42);
 }
 
 [data-theme="dark"],
@@ -2178,7 +2179,15 @@ main,
 .page-banner,
 .seller-hero,
 .announcement-bar {
-  background: transparent;
+  background: var(--bg-main);
+}
+
+.section-properties:nth-of-type(even),
+.advisory-section,
+.agent-card-section,
+.seller-hero,
+.page-banner {
+  background: var(--bg-soft);
 }
 
 h1,
@@ -2282,10 +2291,9 @@ button:hover,
 .btn:hover,
 .seller-whatsapp-btn:hover,
 .review-auth-btn:hover {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: #991b1b;
+  border-color: #991b1b;
   color: #fff;
-  filter: brightness(0.92);
   transform: translateY(-2px);
 }
 
@@ -2303,8 +2311,8 @@ button:hover,
 .btn-secondary:hover,
 .review-auth-btn-outline:hover,
 .nav-auth-action:hover {
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--primary);
+  color: #fff;
 }
 
 .property-card,
@@ -2319,13 +2327,16 @@ button:hover,
 .dashboard-card,
 .contact-form,
 .favorite-property-button,
-.review-auth-btn-outline {
+.review-auth-btn-outline,
+.agent-public-profile {
   background: var(--bg-card);
   color: var(--text-main);
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 16px;
   box-shadow: var(--shadow-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .property-card:hover,
@@ -2336,8 +2347,9 @@ button:hover,
 .seller-contact-card:hover,
 .seller-form:hover,
 .agent-property-card:hover,
-.review-card:hover {
-  transform: translateY(-4px);
+.review-card:hover,
+.agent-public-profile:hover {
+  transform: translateY(-5px);
   box-shadow: var(--shadow-card-hover);
 }
 
@@ -2380,7 +2392,7 @@ button:hover,
 .seller-form textarea {
   background: var(--input-bg);
   color: var(--text-main);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid rgba(185, 28, 28, 0.14);
   border-radius: 10px;
 }
 
@@ -2407,7 +2419,7 @@ button:hover,
 
 .announcement-track span,
 .eyebrow {
-  color: #fff;
+  color: var(--text-main);
 }
 
 .agents-grid,
@@ -2420,8 +2432,8 @@ button:hover,
   width: 4rem;
   height: 4rem;
   border-radius: 999px;
-  background: var(--primary-soft);
-  border: none;
+  background: rgba(185, 28, 28, 0.1);
+  border: 1px solid rgba(185, 28, 28, 0.14);
   color: var(--primary);
 }
 
@@ -2444,9 +2456,11 @@ button:hover,
 }
 
 .footer-social a {
-  background: var(--bg-card);
+  background: rgba(255, 255, 255, 0.3);
   color: var(--text-main);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .footer-social a:hover {
@@ -2459,4 +2473,41 @@ button:hover,
     background: var(--nav-mobile-bg);
     border: 1px solid var(--header-border);
   }
+}
+
+
+body:not(.dark):not(.dark-mode) .badge {
+  background: rgba(185, 28, 28, 0.1);
+  color: var(--primary);
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid rgba(185, 28, 28, 0.12);
+}
+
+body:not(.dark):not(.dark-mode) .property-card .text-link,
+body:not(.dark):not(.dark-mode) .agent-card .text-link,
+body:not(.dark):not(.dark-mode) .card .text-link {
+  color: var(--primary);
+}
+
+body:not(.dark):not(.dark-mode) .property-card,
+body:not(.dark):not(.dark-mode) .agent-card,
+body:not(.dark):not(.dark-mode) .card,
+body:not(.dark):not(.dark-mode) .highlight-card,
+body:not(.dark):not(.dark-mode) .seller-benefit-card,
+body:not(.dark):not(.dark-mode) .seller-contact-card,
+body:not(.dark):not(.dark-mode) .seller-form,
+body:not(.dark):not(.dark-mode) .agent-property-card,
+body:not(.dark):not(.dark-mode) .review-card,
+body:not(.dark):not(.dark-mode) .dashboard-card,
+body:not(.dark):not(.dark-mode) .contact-form,
+body:not(.dark):not(.dark-mode) .agent-public-profile {
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+body:not(.dark):not(.dark-mode) .page-banner,
+body:not(.dark):not(.dark-mode) .seller-hero,
+body:not(.dark):not(.dark-mode) .announcement-bar {
+  background: var(--bg-soft);
 }
