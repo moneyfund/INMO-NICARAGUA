@@ -2571,3 +2571,193 @@ body:not(.dark):not(.dark-mode) .card {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+
+/* Light mode premium red refresh and hero video visibility fix */
+:root {
+  --bg-primary: #e53935;
+  --bg-secondary: #d32f2f;
+  --card-bg: rgba(255, 255, 255, 0.08);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  --overlay-light: rgba(0, 0, 0, 0.35);
+}
+
+body:not(.dark):not(.dark-mode) {
+  --bg-main: var(--bg-primary);
+  --bg-secondary: #d32f2f;
+  --bg-card: var(--card-bg);
+  --text-main: var(--text-primary);
+  --text-inverse: var(--text-primary);
+  --text-strong: var(--text-primary);
+  --accent-primary: var(--text-primary);
+  --accent-strong: rgba(255, 255, 255, 0.92);
+  --accent-strong-hover: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.12);
+  --accent-softest: rgba(255, 255, 255, 0.16);
+  --bg-soft: rgba(255, 255, 255, 0.12);
+  --bg-muted: rgba(255, 255, 255, 0.1);
+  --bg-input: rgba(255, 255, 255, 0.14);
+  --border-default: rgba(255, 255, 255, 0.18);
+  --border-muted: rgba(255, 255, 255, 0.14);
+  --border-soft: rgba(255, 255, 255, 0.15);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --glass-card: var(--card-bg);
+  --glass-card-strong: rgba(255, 255, 255, 0.12);
+  --glass-muted: rgba(255, 255, 255, 0.12);
+  --glass-subtle: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-border-strong: rgba(255, 255, 255, 0.15);
+  --card-shadow: rgba(103, 0, 0, 0.18);
+  --card-shadow-hover: rgba(103, 0, 0, 0.28);
+  --announcement-bg: linear-gradient(90deg, rgba(211, 47, 47, 0.95), rgba(229, 57, 53, 0.95));
+  --section-banner: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+  --surface-overlay: rgba(255, 255, 255, 0.08);
+  --surface-overlay-strong: rgba(255, 255, 255, 0.16);
+  --surface-border: rgba(255, 255, 255, 0.15);
+  --surface-border-strong: rgba(255, 255, 255, 0.2);
+  --input-bg: rgba(255, 255, 255, 0.12);
+}
+
+body:not(.dark):not(.dark-mode),
+body:not(.dark):not(.dark-mode) main {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+body:not(.dark):not(.dark-mode) .section,
+body:not(.dark):not(.dark-mode) .section-properties,
+body:not(.dark):not(.dark-mode) .section-dark,
+body:not(.dark):not(.dark-mode) .advisory-section,
+body:not(.dark):not(.dark-mode) .page-banner,
+body:not(.dark):not(.dark-mode) .site-footer,
+body:not(.dark):not(.dark-mode) .announcement-bar,
+body:not(.dark):not(.dark-mode) .seller-hero,
+body:not(.dark):not(.dark-mode) .agent-card-section,
+body:not(.dark):not(.dark-mode) .map-page-main,
+body:not(.dark):not(.dark-mode) .map-page-section {
+  background: var(--bg-secondary);
+}
+
+body:not(.dark):not(.dark-mode) h1,
+body:not(.dark):not(.dark-mode) h2,
+body:not(.dark):not(.dark-mode) h3,
+body:not(.dark):not(.dark-mode) h4,
+body:not(.dark):not(.dark-mode) h5,
+body:not(.dark):not(.dark-mode) h6,
+body:not(.dark):not(.dark-mode) .brand,
+body:not(.dark):not(.dark-mode) .site-nav a,
+body:not(.dark):not(.dark-mode) .section-title,
+body:not(.dark):not(.dark-mode) .section-header h2,
+body:not(.dark):not(.dark-mode) .property-card h1,
+body:not(.dark):not(.dark-mode) .property-card h2,
+body:not(.dark):not(.dark-mode) .property-card h3,
+body:not(.dark):not(.dark-mode) .agent-card h1,
+body:not(.dark):not(.dark-mode) .agent-card h2,
+body:not(.dark):not(.dark-mode) .agent-card h3,
+body:not(.dark):not(.dark-mode) .highlight-card h3,
+body:not(.dark):not(.dark-mode) .seller-contact-card h2,
+body:not(.dark):not(.dark-mode) .seller-benefit-card h3 {
+  color: var(--text-primary);
+}
+
+body:not(.dark):not(.dark-mode) p,
+body:not(.dark):not(.dark-mode) li,
+body:not(.dark):not(.dark-mode) label,
+body:not(.dark):not(.dark-mode) .property-meta,
+body:not(.dark):not(.dark-mode) .property-card p,
+body:not(.dark):not(.dark-mode) .agent-card p,
+body:not(.dark):not(.dark-mode) .highlight-card p,
+body:not(.dark):not(.dark-mode) .seller-contact-card p,
+body:not(.dark):not(.dark-mode) .seller-agent-message,
+body:not(.dark):not(.dark-mode) .footer-text {
+  color: var(--text-secondary);
+}
+
+body:not(.dark):not(.dark-mode) .text-link,
+body:not(.dark):not(.dark-mode) .price,
+body:not(.dark):not(.dark-mode) .badge,
+body:not(.dark):not(.dark-mode) .brand span,
+body:not(.dark):not(.dark-mode) .site-nav a:hover,
+body:not(.dark):not(.dark-mode) .site-nav a.active {
+  color: #ffffff;
+}
+
+.site-header,
+.navbar,
+.navbar-light {
+  background: transparent;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+body:not(.dark):not(.dark-mode) .hero {
+  position: relative;
+  background: transparent;
+  isolation: isolate;
+}
+
+body:not(.dark):not(.dark-mode) .hero video,
+body:not(.dark):not(.dark-mode) .hero .hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+body:not(.dark):not(.dark-mode) .hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--overlay-light);
+  z-index: 2;
+}
+
+body:not(.dark):not(.dark-mode) .hero-overlay {
+  display: none;
+}
+
+body:not(.dark):not(.dark-mode) .hero-content {
+  position: relative;
+  z-index: 3;
+  color: var(--text-primary);
+}
+
+body:not(.dark):not(.dark-mode) .property-card,
+body:not(.dark):not(.dark-mode) .agent-card,
+body:not(.dark):not(.dark-mode) .agent-property-card,
+body:not(.dark):not(.dark-mode) .highlight-card,
+body:not(.dark):not(.dark-mode) .seller-benefit-card,
+body:not(.dark):not(.dark-mode) .seller-contact-card,
+body:not(.dark):not(.dark-mode) .contact-form,
+body:not(.dark):not(.dark-mode) .review-card,
+body:not(.dark):not(.dark-mode) .dashboard-card,
+body:not(.dark):not(.dark-mode) .favorite-property-button {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(103, 0, 0, 0.18);
+}
+
+body:not(.dark):not(.dark-mode) .search-form input,
+body:not(.dark):not(.dark-mode) .search-form select,
+body:not(.dark):not(.dark-mode) .filter-grid input,
+body:not(.dark):not(.dark-mode) .filter-grid select,
+body:not(.dark):not(.dark-mode) .contact-form input,
+body:not(.dark):not(.dark-mode) .contact-form textarea,
+body:not(.dark):not(.dark-mode) .seller-form input,
+body:not(.dark):not(.dark-mode) .seller-form select,
+body:not(.dark):not(.dark-mode) .seller-form textarea,
+body:not(.dark):not(.dark-mode) .seller-agent-select {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+body:not(.dark):not(.dark-mode) input::placeholder,
+body:not(.dark):not(.dark-mode) textarea::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
