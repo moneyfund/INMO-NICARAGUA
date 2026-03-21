@@ -15,13 +15,15 @@ import {
   where,
   serverTimestamp,
   ref,
-  uploadBytesResumable,
-  getDownloadURL,
   deleteObject,
   onAuthStateChanged,
   signInWithPopup,
   signOut
 } from './firebase-services.js';
+import {
+  subirMultiplesImagenes,
+  validateImageFile
+} from './storage-upload.js';
 
 const state = {
   user: null,
@@ -68,11 +70,6 @@ function getProfilePayload(user) {
     whatsapp: document.getElementById('agentWhatsapp').value.trim(),
     updatedAt: serverTimestamp()
   };
-}
-
-function createStoragePath(userId, fileName) {
-  const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '-').toLowerCase();
-  return `propiedades/${userId}/${Date.now()}-${safeName}`;
 }
 
 function formatBytes(bytes) {
@@ -303,14 +300,6 @@ function bindImagePreviewActions() {
   });
 }
 
-function validateImageFile(file) {
-  if (!file.type.startsWith('image/')) {
-    return 'Solo se permiten archivos de imagen.';
-  }
-
-  return '';
-}
-
 async function compressImage(file) {
   if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
 
@@ -362,9 +351,10 @@ async function handleSelectedFiles(fileList) {
   const errors = [];
 
   for (const file of slicedFiles) {
-    const validationError = validateImageFile(file);
-    if (validationError) {
-      errors.push(validationError);
+    try {
+      validateImageFile(file, { maxFileSize: maxImageSize });
+    } catch (error) {
+      errors.push(error.message);
       continue;
     }
 
@@ -424,41 +414,13 @@ function bindImagePicker() {
   dropzone.addEventListener('click', () => input.click());
 }
 
-async function subirImagen(file, onProgress = () => {}) {
-  if (!state.user) throw new Error('Debes iniciar sesión para subir imágenes.');
-
-  const path = createStoragePath(state.user.uid, file.name);
-  const storageRef = ref(storage, path);
-
-  const snapshot = await new Promise((resolve, reject) => {
-    const task = uploadBytesResumable(storageRef, file, { contentType: file.type });
-    task.on('state_changed', (current) => {
-      const progress = Math.round((current.bytesTransferred / current.totalBytes) * 100);
-      onProgress(progress);
-    }, reject, () => resolve(task.snapshot));
-  });
-
-  const url = await getDownloadURL(snapshot.ref);
-  return { url, path };
-}
-
-async function subirMultiplesImagenes(files) {
-  const uploads = [];
-
-  for (const image of files) {
-    const uploaded = await subirImagen(image.file, (progress) => {
-      image.progress = progress;
-      renderImagePreview();
-    });
-    uploads.push(uploaded);
-  }
-
-  return uploads;
-}
-
 async function guardarPropiedad(data, imagenes, propertyId = '') {
   if (!state.user) throw new Error('Sesión no válida.');
 
+  console.log('[AgentDashboard] Guardando en Firestore...', {
+    propertyId: propertyId || '(nuevo)',
+    totalImagenes: imagenes.length
+  });
   const payload = getPropertyPayload(state.user, data.agentName, imagenes);
   const propertiesCollection = collection(db, 'properties');
 
@@ -547,6 +509,8 @@ async function saveProperty(event) {
   event.preventDefault();
   if (!state.user) return;
 
+  console.log('[AgentDashboard] saveProperty ejecutado.');
+
   const submitButton = event.submitter || document.querySelector('#propertyForm button[type="submit"]');
   const profileName = document.getElementById('agentName').value.trim() || state.user.displayName || 'Agente';
   const propertyId = document.getElementById('propertyDocId').value;
@@ -554,18 +518,35 @@ async function saveProperty(event) {
   try {
     submitButton?.setAttribute('disabled', 'disabled');
     submitButton?.classList.add('is-loading');
-    setMessage('Subiendo imágenes y guardando propiedad...', 'info');
+    setMessage('Subiendo imágenes...', 'info');
 
-    const uploadedImages = await subirMultiplesImagenes(state.pendingImages);
+    console.log('[AgentDashboard] Paso 1/4: Subir imágenes a Firebase Storage.');
+    const uploadedImages = await subirMultiplesImagenes(state.pendingImages, {
+      onItemProgress: (image, progress) => {
+        if (image) image.progress = progress;
+        renderImagePreview();
+      }
+    });
     state.existingImages = [...state.existingImages, ...uploadedImages];
 
+    console.log('[AgentDashboard] Paso 2/4: URLs obtenidas.', {
+      totalSubidas: uploadedImages.length
+    });
     const imageUrls = state.existingImages.map((image) => image.url);
+
+    console.log('[AgentDashboard] Paso 3/4: Guardando propiedad en Firestore.');
+    setMessage('Guardando en Firestore...', 'info');
     await guardarPropiedad({ agentName: profileName }, imageUrls, propertyId);
 
+    console.log('[AgentDashboard] Paso 4/4: Flujo completado, limpiando UI.');
     setMessage(propertyId ? 'Propiedad actualizada correctamente.' : 'Propiedad creada correctamente.', 'success');
     resetPropertyForm();
   } catch (error) {
-    console.error(error);
+    console.error('[AgentDashboard] Error guardando propiedad.', error);
+    state.pendingImages.forEach((image) => {
+      image.error = error.message || 'Error de subida';
+    });
+    renderImagePreview();
     setMessage(error.message || 'No fue posible guardar la propiedad.', 'error');
   } finally {
     submitButton?.removeAttribute('disabled');
