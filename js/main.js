@@ -15,7 +15,9 @@ const siteHeader = document.querySelector('.site-header');
 
 function updateHeaderOnScroll() {
   if (!siteHeader) return;
-  siteHeader.classList.toggle('is-scrolled', window.scrollY > 12);
+  const isScrolled = window.scrollY > 12;
+  siteHeader.classList.toggle('scrolled', isScrolled);
+  siteHeader.classList.toggle('is-scrolled', isScrolled);
 }
 
 updateHeaderOnScroll();
