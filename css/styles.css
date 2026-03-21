@@ -2460,3 +2460,89 @@ button:hover,
     border: 1px solid var(--header-border);
   }
 }
+
+/* Navbar glassmorphism refresh */
+:root {
+  --header-border: rgba(0, 0, 0, 0.05);
+  --nav-mobile-bg: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"],
+body.dark,
+body.dark-mode {
+  --header-border: rgba(255, 255, 255, 0.05);
+  --nav-mobile-bg: rgba(255, 255, 255, 0.06);
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: transparent;
+  border-bottom: 1px solid var(--header-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: none;
+}
+
+.site-header.scrolled,
+.site-header.is-scrolled,
+body.dark .site-header,
+body.dark-mode .site-header,
+body.dark .site-header.scrolled,
+body.dark .site-header.is-scrolled,
+body.dark-mode .site-header.scrolled,
+body.dark-mode .site-header.is-scrolled {
+  background: transparent;
+  border-bottom-color: var(--header-border);
+  box-shadow: none;
+}
+
+.brand,
+.site-nav a,
+.menu-toggle,
+.theme-toggle {
+  color: var(--text-main);
+}
+
+.site-nav a {
+  font-weight: 500;
+}
+
+.site-nav a:hover,
+.site-nav a.active,
+.menu-toggle:hover,
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  color: var(--primary);
+}
+
+.site-nav a::after {
+  background: var(--primary);
+  height: 2px;
+}
+
+.theme-toggle,
+.nav-auth-action {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--primary);
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible,
+.nav-auth-action:hover,
+.nav-auth-action:focus-visible {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+@media (max-width: 720px) {
+  .site-nav {
+    background: transparent;
+    border: 1px solid var(--header-border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
