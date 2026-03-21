@@ -69,15 +69,11 @@
             <input type="number" id="propertyBathrooms" placeholder="Baños" min="0" />
             <input type="number" id="propertyArea" placeholder="Área m²" min="0" />
             <input type="url" id="propertyVideo" placeholder="Video URL" />
-            <input type="hidden" id="propertyImagesData" />
             <div class="dashboard-image-uploader">
-              <label for="propertyImagesInput" class="dashboard-label">Imágenes de la propiedad</label>
-              <input type="file" id="propertyImagesInput" accept="image/*" multiple />
-              <button type="button" id="propertyDropzone" class="property-dropzone">
-                <span>Arrastra imágenes aquí o haz clic para seleccionarlas</span>
-                <small>Máximo 2MB por imagen. JPG, PNG o WEBP.</small>
-              </button>
-              <p id="propertyImagesCounter" class="dashboard-helper-text">0 imagen(es) seleccionada(s)</p>
+              <label for="propertyImageUrls" class="dashboard-label">URLs de imágenes de la propiedad</label>
+              <textarea id="propertyImageUrls" rows="4" placeholder="https://ejemplo.com/imagen-1.jpg&#10;https://ejemplo.com/imagen-2.jpg"></textarea>
+              <small class="dashboard-helper-text">Ingresa una URL por línea o separadas por coma.</small>
+              <p id="propertyImagesCounter" class="dashboard-helper-text">0 URL(s) de imagen</p>
               <div id="propertyImagesPreview" class="image-preview-grid"></div>
             </div>
             <input type="hidden" id="propertyLat" />
