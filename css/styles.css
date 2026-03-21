@@ -157,7 +157,7 @@ a { text-decoration: none; }
   gap: 1rem;
 }
 .brand { color: var(--text-inverse); font-weight: 700; letter-spacing: 1px; font-size: 1.1rem; }
-.brand span { color: var(--gold-light); }
+.brand span { color: var(--accent-gold-soft); }
 .brand:hover { color: var(--accent-softest); }
 .site-nav {
   justify-self: center;
@@ -179,11 +179,11 @@ a { text-decoration: none; }
   bottom: -6px;
   width: 0;
   height: 2px;
-  background: var(--gold);
+  background: var(--accent-gold);
   transition: width 0.3s ease;
 }
 .site-nav a.active, .site-nav a:hover {
-  color: var(--gold-light);
+  color: var(--accent-gold-soft);
   transform: translateY(-2px);
 }
 .site-nav a.active::after, .site-nav a:hover::after {
@@ -236,7 +236,7 @@ main { padding-top: 84px; }
 }
 .hero-content { position: relative; color: var(--text-inverse); max-width: 760px; }
 .hero h1 { color: var(--text-inverse); font-size: clamp(2rem, 4.5vw, 3.4rem); margin: .5rem 0 1rem; }
-.eyebrow { color: var(--gold-light); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; font-size: .85rem; }
+.eyebrow { color: var(--accent-gold-soft); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; font-size: .85rem; }
 .search-form { display: grid; grid-template-columns: 2fr 1fr auto; gap: .75rem; margin-top: 1.5rem; }
 .search-form input, .search-form select, .search-form button,
 .filter-grid input, .filter-grid select, .filter-grid button,
@@ -545,7 +545,7 @@ section h2,
   cursor: pointer;
 }
 .gallery-indicators button.is-active {
-  background: var(--gold);
+  background: var(--accent-gold);
 }
 .badge {
   display: inline-block;
@@ -2124,19 +2124,20 @@ body.dark-mode .review-auth-btn {
 /* Unified color system */
 :root {
   --bg-main: #fdf2f2;
-  --bg-card: #ffffff;
+  --bg-secondary: rgba(255, 255, 255, 0.58);
+  --bg-card: rgba(255, 255, 255, 0.62);
   --primary: #b91c1c;
-  --primary-soft: #fecaca;
+  --primary-soft: rgba(254, 202, 202, 0.7);
   --text-main: #1f2937;
   --text-secondary: #6b7280;
   --text-inverse: #ffffff;
-  --border-subtle: rgba(31, 41, 55, 0.08);
-  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-card-hover: 0 14px 28px rgba(0, 0, 0, 0.14);
-  --header-border: rgba(0, 0, 0, 0.05);
-  --header-scrolled: rgba(253, 242, 242, 0.88);
-  --nav-mobile-bg: rgba(253, 242, 242, 0.96);
-  --input-bg: var(--bg-card);
+  --border-subtle: rgba(185, 28, 28, 0.14);
+  --shadow-card: 0 12px 30px rgba(185, 28, 28, 0.12);
+  --shadow-card-hover: 0 20px 38px rgba(185, 28, 28, 0.18);
+  --header-border: rgba(255, 255, 255, 0.35);
+  --header-scrolled: rgba(253, 242, 242, 0.3);
+  --nav-mobile-bg: rgba(255, 255, 255, 0.2);
+  --input-bg: rgba(255, 255, 255, 0.72);
 }
 
 [data-theme="dark"],
@@ -2326,6 +2327,8 @@ button:hover,
   border-radius: 16px;
   padding: 16px;
   box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .property-card:hover,
@@ -2463,8 +2466,8 @@ button:hover,
 
 /* Navbar glassmorphism refresh */
 :root {
-  --header-border: rgba(0, 0, 0, 0.05);
-  --nav-mobile-bg: rgba(255, 255, 255, 0.08);
+  --header-border: rgba(255, 255, 255, 0.34);
+  --nav-mobile-bg: rgba(255, 255, 255, 0.22);
 }
 
 [data-theme="dark"],
