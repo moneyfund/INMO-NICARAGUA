@@ -3074,3 +3074,134 @@ main {
   object-fit: cover;
   display: block;
 }
+
+
+/* Light mode refinements for agent cards and public agent profile */
+body:not(.dark):not(.dark-mode) .agent-card,
+body:not(.dark):not(.dark-mode) .agent-profile-card,
+body:not(.dark):not(.dark-mode) .agent-public-profile,
+body:not(.dark):not(.dark-mode) .agent-public-stats,
+body:not(.dark):not(.dark-mode) .agent-property-card {
+  background: #c62828;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+body:not(.dark):not(.dark-mode) .agent-card h1,
+body:not(.dark):not(.dark-mode) .agent-card h2,
+body:not(.dark):not(.dark-mode) .agent-card h3,
+body:not(.dark):not(.dark-mode) .agent-card p,
+body:not(.dark):not(.dark-mode) .agent-profile-card h1,
+body:not(.dark):not(.dark-mode) .agent-profile-card p,
+body:not(.dark):not(.dark-mode) .agent-public-summary h2,
+body:not(.dark):not(.dark-mode) .agent-public-summary p,
+body:not(.dark):not(.dark-mode) .agent-public-stats h3,
+body:not(.dark):not(.dark-mode) .agent-public-stats p,
+body:not(.dark):not(.dark-mode) .agent-content h2,
+body:not(.dark):not(.dark-mode) .agent-content p {
+  color: #ffffff;
+}
+
+body:not(.dark):not(.dark-mode) .agent-card a,
+body:not(.dark):not(.dark-mode) .agent-profile-card a,
+body:not(.dark):not(.dark-mode) .agent-public-profile a,
+body:not(.dark):not(.dark-mode) .agent-public-stats a,
+body:not(.dark):not(.dark-mode) .agent-property-card a {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+body:not(.dark):not(.dark-mode) .agent-card a:hover,
+body:not(.dark):not(.dark-mode) .agent-profile-card a:hover,
+body:not(.dark):not(.dark-mode) .agent-public-profile a:hover,
+body:not(.dark):not(.dark-mode) .agent-public-stats a:hover,
+body:not(.dark):not(.dark-mode) .agent-property-card a:hover {
+  opacity: 0.85;
+}
+
+body:not(.dark):not(.dark-mode) .agent-card .button,
+body:not(.dark):not(.dark-mode) .agent-card button,
+body:not(.dark):not(.dark-mode) .agent-card .button-outline,
+body:not(.dark):not(.dark-mode) .agent-profile-card .button,
+body:not(.dark):not(.dark-mode) .agent-profile-card button,
+body:not(.dark):not(.dark-mode) .agent-profile-card .button-outline,
+body:not(.dark):not(.dark-mode) .agent-public-profile .button,
+body:not(.dark):not(.dark-mode) .agent-public-profile button,
+body:not(.dark):not(.dark-mode) .agent-public-profile .button-outline,
+body:not(.dark):not(.dark-mode) .agent-public-stats .button,
+body:not(.dark):not(.dark-mode) .agent-public-stats button,
+body:not(.dark):not(.dark-mode) .agent-public-stats .button-outline {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+body:not(.dark):not(.dark-mode) .agent-card .button:hover,
+body:not(.dark):not(.dark-mode) .agent-card button:hover,
+body:not(.dark):not(.dark-mode) .agent-card .button-outline:hover,
+body:not(.dark):not(.dark-mode) .agent-profile-card .button:hover,
+body:not(.dark):not(.dark-mode) .agent-profile-card button:hover,
+body:not(.dark):not(.dark-mode) .agent-profile-card .button-outline:hover,
+body:not(.dark):not(.dark-mode) .agent-public-profile .button:hover,
+body:not(.dark):not(.dark-mode) .agent-public-profile button:hover,
+body:not(.dark):not(.dark-mode) .agent-public-profile .button-outline:hover,
+body:not(.dark):not(.dark-mode) .agent-public-stats .button:hover,
+body:not(.dark):not(.dark-mode) .agent-public-stats button:hover,
+body:not(.dark):not(.dark-mode) .agent-public-stats .button-outline:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.42);
+}
+
+body:not(.dark):not(.dark-mode) .agent-public-social-link {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+body:not(.dark):not(.dark-mode) .agent-public-photo,
+body:not(.dark):not(.dark-mode) .agent-card img {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+/* Light mode refinements for white-background forms */
+body:not(.dark):not(.dark-mode) input,
+body:not(.dark):not(.dark-mode) textarea,
+body:not(.dark):not(.dark-mode) select {
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid #ccc;
+}
+
+body:not(.dark):not(.dark-mode) input::placeholder,
+body:not(.dark):not(.dark-mode) textarea::placeholder {
+  color: #666;
+}
+
+body:not(.dark):not(.dark-mode) label,
+body:not(.dark):not(.dark-mode) .form-row label,
+body:not(.dark):not(.dark-mode) .contact-form label,
+body:not(.dark):not(.dark-mode) .seller-form label,
+body:not(.dark):not(.dark-mode) .seller-agent-label {
+  color: #222;
+  font-weight: 500;
+}
+
+body:not(.dark):not(.dark-mode) input:focus,
+body:not(.dark):not(.dark-mode) textarea:focus,
+body:not(.dark):not(.dark-mode) select:focus {
+  outline: none;
+  border-color: #c62828;
+  box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.2);
+}
+
+body:not(.dark):not(.dark-mode) form button {
+  background: #c62828;
+  color: #ffffff;
+  border: none;
+}
+
+body:not(.dark):not(.dark-mode) form button:hover {
+  background: #b71c1c;
+}
