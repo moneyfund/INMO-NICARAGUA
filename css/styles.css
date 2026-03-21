@@ -2120,3 +2120,343 @@ body.dark-mode .review-auth-btn {
     border-color: var(--border-soft);
   }
 }
+
+/* Unified color system */
+:root {
+  --bg-main: #fdf2f2;
+  --bg-card: #ffffff;
+  --primary: #b91c1c;
+  --primary-soft: #fecaca;
+  --text-main: #1f2937;
+  --text-secondary: #6b7280;
+  --text-inverse: #ffffff;
+  --border-subtle: rgba(31, 41, 55, 0.08);
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 14px 28px rgba(0, 0, 0, 0.14);
+  --header-border: rgba(0, 0, 0, 0.05);
+  --header-scrolled: rgba(253, 242, 242, 0.88);
+  --nav-mobile-bg: rgba(253, 242, 242, 0.96);
+  --input-bg: var(--bg-card);
+}
+
+[data-theme="dark"],
+body.dark,
+body.dark-mode {
+  --bg-main: #1a0f0f;
+  --bg-card: #2a1414;
+  --primary: #ef4444;
+  --primary-soft: #7f1d1d;
+  --text-main: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-inverse: #ffffff;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 14px 28px rgba(0, 0, 0, 0.5);
+  --header-border: rgba(255, 255, 255, 0.05);
+  --header-scrolled: rgba(26, 15, 15, 0.9);
+  --nav-mobile-bg: rgba(26, 15, 15, 0.96);
+  --input-bg: #241212;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+body,
+main,
+.section,
+.container,
+.section-properties,
+.terrenos-section,
+.alquileres-section,
+.advisory-section,
+.agent-card-section,
+.map-page-main,
+.map-page-section,
+.site-footer,
+.page-banner,
+.seller-hero,
+.announcement-bar {
+  background: transparent;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+li,
+label,
+.footer-text,
+.brand,
+.site-nav a,
+.menu-toggle,
+.property-card h1,
+.property-card h2,
+.property-card h3,
+.property-card p,
+.agent-card h1,
+.agent-card h2,
+.agent-card h3,
+.agent-card p,
+.highlight-card h3,
+.highlight-card p,
+.seller-form h2,
+.seller-contact-card h2,
+.seller-contact-card p,
+.seller-benefit-card h3,
+.seller-benefit-card p {
+  color: var(--text-main);
+}
+
+.property-meta,
+.text-muted,
+.agent-role,
+.empty-state,
+.seller-auth-message,
+.seller-agent-message,
+.footer-text,
+.checklist li,
+.form-message,
+.property-card p:not(.price):not(.badge),
+.agent-card p,
+.highlight-card .checklist li {
+  color: var(--text-secondary);
+}
+
+.site-header {
+  background: transparent;
+  border-bottom: 1px solid var(--header-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: none;
+}
+
+.site-header.is-scrolled {
+  background: var(--header-scrolled);
+  border-bottom-color: var(--header-border);
+}
+
+.brand span,
+.text-link,
+.price,
+.badge,
+.site-nav a:hover,
+.site-nav a.active {
+  color: var(--primary);
+}
+
+.site-nav a::after {
+  background: var(--primary);
+}
+
+.theme-toggle {
+  background: var(--bg-card);
+  color: var(--primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.theme-toggle:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+button,
+.button,
+.btn,
+.seller-whatsapp-btn,
+.review-auth-btn {
+  background: var(--primary);
+  color: #fff;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+button:hover,
+.button:hover,
+.btn:hover,
+.seller-whatsapp-btn:hover,
+.review-auth-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  filter: brightness(0.92);
+  transform: translateY(-2px);
+}
+
+.button-outline,
+.btn-secondary,
+.review-auth-btn-outline,
+.nav-auth-action {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+}
+
+.button-outline:hover,
+.btn-secondary:hover,
+.review-auth-btn-outline:hover,
+.nav-auth-action:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.property-card,
+.agent-card,
+.card,
+.highlight-card,
+.seller-benefit-card,
+.seller-contact-card,
+.seller-form,
+.agent-property-card,
+.review-card,
+.dashboard-card,
+.contact-form,
+.favorite-property-button,
+.review-auth-btn-outline {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.property-card:hover,
+.agent-card:hover,
+.card:hover,
+.highlight-card:hover,
+.seller-benefit-card:hover,
+.seller-contact-card:hover,
+.seller-form:hover,
+.agent-property-card:hover,
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.property-card::before,
+.property-card::after {
+  display: none;
+}
+
+.property-card img,
+.agent-card img,
+.agent-property-card img {
+  border-radius: 12px;
+}
+
+.section-dark,
+.highlight-card,
+.advisory-section,
+.section-properties,
+#agentsGrid,
+.about-video-wrapper,
+.detail-gallery,
+.property-map,
+.properties-map-full {
+  background: transparent;
+}
+
+.about-video-wrapper,
+.detail-gallery,
+.property-map,
+.properties-map-full,
+.seller-agent-select,
+.search-form input,
+.search-form select,
+.filter-grid input,
+.filter-grid select,
+.contact-form input,
+.contact-form textarea,
+.seller-form input,
+.seller-form select,
+.seller-form textarea {
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+}
+
+.page-banner,
+.seller-hero {
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+}
+
+.page-banner h1,
+.page-banner p,
+.seller-hero h1,
+.seller-hero p,
+.section-dark h2,
+.section-dark h3,
+.section-dark p,
+.section-dark li,
+.advisory-section h2,
+.advisory-section h3,
+.advisory-section p,
+.advisory-section li {
+  color: var(--text-main);
+}
+
+.announcement-track span,
+.eyebrow {
+  color: #fff;
+}
+
+.agents-grid,
+.properties-grid,
+.seller-benefits {
+  gap: 1.25rem;
+}
+
+.seller-benefit-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  border: none;
+  color: var(--primary);
+}
+
+.seller-benefit-icon i {
+  font-size: 1.35rem;
+  color: var(--primary);
+}
+
+.seller-whatsapp-btn span {
+  color: inherit;
+}
+
+.filter-grid button,
+.search-form button {
+  min-height: 48px;
+}
+
+.site-footer {
+  border-top: 1px solid var(--header-border);
+}
+
+.footer-social a {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+}
+
+.footer-social a:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+@media (max-width: 720px) {
+  .site-nav {
+    background: var(--nav-mobile-bg);
+    border: 1px solid var(--header-border);
+  }
+}
