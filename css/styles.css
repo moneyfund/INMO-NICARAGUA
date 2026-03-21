@@ -2953,28 +2953,20 @@ body:not(.dark):not(.dark-mode) .agent-social svg {
   font-weight: 600;
 }
 
-#propertyImagesInput {
-  display: none;
-}
-
-.property-dropzone {
-  display: grid;
-  gap: 0.25rem;
+#propertyImageUrls {
   width: 100%;
-  padding: 1rem;
-  border: 2px dashed var(--border-default);
+  min-height: 110px;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-default);
   border-radius: 14px;
-  background: var(--bg-soft);
+  background: var(--bg-card);
   color: var(--text-main);
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  resize: vertical;
 }
 
-.property-dropzone.is-dragging,
-.property-dropzone:hover {
+#propertyImageUrls:focus {
+  outline: 2px solid rgba(183, 28, 28, 0.18);
   border-color: var(--accent-primary);
-  transform: translateY(-1px);
 }
 
 .dashboard-helper-text {
@@ -3028,20 +3020,6 @@ body:not(.dark):not(.dark-mode) .agent-social svg {
   border: 1px solid var(--border-default);
 }
 
-.upload-progress {
-  width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(128, 128, 128, 0.18);
-  overflow: hidden;
-}
-
-.upload-progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent-primary), #7bdcb5);
-  border-radius: inherit;
-  transition: width 0.2s ease;
-}
 
 .image-preview-card.has-error {
   border-color: #d93025;

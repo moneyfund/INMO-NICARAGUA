@@ -2,7 +2,6 @@ import {
   auth,
   provider,
   db,
-  storage,
   collection,
   addDoc,
   doc,
@@ -14,30 +13,20 @@ import {
   query,
   where,
   serverTimestamp,
-  ref,
-  deleteObject,
   onAuthStateChanged,
   signInWithPopup,
   signOut
 } from './firebase-services.js';
-import {
-  subirMultiplesImagenes,
-  validateImageFile
-} from './storage-upload.js';
 
 const state = {
   user: null,
   unsubscribeProperties: null,
   map: null,
   mapMarker: null,
-  existingImages: [],
-  pendingImages: [],
-  imageUploads: []
+  existingImages: []
 };
 
 const fallbackPhoto = 'assets/placeholder.svg';
-const maxImageSize = 2 * 1024 * 1024;
-const maxImages = 12;
 
 function setMessage(message, type = 'info') {
   const box = document.getElementById('dashboardMessage');
@@ -72,24 +61,11 @@ function getProfilePayload(user) {
   };
 }
 
-function formatBytes(bytes) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
-
-function resetUploadsState() {
-  state.pendingImages.forEach((item) => URL.revokeObjectURL(item.previewUrl));
-  state.pendingImages = [];
-  state.imageUploads = [];
-}
-
 function resetPropertyForm() {
   document.getElementById('propertyForm').reset();
   document.getElementById('propertyDocId').value = '';
-  setPropertyCoordinates(NaN, NaN);
   state.existingImages = [];
-  resetUploadsState();
+  setPropertyCoordinates(NaN, NaN);
   renderImagePreview();
 
   if (state.mapMarker && state.map) {
@@ -162,7 +138,57 @@ function initPropertyLocationMap() {
   setPropertyCoordinates(NaN, NaN);
 }
 
-function getPropertyPayload(user, profileName, imagenes = state.existingImages.map((image) => image.url)) {
+function normalizeImageUrls(urls) {
+  return Array.from(new Set(
+    urls
+      .map((url) => String(url || '').trim())
+      .filter(Boolean)
+  ));
+}
+
+function parseImageUrls(value) {
+  return normalizeImageUrls(String(value || '').split(/[\n,]+/));
+}
+
+function isValidHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function validateImageUrls(urls) {
+  if (!urls.length) {
+    throw new Error('Ingresa al menos una URL de imagen.');
+  }
+
+  const invalidUrls = urls.filter((url) => !isValidHttpUrl(url));
+  if (invalidUrls.length) {
+    throw new Error(`Estas URLs no son válidas: ${invalidUrls.join(', ')}`);
+  }
+}
+
+function syncImageUrlsFromInput() {
+  const input = document.getElementById('propertyImageUrls');
+  if (!input) return [];
+
+  const urls = parseImageUrls(input.value);
+  state.existingImages = urls;
+  renderImagePreview();
+  return urls;
+}
+
+function updateImageUrlsInput(urls) {
+  const input = document.getElementById('propertyImageUrls');
+  if (!input) return;
+
+  input.value = urls.join('\n');
+  syncImageUrlsFromInput();
+}
+
+function getPropertyPayload(user, profileName, imagenes = state.existingImages) {
   const lat = Number(document.getElementById('propertyLat').value);
   const lng = Number(document.getElementById('propertyLng').value);
   const title = document.getElementById('propertyTitle').value.trim();
@@ -201,90 +227,28 @@ function getPropertyPayload(user, profileName, imagenes = state.existingImages.m
 
 function renderImagePreview() {
   const container = document.getElementById('propertyImagesPreview');
-  const hiddenInput = document.getElementById('propertyImagesData');
   const totalLabel = document.getElementById('propertyImagesCounter');
-  if (!container || !hiddenInput || !totalLabel) return;
+  if (!container || !totalLabel) return;
 
-  const allUrls = [
-    ...state.existingImages.map((image) => image.url),
-    ...state.pendingImages.map((item) => item.previewUrl)
-  ];
+  totalLabel.textContent = `${state.existingImages.length} URL(s) de imagen`;
 
-  hiddenInput.value = JSON.stringify(state.existingImages.map((image) => image.url));
-  totalLabel.textContent = `${allUrls.length} imagen(es) seleccionada(s)`;
-
-  if (!allUrls.length) {
-    container.innerHTML = '<p class="empty-state uploader-empty">No has seleccionado imágenes todavía.</p>';
+  if (!state.existingImages.length) {
+    container.innerHTML = '<p class="empty-state uploader-empty">Ingresa una o varias URLs para previsualizar las imágenes.</p>';
     return;
   }
 
-  const existingMarkup = state.existingImages.map((image, index) => `
+  container.innerHTML = state.existingImages.map((url, index) => `
     <article class="image-preview-card is-uploaded">
-      <img src="${image.url}" alt="Imagen subida ${index + 1}">
+      <img src="${url}" alt="Imagen ${index + 1}" loading="lazy" referrerpolicy="no-referrer">
       <div class="image-preview-meta">
-        <strong>Imagen guardada</strong>
-        <span>Lista para publicar</span>
+        <strong>Imagen ${index + 1}</strong>
+        <span>${url}</span>
       </div>
       <div class="image-preview-actions">
-        <button type="button" data-remove-existing-image="${image.path}">Eliminar</button>
+        <button type="button" data-remove-image-url="${encodeURIComponent(url)}">Eliminar</button>
       </div>
     </article>
   `).join('');
-
-  const pendingMarkup = state.pendingImages.map((item) => `
-    <article class="image-preview-card ${item.error ? 'has-error' : ''}">
-      <img src="${item.previewUrl}" alt="${item.file.name}">
-      <div class="image-preview-meta">
-        <strong>${item.file.name}</strong>
-        <span>${formatBytes(item.file.size)}</span>
-      </div>
-      <div class="upload-progress">
-        <div class="upload-progress-bar" style="width:${item.progress || 0}%"></div>
-      </div>
-      <small>${item.error || (item.progress ? `${item.progress}% subido` : 'Pendiente de subir')}</small>
-      <div class="image-preview-actions">
-        <button type="button" data-remove-pending-image="${item.id}">Quitar</button>
-      </div>
-    </article>
-  `).join('');
-
-  container.innerHTML = existingMarkup + pendingMarkup;
-}
-
-function removePendingImage(imageId) {
-  const selected = state.pendingImages.find((item) => item.id === imageId);
-  if (selected) URL.revokeObjectURL(selected.previewUrl);
-  state.pendingImages = state.pendingImages.filter((item) => item.id !== imageId);
-  renderImagePreview();
-}
-
-async function removeExistingImageByPath(path) {
-  if (!state.user) return;
-
-  const image = state.existingImages.find((item) => item.path === path);
-  if (!image) return;
-
-  try {
-    await deleteObject(ref(storage, path));
-    state.existingImages = state.existingImages.filter((item) => item.path !== path);
-
-    const propertyId = document.getElementById('propertyDocId').value;
-    if (propertyId) {
-      const imageUrls = state.existingImages.map((item) => item.url);
-      await updateDoc(doc(db, 'properties', propertyId), {
-        images: imageUrls,
-        imagenes: imageUrls,
-        image: imageUrls[0] || fallbackPhoto,
-        updatedAt: serverTimestamp()
-      });
-    }
-
-    renderImagePreview();
-    setMessage('Imagen eliminada de Firebase Storage.', 'success');
-  } catch (error) {
-    console.error(error);
-    setMessage('No fue posible eliminar la imagen subida.', 'error');
-  }
 }
 
 function bindImagePreviewActions() {
@@ -292,135 +256,27 @@ function bindImagePreviewActions() {
   if (!container) return;
 
   container.addEventListener('click', (event) => {
-    const pendingId = event.target.dataset.removePendingImage;
-    const existingPath = event.target.dataset.removeExistingImage;
+    const encodedUrl = event.target.dataset.removeImageUrl;
+    if (!encodedUrl) return;
 
-    if (pendingId) removePendingImage(pendingId);
-    if (existingPath) removeExistingImageByPath(existingPath);
+    const url = decodeURIComponent(encodedUrl);
+    const nextUrls = state.existingImages.filter((imageUrl) => imageUrl !== url);
+    updateImageUrlsInput(nextUrls);
   });
 }
 
-async function compressImage(file) {
-  if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
+function bindImageUrlInput() {
+  const input = document.getElementById('propertyImageUrls');
+  if (!input) return;
 
-  const imageUrl = URL.createObjectURL(file);
-  const image = await new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = imageUrl;
+  input.addEventListener('input', () => {
+    syncImageUrlsFromInput();
   });
-
-  const maxDimension = 1600;
-  let { width, height } = image;
-
-  if (width > maxDimension || height > maxDimension) {
-    const ratio = Math.min(maxDimension / width, maxDimension / height);
-    width = Math.round(width * ratio);
-    height = Math.round(height * ratio);
-  }
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext('2d');
-  context.drawImage(image, 0, 0, width, height);
-
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.82));
-  URL.revokeObjectURL(imageUrl);
-
-  if (!blob || blob.size >= file.size || blob.size > maxImageSize) return file;
-
-  return new File([blob], file.name.replace(/\.(png|webp|jpeg)$/i, '.jpg'), {
-    type: 'image/jpeg',
-    lastModified: Date.now()
-  });
-}
-
-async function handleSelectedFiles(fileList) {
-  const incomingFiles = Array.from(fileList || []);
-  if (!incomingFiles.length) return;
-
-  const availableSlots = maxImages - state.pendingImages.length - state.existingImages.length;
-  if (availableSlots <= 0) {
-    setMessage(`Solo puedes cargar hasta ${maxImages} imágenes por propiedad.`, 'error');
-    return;
-  }
-
-  const slicedFiles = incomingFiles.slice(0, availableSlots);
-  const errors = [];
-
-  for (const file of slicedFiles) {
-    try {
-      validateImageFile(file, { maxFileSize: maxImageSize });
-    } catch (error) {
-      errors.push(error.message);
-      continue;
-    }
-
-    const optimizedFile = await compressImage(file);
-    if (optimizedFile.size > maxImageSize) {
-      errors.push(`La imagen ${file.name} sigue superando el máximo de 2MB después de optimizar.`);
-      continue;
-    }
-
-    state.pendingImages.push({
-      id: crypto.randomUUID(),
-      file: optimizedFile,
-      originalName: file.name,
-      previewUrl: URL.createObjectURL(optimizedFile),
-      progress: 0,
-      error: ''
-    });
-  }
-
-  renderImagePreview();
-
-  if (errors.length) {
-    setMessage(errors.join(' '), 'error');
-  } else {
-    setMessage('Imágenes listas para subir.', 'success');
-  }
-}
-
-function bindImagePicker() {
-  const input = document.getElementById('propertyImagesInput');
-  const dropzone = document.getElementById('propertyDropzone');
-  if (!input || !dropzone) return;
-
-  input.addEventListener('change', async (event) => {
-    await handleSelectedFiles(event.target.files);
-    input.value = '';
-  });
-
-  ['dragenter', 'dragover'].forEach((eventName) => {
-    dropzone.addEventListener(eventName, (event) => {
-      event.preventDefault();
-      dropzone.classList.add('is-dragging');
-    });
-  });
-
-  ['dragleave', 'drop'].forEach((eventName) => {
-    dropzone.addEventListener(eventName, (event) => {
-      event.preventDefault();
-      dropzone.classList.remove('is-dragging');
-    });
-  });
-
-  dropzone.addEventListener('drop', async (event) => {
-    await handleSelectedFiles(event.dataTransfer.files);
-  });
-
-  dropzone.addEventListener('click', () => input.click());
 }
 
 async function guardarPropiedad(data, imagenes, propertyId = '') {
   if (!state.user) throw new Error('Sesión no válida.');
 
-  console.log('[AgentDashboard] Guardando en Firestore...', {
-    propertyId: propertyId || '(nuevo)',
-    totalImagenes: imagenes.length
-  });
   const payload = getPropertyPayload(state.user, data.agentName, imagenes);
   const propertiesCollection = collection(db, 'properties');
 
@@ -451,21 +307,8 @@ function fillPropertyForm(property) {
   document.getElementById('propertyBathrooms').value = property.bathrooms || property.banos || 0;
   document.getElementById('propertyArea').value = property.area || 0;
   document.getElementById('propertyVideo').value = property.video || '';
-  state.existingImages = (property.images || property.imagenes || []).map((url) => ({
-    url,
-    path: (() => {
-      try {
-        const decoded = decodeURIComponent(new URL(url).pathname);
-        const marker = '/o/';
-        const idx = decoded.indexOf(marker);
-        return idx >= 0 ? decoded.slice(idx + marker.length) : '';
-      } catch {
-        return '';
-      }
-    })()
-  }));
-  resetUploadsState();
-  renderImagePreview();
+  state.existingImages = normalizeImageUrls(property.images || property.imagenes || []);
+  updateImageUrlsInput(state.existingImages);
 
   const lat = Number(property.lat ?? property.latitude);
   const lng = Number(property.lng ?? property.longitude);
@@ -509,8 +352,6 @@ async function saveProperty(event) {
   event.preventDefault();
   if (!state.user) return;
 
-  console.log('[AgentDashboard] saveProperty ejecutado.');
-
   const submitButton = event.submitter || document.querySelector('#propertyForm button[type="submit"]');
   const profileName = document.getElementById('agentName').value.trim() || state.user.displayName || 'Agente';
   const propertyId = document.getElementById('propertyDocId').value;
@@ -518,35 +359,17 @@ async function saveProperty(event) {
   try {
     submitButton?.setAttribute('disabled', 'disabled');
     submitButton?.classList.add('is-loading');
-    setMessage('Subiendo imágenes...', 'info');
 
-    console.log('[AgentDashboard] Paso 1/4: Subir imágenes a Firebase Storage.');
-    const uploadedImages = await subirMultiplesImagenes(state.pendingImages, {
-      onItemProgress: (image, progress) => {
-        if (image) image.progress = progress;
-        renderImagePreview();
-      }
-    });
-    state.existingImages = [...state.existingImages, ...uploadedImages];
+    const imageUrls = syncImageUrlsFromInput();
+    validateImageUrls(imageUrls);
+    setMessage('Guardando propiedad...', 'info');
 
-    console.log('[AgentDashboard] Paso 2/4: URLs obtenidas.', {
-      totalSubidas: uploadedImages.length
-    });
-    const imageUrls = state.existingImages.map((image) => image.url);
-
-    console.log('[AgentDashboard] Paso 3/4: Guardando propiedad en Firestore.');
-    setMessage('Guardando en Firestore...', 'info');
     await guardarPropiedad({ agentName: profileName }, imageUrls, propertyId);
 
-    console.log('[AgentDashboard] Paso 4/4: Flujo completado, limpiando UI.');
     setMessage(propertyId ? 'Propiedad actualizada correctamente.' : 'Propiedad creada correctamente.', 'success');
     resetPropertyForm();
   } catch (error) {
     console.error('[AgentDashboard] Error guardando propiedad.', error);
-    state.pendingImages.forEach((image) => {
-      image.error = error.message || 'Error de subida';
-    });
-    renderImagePreview();
     setMessage(error.message || 'No fue posible guardar la propiedad.', 'error');
   } finally {
     submitButton?.removeAttribute('disabled');
@@ -569,21 +392,6 @@ async function markPropertyAsSold(propertyId) {
   setMessage('Propiedad marcada como vendida.', 'success');
 }
 
-async function deletePropertyImages(property) {
-  const images = property.images || property.imagenes || [];
-  await Promise.all(images.map(async (url) => {
-    try {
-      const decoded = decodeURIComponent(new URL(url).pathname);
-      const marker = '/o/';
-      const idx = decoded.indexOf(marker);
-      const path = idx >= 0 ? decoded.slice(idx + marker.length) : '';
-      if (path) await deleteObject(ref(storage, path));
-    } catch (error) {
-      console.warn('No se pudo eliminar una imagen asociada.', error);
-    }
-  }));
-}
-
 async function deleteProperty(propertyId) {
   if (!state.user || !propertyId) return;
 
@@ -594,7 +402,6 @@ async function deleteProperty(propertyId) {
     return;
   }
 
-  await deletePropertyImages(snapshot.data());
   await deleteDoc(refDoc);
   setMessage('Propiedad eliminada.', 'success');
 }
@@ -688,7 +495,7 @@ function init() {
   document.getElementById('propertyFormReset')?.addEventListener('click', resetPropertyForm);
   initPropertyLocationMap();
   bindAuthControls();
-  bindImagePicker();
+  bindImageUrlInput();
   bindImagePreviewActions();
   renderImagePreview();
 }
