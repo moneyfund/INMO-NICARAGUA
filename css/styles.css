@@ -155,10 +155,23 @@ a { text-decoration: none; }
 }
 .nav-wrapper {
   min-height: 84px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1rem;
+  width: 100%;
+}
+
+.site-header .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .brand { color: var(--text-inverse); font-weight: 700; letter-spacing: 1px; font-size: 1.1rem; }
 .brand span { color: var(--accent-gold-soft); }
@@ -168,12 +181,13 @@ a { text-decoration: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2.25rem;
+  gap: 20px;
 }
 .site-nav a {
   color: var(--text-inverse);
   font-weight: 500;
   position: relative;
+  padding: 6px 10px;
   transition: color 0.3s ease, transform 0.2s ease;
 }
 .site-nav a::after {
@@ -3204,4 +3218,64 @@ body:not(.dark):not(.dark-mode) form button {
 
 body:not(.dark):not(.dark-mode) form button:hover {
   background: #b71c1c;
+}
+
+
+/* Premium card refinements and navbar spacing */
+body:not(.dark):not(.dark-mode) .property-card,
+body:not(.dark):not(.dark-mode) .agent-card,
+body:not(.dark):not(.dark-mode) .agent-profile-card,
+body:not(.dark):not(.dark-mode) .agent-public-profile,
+body:not(.dark):not(.dark-mode) .agent-public-stats,
+body:not(.dark):not(.dark-mode) .agent-property-card,
+body:not(.dark):not(.dark-mode) .card {
+  border: 1.5px solid #d4af37;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15),
+              0 0 0 1px rgba(212, 175, 55, 0.2);
+}
+
+.agent-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25),
+              0 0 0 1px rgba(212, 175, 55, 0.22);
+}
+
+body:not(.dark):not(.dark-mode) .agent-card:hover {
+  background: #c62828;
+  color: #ffffff;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25),
+              0 0 0 1px rgba(212, 175, 55, 0.22);
+}
+
+body:not(.dark):not(.dark-mode) .agent-card:hover h1,
+body:not(.dark):not(.dark-mode) .agent-card:hover h2,
+body:not(.dark):not(.dark-mode) .agent-card:hover h3,
+body:not(.dark):not(.dark-mode) .agent-card:hover p,
+body:not(.dark):not(.dark-mode) .agent-card:hover a {
+  color: #ffffff;
+}
+
+.site-header {
+  width: 100%;
+}
+
+.site-header .container.nav-wrapper {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  justify-content: initial;
+}
+
+@media (max-width: 720px) {
+  .nav-wrapper {
+    padding: 0 20px;
+  }
+
+  .site-header .container.nav-wrapper {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .site-nav {
+    gap: 1rem;
+  }
 }
