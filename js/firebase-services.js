@@ -42,7 +42,7 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
-const storage = getStorage(app);
+const storage = getStorage(app, `gs://${firebaseConfig.storageBucket}`);
 
 export {
   app,

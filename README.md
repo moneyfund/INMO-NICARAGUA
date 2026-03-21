@@ -75,6 +75,21 @@ El panel `agent-dashboard.html` ahora permite:
 
 ### Reglas recomendadas de Storage
 
+Para pruebas rápidas, usa temporalmente estas reglas:
+
+```txt
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+Si con estas reglas funciona, el problema estaba en permisos/ruta del bucket y luego puedes endurecerlas.
+
 Publica también `storage.rules`:
 
 ```bash
