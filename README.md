@@ -60,3 +60,23 @@ firebase deploy --only firestore:rules
 - Usa enlaces directos que terminen en `.jpg`, `.jpeg`, `.png` o `.webp`.
 - Evita URLs de Facebook (`facebook.com`, `fbcdn.net`), porque suelen bloquear la carga directa de imágenes.
 - El frontend mantiene fallback automático para imágenes inválidas usando `assets/placeholder.svg`.
+
+
+## Subida de imágenes con Firebase Storage
+
+El panel `agent-dashboard.html` ahora permite:
+
+- seleccionar múltiples imágenes desde el equipo,
+- arrastrar y soltar,
+- previsualizar antes de guardar,
+- comprimir imágenes grandes antes de subir,
+- subir archivos a `propiedades/{userId}/{timestamp}-{filename}` en Firebase Storage,
+- guardar automáticamente las URLs resultantes en Firestore dentro de `images` e `imagenes`.
+
+### Reglas recomendadas de Storage
+
+Publica también `storage.rules`:
+
+```bash
+firebase deploy --only storage
+```

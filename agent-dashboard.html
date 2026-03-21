@@ -69,13 +69,26 @@
             <input type="number" id="propertyBathrooms" placeholder="Baños" min="0" />
             <input type="number" id="propertyArea" placeholder="Área m²" min="0" />
             <input type="url" id="propertyVideo" placeholder="Video URL" />
-            <textarea id="propertyImages" rows="3" placeholder="Imágenes (una URL por línea)"></textarea>
+            <input type="hidden" id="propertyImagesData" />
+            <div class="dashboard-image-uploader">
+              <label for="propertyImagesInput" class="dashboard-label">Imágenes de la propiedad</label>
+              <input type="file" id="propertyImagesInput" accept="image/*" multiple />
+              <button type="button" id="propertyDropzone" class="property-dropzone">
+                <span>Arrastra imágenes aquí o haz clic para seleccionarlas</span>
+                <small>Máximo 2MB por imagen. JPG, PNG o WEBP.</small>
+              </button>
+              <p id="propertyImagesCounter" class="dashboard-helper-text">0 imagen(es) seleccionada(s)</p>
+              <div id="propertyImagesPreview" class="image-preview-grid"></div>
+            </div>
             <input type="hidden" id="propertyLat" />
             <input type="hidden" id="propertyLng" />
             <p class="map-picker-hint">Haz clic en el mapa para seleccionar la ubicación exacta de la propiedad.</p>
             <div id="propertyLocationMap" class="dashboard-property-map" aria-label="Mapa para seleccionar coordenadas"></div>
             <p id="propertyCoordinatesLabel" class="map-picker-coordinates">Sin coordenadas seleccionadas.</p>
-            <button type="submit">Guardar propiedad</button>
+            <div class="dashboard-form-actions">
+              <button type="button" id="propertyFormReset" class="button-secondary">Limpiar</button>
+              <button type="submit">Guardar propiedad</button>
+            </div>
           </form>
         </article>
       </div>
@@ -93,6 +106,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="js/firebase-client.js"></script>
   <script src="js/main.js"></script>
-  <script src="js/agent-dashboard.js"></script>
+  <script type="module" src="js/agent-dashboard.js"></script>
 </body>
 </html>
