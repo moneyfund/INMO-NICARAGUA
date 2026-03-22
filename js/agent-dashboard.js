@@ -28,6 +28,26 @@ const state = {
 
 const fallbackPhoto = 'assets/placeholder.svg';
 
+function formatPropertyType(value = '') {
+  const normalized = String(value || '').trim().toLowerCase();
+  const labels = {
+    casa: 'Casa',
+    apartamento: 'Apartamento',
+    terreno: 'Terreno',
+    bodega: 'Bodega'
+  };
+  return labels[normalized] || '';
+}
+
+function formatPropertyOperation(value = '') {
+  const normalized = String(value || '').trim().toLowerCase();
+  const labels = {
+    venta: 'Venta',
+    alquiler: 'Alquiler'
+  };
+  return labels[normalized] || '';
+}
+
 function setMessage(message, type = 'info') {
   const box = document.getElementById('dashboardMessage');
   if (!box) return;
@@ -208,8 +228,10 @@ function getPropertyPayload(user, profileName, imagenes = state.existingImages) 
     video: document.getElementById('propertyVideo').value.trim(),
     location: document.getElementById('propertyLocation').value.trim(),
     ubicacion: document.getElementById('propertyLocation').value.trim(),
-    type: document.getElementById('propertyType').value.trim(),
-    tipo: document.getElementById('propertyType').value.trim(),
+    type: document.getElementById('tipo-propiedad').value.trim(),
+    tipo: document.getElementById('tipo-propiedad').value.trim(),
+    operation: document.getElementById('operacion-propiedad').value.trim(),
+    operacion: document.getElementById('operacion-propiedad').value.trim(),
     bedrooms: Number(document.getElementById('propertyBedrooms').value || 0),
     habitaciones: Number(document.getElementById('propertyBedrooms').value || 0),
     bathrooms: Number(document.getElementById('propertyBathrooms').value || 0),
@@ -302,7 +324,8 @@ function fillPropertyForm(property) {
   document.getElementById('propertyPrice').value = property.price || property.precio || '';
   document.getElementById('propertyLocation').value = property.location || property.ubicacion || '';
   document.getElementById('propertyDescription').value = property.description || property.descripcion || '';
-  document.getElementById('propertyType').value = property.type || property.tipo || '';
+  document.getElementById('tipo-propiedad').value = (property.type || property.tipo || '').toLowerCase();
+  document.getElementById('operacion-propiedad').value = (property.operation || property.operacion || '').toLowerCase();
   document.getElementById('propertyBedrooms').value = property.bedrooms || property.habitaciones || 0;
   document.getElementById('propertyBathrooms').value = property.bathrooms || property.banos || 0;
   document.getElementById('propertyArea').value = property.area || 0;
@@ -326,6 +349,7 @@ function propertyCard(property) {
     <article class="property-card">
       <img src="${property.image || property.images?.[0] || property.imagenes?.[0] || fallbackPhoto}" alt="${property.title || property.titulo || 'Propiedad'}">
       <div class="property-card-content">
+        <p class="badge">${formatPropertyType(property.type || property.tipo)} en ${String(formatPropertyOperation(property.operation || property.operacion) || 'Venta').toLowerCase()}</p>
         <h3>${property.title || property.titulo || 'Propiedad'}</h3>
         <p>${property.location || property.ubicacion || ''}</p>
         <p class="price">$${Number(property.price || property.precio || 0).toLocaleString()}</p>
@@ -355,10 +379,20 @@ async function saveProperty(event) {
   const submitButton = event.submitter || document.querySelector('#propertyForm button[type="submit"]');
   const profileName = document.getElementById('agentName').value.trim() || state.user.displayName || 'Agente';
   const propertyId = document.getElementById('propertyDocId').value;
+  const propertyType = document.getElementById('tipo-propiedad')?.value.trim();
+  const propertyOperation = document.getElementById('operacion-propiedad')?.value.trim();
 
   try {
     submitButton?.setAttribute('disabled', 'disabled');
     submitButton?.classList.add('is-loading');
+
+    if (!propertyType) {
+      throw new Error('Selecciona el tipo de propiedad antes de guardar.');
+    }
+
+    if (!propertyOperation) {
+      throw new Error('Selecciona el tipo de operación antes de guardar.');
+    }
 
     const imageUrls = syncImageUrlsFromInput();
     validateImageUrls(imageUrls);

@@ -64,7 +64,18 @@
             <input type="number" id="propertyPrice" placeholder="Precio" min="1" required />
             <input type="text" id="propertyLocation" placeholder="Ubicación" required />
             <textarea id="propertyDescription" rows="4" placeholder="Descripción"></textarea>
-            <input type="text" id="propertyType" placeholder="Tipo (Casa, Terreno...)" required />
+            <select id="tipo-propiedad" required>
+              <option value="">Seleccionar tipo</option>
+              <option value="casa">Casa</option>
+              <option value="apartamento">Apartamento</option>
+              <option value="terreno">Terreno</option>
+              <option value="bodega">Bodega</option>
+            </select>
+            <select id="operacion-propiedad" required>
+              <option value="">Tipo de operación</option>
+              <option value="venta">Venta</option>
+              <option value="alquiler">Alquiler</option>
+            </select>
             <input type="number" id="propertyBedrooms" placeholder="Habitaciones" min="0" />
             <input type="number" id="propertyBathrooms" placeholder="Baños" min="0" />
             <input type="number" id="propertyArea" placeholder="Área m²" min="0" />
