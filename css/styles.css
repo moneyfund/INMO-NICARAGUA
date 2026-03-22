@@ -3465,6 +3465,12 @@ body.dark-mode .legal-page,
   border: 1px solid var(--border-soft);
   border-radius: 24px;
   box-shadow: 0 18px 45px var(--glass-shadow);
+  color: var(--legal-text-color);
+}
+
+.legal-card :where(p, li, span, strong, em, small, a),
+.legal-placeholder :where(p, li, span, strong, em, small, a) {
+  color: var(--legal-text-color);
 }
 
 .legal-card {
