@@ -123,9 +123,23 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   color: var(--text-main);
-  background: var(--bg-main);
+  background: var(--bg-main) !important;
   line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body,
+main,
+.main,
+section,
+.section {
+  background: var(--bg-main) !important;
+  color: var(--text-main);
+}
+
+section,
+.section {
+  background: transparent !important;
 }
 
 h1, h2, h3 { font-family: 'Playfair Display', serif; margin-top: 0; color: var(--text-main); }
@@ -2719,7 +2733,7 @@ body:not(.dark):not(.dark-mode) .navbar-light {
 }
 
 body:not(.dark):not(.dark-mode) .site-nav a {
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) .site-nav a::after {
@@ -2728,7 +2742,7 @@ body:not(.dark):not(.dark-mode) .site-nav a::after {
 
 body:not(.dark):not(.dark-mode) .site-nav a:hover,
 body:not(.dark):not(.dark-mode) .site-nav a.active {
-  color: #ffffff;
+  color: var(--text-main);
   background: transparent;
 }
 
@@ -2738,14 +2752,14 @@ body:not(.dark):not(.dark-mode) .brand span {
 
 body:not(.dark):not(.dark-mode) .theme-toggle {
   background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
+  color: var(--text-main);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 body:not(.dark):not(.dark-mode) .theme-toggle:hover,
 body:not(.dark):not(.dark-mode) .theme-toggle:focus-visible {
   background: rgba(255, 255, 255, 0.24);
-  color: #ffffff;
+  color: var(--text-main);
   border-color: rgba(255, 255, 255, 0.28);
 }
 
@@ -2767,13 +2781,13 @@ body:not(.dark):not(.dark-mode) .hero-content {
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) .hero h1,
 body:not(.dark):not(.dark-mode) .hero p,
 body:not(.dark):not(.dark-mode) .hero .eyebrow {
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) button,
@@ -2782,7 +2796,7 @@ body:not(.dark):not(.dark-mode) .search-form button,
 body:not(.dark):not(.dark-mode) .filter-grid button,
 body:not(.dark):not(.dark-mode) .contact-form button,
 body:not(.dark):not(.dark-mode) .nav-auth-action {
-  background: #ffffff;
+  background: var(--bg-card);
   color: var(--card-text);
 }
 
@@ -2792,7 +2806,7 @@ body:not(.dark):not(.dark-mode) .search-form button:hover,
 body:not(.dark):not(.dark-mode) .filter-grid button:hover,
 body:not(.dark):not(.dark-mode) .contact-form button:hover,
 body:not(.dark):not(.dark-mode) .nav-auth-action:hover {
-  background: #fbe4e4;
+  background: var(--accent-softest);
 }
 
 body:not(.dark):not(.dark-mode) .property-card,
@@ -2876,13 +2890,13 @@ body:not(.dark):not(.dark-mode) .announcement-bar,
 body:not(.dark):not(.dark-mode) .footer-social,
 body:not(.dark):not(.dark-mode) .site-footer {
   background: var(--section-dark);
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) .section-dark .highlight-card {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) .section-dark h2,
@@ -2891,12 +2905,12 @@ body:not(.dark):not(.dark-mode) .section-dark p,
 body:not(.dark):not(.dark-mode) .section-dark li,
 body:not(.dark):not(.dark-mode) .announcement-bar span,
 body:not(.dark):not(.dark-mode) .footer-text {
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) .button-outline {
   border-color: rgba(255, 255, 255, 0.72);
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) .search-form input,
@@ -2909,7 +2923,7 @@ body:not(.dark):not(.dark-mode) .seller-form input,
 body:not(.dark):not(.dark-mode) .seller-form select,
 body:not(.dark):not(.dark-mode) .seller-form textarea,
 body:not(.dark):not(.dark-mode) .seller-agent-select {
-  background: #ffffff;
+  background: var(--bg-card);
   color: var(--card-text);
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
@@ -2928,7 +2942,7 @@ body:not(.dark):not(.dark-mode) .footer-social a,
 body:not(.dark):not(.dark-mode) .social-icon,
 body:not(.dark):not(.dark-mode) .agent-social a {
   background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+  color: var(--text-main);
   border-radius: 50%;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -2939,7 +2953,7 @@ body:not(.dark):not(.dark-mode) .footer-social a:hover,
 body:not(.dark):not(.dark-mode) .social-icon:hover,
 body:not(.dark):not(.dark-mode) .agent-social a:hover {
   background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) .footer-social svg,
@@ -2954,7 +2968,7 @@ body:not(.dark):not(.dark-mode) .agent-social svg {
   }
 
   body:not(.dark):not(.dark-mode) .site-nav a {
-    color: #ffffff;
+    color: var(--text-main);
   }
 }
 
@@ -3112,8 +3126,8 @@ body:not(.dark):not(.dark-mode) .agent-profile-card,
 body:not(.dark):not(.dark-mode) .agent-public-profile,
 body:not(.dark):not(.dark-mode) .agent-public-stats,
 body:not(.dark):not(.dark-mode) .agent-property-card {
-  background: #c62828;
-  color: #ffffff;
+  background: var(--primary-red);
+  color: var(--text-main);
   border: none;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
@@ -3130,7 +3144,7 @@ body:not(.dark):not(.dark-mode) .agent-public-stats h3,
 body:not(.dark):not(.dark-mode) .agent-public-stats p,
 body:not(.dark):not(.dark-mode) .agent-content h2,
 body:not(.dark):not(.dark-mode) .agent-content p {
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) .agent-card a,
@@ -3138,7 +3152,7 @@ body:not(.dark):not(.dark-mode) .agent-profile-card a,
 body:not(.dark):not(.dark-mode) .agent-public-profile a,
 body:not(.dark):not(.dark-mode) .agent-public-stats a,
 body:not(.dark):not(.dark-mode) .agent-property-card a {
-  color: #ffffff;
+  color: var(--text-main);
   text-decoration: none;
   font-weight: 500;
 }
@@ -3164,7 +3178,7 @@ body:not(.dark):not(.dark-mode) .agent-public-stats .button,
 body:not(.dark):not(.dark-mode) .agent-public-stats button,
 body:not(.dark):not(.dark-mode) .agent-public-stats .button-outline {
   background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  color: var(--text-main);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
@@ -3187,7 +3201,7 @@ body:not(.dark):not(.dark-mode) .agent-public-stats .button-outline:hover {
 body:not(.dark):not(.dark-mode) .agent-public-social-link {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 body:not(.dark):not(.dark-mode) .agent-public-photo,
@@ -3199,14 +3213,14 @@ body:not(.dark):not(.dark-mode) .agent-card img {
 body:not(.dark):not(.dark-mode) input,
 body:not(.dark):not(.dark-mode) textarea,
 body:not(.dark):not(.dark-mode) select {
-  background: #ffffff;
-  color: #1a1a1a;
-  border: 1px solid #ccc;
+  background: var(--bg-card);
+  color: var(--card-text);
+  border: 1px solid var(--border-default);
 }
 
 body:not(.dark):not(.dark-mode) input::placeholder,
 body:not(.dark):not(.dark-mode) textarea::placeholder {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 body:not(.dark):not(.dark-mode) label,
@@ -3214,7 +3228,7 @@ body:not(.dark):not(.dark-mode) .form-row label,
 body:not(.dark):not(.dark-mode) .contact-form label,
 body:not(.dark):not(.dark-mode) .seller-form label,
 body:not(.dark):not(.dark-mode) .seller-agent-label {
-  color: #222;
+  color: var(--text-main);
   font-weight: 500;
 }
 
@@ -3222,13 +3236,13 @@ body:not(.dark):not(.dark-mode) input:focus,
 body:not(.dark):not(.dark-mode) textarea:focus,
 body:not(.dark):not(.dark-mode) select:focus {
   outline: none;
-  border-color: #c62828;
+  border-color: var(--primary-red);
   box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.2);
 }
 
 body:not(.dark):not(.dark-mode) form button {
-  background: #c62828;
-  color: #ffffff;
+  background: var(--primary-red);
+  color: var(--text-main);
   border: none;
 }
 
@@ -3257,8 +3271,8 @@ body:not(.dark):not(.dark-mode) .card {
 }
 
 body:not(.dark):not(.dark-mode) .agent-card:hover {
-  background: #c62828;
-  color: #ffffff;
+  background: var(--primary-red);
+  color: var(--text-main);
   transform: translateY(-5px);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25),
               0 0 0 1px rgba(212, 175, 55, 0.22);
@@ -3269,7 +3283,7 @@ body:not(.dark):not(.dark-mode) .agent-card:hover h2,
 body:not(.dark):not(.dark-mode) .agent-card:hover h3,
 body:not(.dark):not(.dark-mode) .agent-card:hover p,
 body:not(.dark):not(.dark-mode) .agent-card:hover a {
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 .site-header {
