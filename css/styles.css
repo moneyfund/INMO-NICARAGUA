@@ -3459,6 +3459,11 @@ body.dark-mode .legal-page,
   max-width: 860px;
 }
 
+[data-theme="light"] .legal-container,
+[data-theme="light"] .legal-container * {
+  color: #000000 !important;
+}
+
 .legal-card,
 .legal-placeholder {
   background: var(--glass-card);
