@@ -42,10 +42,10 @@
           <input type="text" id="searchInput" placeholder="Ciudad o zona (Ej: San Juan del Sur)" aria-label="Buscar ubicación" />
           <select id="typeInput" aria-label="Tipo de propiedad">
             <option value="">Tipo de propiedad</option>
-            <option value="Casa">Casa</option>
-            <option value="Apartamento">Apartamento</option>
-            <option value="Terreno">Terreno</option>
-            <option value="Finca">Finca</option>
+            <option value="casa">Casa</option>
+            <option value="apartamento">Apartamento</option>
+            <option value="terreno">Terreno</option>
+            <option value="bodega">Bodega</option>
           </select>
           <button type="submit">Buscar ahora</button>
         </form>
@@ -63,7 +63,7 @@
     <section class="section section-properties container terrenos-section">
       <div class="section-header">
         <h2>Terrenos</h2>
-        <a href="propiedades.html?tipo=Terreno" class="text-link">Ver todos</a>
+        <a href="propiedades.html?tipo=terreno" class="text-link">Ver todos</a>
       </div>
       <div id="terrenosGrid" class="properties-grid"></div>
     </section>
@@ -71,7 +71,7 @@
     <section class="section section-properties container alquileres-section">
       <div class="section-header">
         <h2>Alquileres</h2>
-        <a href="propiedades.html" class="text-link">Ver todos</a>
+        <a href="propiedades.html?operacion=alquiler" class="text-link">Ver todos</a>
       </div>
       <div id="alquileresGrid" class="properties-grid"></div>
     </section>

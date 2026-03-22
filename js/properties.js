@@ -60,6 +60,34 @@ async function getModularFirestore() {
   return modularFirestorePromise;
 }
 
+function formatPropertyType(value = '') {
+  const normalized = String(value || '').trim().toLowerCase();
+  const labels = {
+    casa: 'Casa',
+    apartamento: 'Apartamento',
+    terreno: 'Terreno',
+    bodega: 'Bodega'
+  };
+  return labels[normalized] || '';
+}
+
+function formatPropertyOperation(value = '') {
+  const normalized = String(value || '').trim().toLowerCase();
+  const labels = {
+    venta: 'Venta',
+    alquiler: 'Alquiler'
+  };
+  return labels[normalized] || '';
+}
+
+function normalizePropertyType(value = '') {
+  return String(value || '').trim().toLowerCase();
+}
+
+function normalizePropertyOperation(value = '') {
+  return String(value || '').trim().toLowerCase();
+}
+
 function normalizeProperty(property = {}, id = '') {
   const title = property.title || property.titulo || '';
   const price = Number(property.price ?? property.precio ?? 0);
@@ -68,7 +96,8 @@ function normalizeProperty(property = {}, id = '') {
   const bedrooms = Number(property.bedrooms ?? property.habitaciones ?? 0);
   const bathrooms = Number(property.bathrooms ?? property.banos ?? 0);
   const area = Number(property.area ?? 0);
-  const type = property.type || property.tipo || '';
+  const type = normalizePropertyType(property.type || property.tipo || '');
+  const operation = normalizePropertyOperation(property.operation || property.operacion || '');
   const description = property.description || property.descripcion || '';
 
   return {
@@ -89,6 +118,10 @@ function normalizeProperty(property = {}, id = '') {
     area,
     type,
     tipo: type,
+    typeLabel: formatPropertyType(type),
+    operation,
+    operacion: operation,
+    operationLabel: formatPropertyOperation(operation),
     description,
     descripcion: description
   };
@@ -178,7 +211,7 @@ function propertyCardTemplate(property) {
     <article class="property-card${featuredClass}">
       <img src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
       <div class="property-card-content">
-        <p class="badge">${property.tipo}</p>
+        <p class="badge">${property.typeLabel || formatPropertyType(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
         <h3>${property.title || property.titulo}</h3>
         <p>${property.city || property.ubicacion}</p>
         <p class="price">$${Number(property.price ?? property.precio ?? 0).toLocaleString()}</p>
@@ -231,33 +264,15 @@ function renderCategory(properties, gridId, filterFn) {
 }
 
 function renderTerrenos(properties) {
-  renderCategory(properties, 'terrenosGrid', (property) => property.tipo === 'Terreno');
+  renderCategory(properties, 'terrenosGrid', (property) => normalizePropertyType(property.tipo) === 'terreno');
 }
 
 function renderAlquileres(properties) {
   const grid = document.getElementById('alquileresGrid');
   if (!grid) return;
 
-  const rentalKeywords = ['alquiler', 'renta'];
-  const rentals = properties.filter((property) => {
-    const searchableFields = [property.tipo, property.titulo, property.descripcion]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-
-    return rentalKeywords.some((keyword) => searchableFields.includes(keyword));
-  });
-
-  const fallbackRentals = properties
-    .filter((property) => property.tipo === 'Casa' || property.tipo === 'Apartamento')
-    .slice(0, 3)
-    .map((property) => ({ ...property, tipo: 'Alquiler' }));
-
-  const cards = (rentals.length ? rentals.slice(0, 3) : fallbackRentals)
-    .map(propertyCardTemplate)
-    .join('');
-
-  grid.innerHTML = cards;
+  const rentals = properties.filter((property) => normalizePropertyOperation(property.operacion) === 'alquiler');
+  grid.innerHTML = rentals.slice(0, 3).map(propertyCardTemplate).join('');
   applyCardRevealAnimation(grid);
 }
 
@@ -295,7 +310,8 @@ function getInitialFilters() {
   const params = new URLSearchParams(window.location.search);
   return {
     ubicacion: params.get('ubicacion') || '',
-    tipo: params.get('tipo') || '',
+    tipo: normalizePropertyType(params.get('tipo') || ''),
+    operacion: normalizePropertyOperation(params.get('operacion') || ''),
     agent: params.get('agent') || ''
   };
 }
@@ -324,13 +340,15 @@ function renderAgentFilterBanner(agentId, agents = []) {
 function applyFilters(properties) {
   const locationInput = document.getElementById('filterLocation')?.value.trim().toLowerCase() || '';
   const typeInput = document.getElementById('filterType')?.value || '';
+  const operationInput = normalizePropertyOperation(document.getElementById('filterOperation')?.value || '');
   const budgetInput = Number(document.getElementById('filterBudget')?.value || 0);
 
   return properties.filter((property) => {
     const matchesLocation = !locationInput || String(property.ubicacion || '').toLowerCase().includes(locationInput);
-    const matchesType = !typeInput || property.tipo === typeInput;
+    const matchesType = !typeInput || normalizePropertyType(property.tipo) === typeInput;
+    const matchesOperation = !operationInput || normalizePropertyOperation(property.operacion) === operationInput;
     const matchesBudget = !budgetInput || Number(property.precio || 0) <= budgetInput;
-    return matchesLocation && matchesType && matchesBudget;
+    return matchesLocation && matchesType && matchesOperation && matchesBudget;
   });
 }
 
@@ -562,9 +580,10 @@ async function renderPropertyDetail() {
         ${galleryMarkup}
       </section>
       <div>
-        <p class="badge">${property.tipo}</p>
+        <p class="badge">${property.typeLabel || formatPropertyType(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
         <h1>${property.titulo}</h1>
         <p>${property.ubicacion}</p>
+        <p><strong>${property.typeLabel || formatPropertyType(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
         <p class="price">$${Number(property.precio || 0).toLocaleString()}</p>
         <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
@@ -700,9 +719,11 @@ function renderGlobalMap(properties) {
     if (filterForm) {
       const filterLocation = document.getElementById('filterLocation');
       const filterType = document.getElementById('filterType');
+      const filterOperation = document.getElementById('filterOperation');
 
       if (filterLocation) filterLocation.value = initial.ubicacion;
       if (filterType) filterType.value = initial.tipo;
+      if (filterOperation) filterOperation.value = initial.operacion;
     }
 
     const renderCatalogViews = (properties) => {
@@ -732,6 +753,19 @@ function renderGlobalMap(properties) {
     if (filterForm) {
       filterForm.addEventListener('submit', (event) => {
         event.preventDefault();
+
+        const params = new URLSearchParams(window.location.search);
+        const filterLocationValue = document.getElementById('filterLocation')?.value.trim() || '';
+        const filterTypeValue = normalizePropertyType(document.getElementById('filterType')?.value || '');
+        const filterOperationValue = normalizePropertyOperation(document.getElementById('filterOperation')?.value || '');
+
+        if (filterLocationValue) params.set('ubicacion', filterLocationValue); else params.delete('ubicacion');
+        if (filterTypeValue) params.set('tipo', filterTypeValue); else params.delete('tipo');
+        if (filterOperationValue) params.set('operacion', filterOperationValue); else params.delete('operacion');
+
+        const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+        window.history.replaceState({}, '', nextUrl);
+
         renderCatalogViews(allProperties);
       });
     }
