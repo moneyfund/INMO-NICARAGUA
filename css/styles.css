@@ -3408,7 +3408,7 @@ main {
 
 .footer-legal-link {
   position: relative;
-  color: var(--text-secondary);
+  color: #ffffff;
   font-size: 0.92rem;
   font-weight: 500;
   transition: color 0.25s ease;
@@ -3430,7 +3430,7 @@ main {
 
 .footer-legal-link:hover,
 .footer-legal-link:focus-visible {
-  color: var(--text-main);
+  color: var(--primary-red-soft);
 }
 
 .footer-legal-link:hover::after,
@@ -3445,7 +3445,14 @@ main {
 }
 
 .legal-page {
+  --legal-text-color: #111111;
   padding: clamp(6rem, 10vw, 8rem) 0 4rem;
+}
+
+body.dark .legal-page,
+body.dark-mode .legal-page,
+[data-theme="dark"] .legal-page {
+  --legal-text-color: #ffffff;
 }
 
 .legal-shell {
@@ -3468,8 +3475,14 @@ main {
   margin-bottom: 2rem;
 }
 
+.legal-card h1,
+.legal-card h2,
+.legal-placeholder h2 {
+  color: var(--legal-text-color);
+}
+
 .legal-intro p {
-  color: var(--text-secondary);
+  color: var(--legal-text-color);
 }
 
 .legal-sections {
@@ -3495,7 +3508,7 @@ main {
 .legal-section p,
 .legal-section li,
 .license-note p {
-  color: var(--text-secondary);
+  color: var(--legal-text-color);
 }
 
 .legal-section ul {
@@ -3515,6 +3528,7 @@ main {
 
 .legal-placeholder h2 {
   margin-bottom: 0.5rem;
+  color: var(--legal-text-color);
 }
 
 .legal-documents-grid {
@@ -3541,7 +3555,7 @@ main {
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
   background: var(--surface-overlay-strong);
-  color: var(--text-main);
+  color: var(--legal-text-color);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -3550,7 +3564,7 @@ main {
 
 .legal-document-slot p {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--legal-text-color);
 }
 
 @media (max-width: 640px) {
