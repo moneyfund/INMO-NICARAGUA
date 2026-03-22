@@ -51,12 +51,38 @@ const footerLinks = [
   { href: 'licencia-de-operacion.html', label: 'Licencia de Operación' }
 ];
 
+const footerSocialLinks = [
+  {
+    href: 'https://instagram.com/',
+    label: 'Instagram',
+    icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5a4.25 4.25 0 0 0 4.25 4.25h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5a4.25 4.25 0 0 0-4.25-4.25h-8.5Zm8.9 2.35a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg>'
+  },
+  {
+    href: 'https://facebook.com/',
+    label: 'Facebook',
+    icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.7 22v-8.2h2.76l.41-3.2H13.7V8.56c0-.93.26-1.56 1.6-1.56h1.7V4.14A22.8 22.8 0 0 0 14.52 4c-2.45 0-4.14 1.5-4.14 4.24v2.36H7.6v3.2h2.78V22h3.32Z"/></svg>'
+  },
+  {
+    href: 'https://www.tiktok.com/',
+    label: 'TikTok',
+    icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.1 3c.38 1.96 1.55 3.38 3.43 4.13 1.03.4 1.93.5 2.47.52v3.14a9.26 9.26 0 0 1-4.36-1.14v5.9c0 3.1-2.55 5.45-5.72 5.45S4 18.65 4 15.52c0-3.12 2.55-5.48 5.92-5.48.33 0 .67.03 1 .1v3.2a2.94 2.94 0 0 0-.99-.17c-1.62 0-2.88 1.06-2.88 2.36 0 1.37 1.19 2.33 2.78 2.33 1.82 0 2.76-1.17 2.76-2.87V3h1.5Z"/></svg>'
+  },
+  {
+    href: 'mailto:correo@inmonicaragua.com',
+    label: 'Gmail',
+    icon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.75 5.5h16.5A1.75 1.75 0 0 1 22 7.25v9.5a1.75 1.75 0 0 1-1.75 1.75H3.75A1.75 1.75 0 0 1 2 16.75v-9.5A1.75 1.75 0 0 1 3.75 5.5Zm0 1.5v.2l8.25 5.7 8.25-5.7V7H3.75Zm16.75 9.75V8.91l-8.07 5.57a.75.75 0 0 1-.86 0L3.5 8.91v7.84c0 .14.11.25.25.25h16.5c.14 0 .25-.11.25-.25Z"/></svg>'
+  }
+];
+
 function renderSiteFooter() {
   const footerMarkup = `
     <div class="container footer-content">
       <nav class="footer-legal-nav" aria-label="Enlaces legales">
         ${footerLinks.map((link) => `<a class="footer-legal-link" href="${link.href}">${link.label}</a>`).join('')}
       </nav>
+      <div class="footer-social" aria-label="Redes sociales de INMO NICARAGUA">
+        ${footerSocialLinks.map((link) => `<a class="footer-social-link" href="${link.href}" ${link.href.startsWith('mailto:') ? '' : 'target="_blank" rel="noopener noreferrer"'} aria-label="${link.label}" title="${link.label}">${link.icon}</a>`).join('')}
+      </div>
       <p class="footer-text">© <span id="currentYear"></span> INMO NICARAGUA</p>
     </div>
   `;
