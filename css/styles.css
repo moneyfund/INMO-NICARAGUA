@@ -230,8 +230,6 @@ a { text-decoration: none; }
 
 main { padding-top: var(--header-offset, 84px); }
 
-body.home-page main { padding-top: 0; }
-
 .hero {
   position: relative;
   overflow: hidden;
@@ -1012,8 +1010,6 @@ body.dark-mode .site-nav {
   }
 
   main { padding-top: var(--header-offset, 74px); }
-
-  body.home-page main { padding-top: 0; }
 
   .menu-toggle { display: block; }
   .theme-toggle { justify-self: end; }
@@ -3287,5 +3283,64 @@ body:not(.dark):not(.dark-mode) .agent-card:hover a {
 
   .site-nav {
     gap: 1rem;
+  }
+}
+
+/* Persistent transparent navbar */
+:root {
+  --header-offset: 84px;
+}
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  height: auto;
+  background: transparent;
+  background-color: transparent;
+  border-bottom: none;
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.site-header.scrolled,
+.site-header.is-scrolled,
+body.dark .site-header,
+body.dark-mode .site-header,
+body.dark .site-header.scrolled,
+body.dark .site-header.is-scrolled,
+body.dark-mode .site-header.scrolled,
+body.dark-mode .site-header.is-scrolled,
+body:not(.dark):not(.dark-mode) .site-header,
+body:not(.dark):not(.dark-mode) .site-header.scrolled,
+body:not(.dark):not(.dark-mode) .site-header.is-scrolled,
+.navbar,
+.navbar-light,
+body:not(.dark):not(.dark-mode) .navbar,
+body:not(.dark):not(.dark-mode) .navbar-light {
+  background: transparent;
+  background-color: transparent;
+  border-bottom: none;
+  box-shadow: none;
+}
+
+body {
+  padding-top: var(--header-offset);
+}
+
+main {
+  padding-top: 0;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --header-offset: 74px;
+  }
+
+  .site-header {
+    height: auto;
   }
 }

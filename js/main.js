@@ -13,15 +13,9 @@ const savedTheme = localStorage.getItem('themeMode');
 
 const siteHeader = document.querySelector('.site-header');
 
-function updateHeaderOnScroll() {
-  if (!siteHeader) return;
-  const isScrolled = window.scrollY > 12;
-  siteHeader.classList.toggle('scrolled', isScrolled);
-  siteHeader.classList.toggle('is-scrolled', isScrolled);
+if (siteHeader) {
+  siteHeader.classList.remove('scrolled', 'is-scrolled');
 }
-
-updateHeaderOnScroll();
-window.addEventListener('scroll', updateHeaderOnScroll, { passive: true });
 
 function applyTheme(theme) {
   const isDarkMode = theme === 'dark';
