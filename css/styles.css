@@ -3711,3 +3711,41 @@ body.dark-mode .announcement-track span,
 body.light .announcement-track span {
   color: var(--primary-red-fixed) !important;
 }
+
+
+/* Light mode visibility fixes for seller form and reviews summary */
+body.light .seller-form,
+body.light .seller-form *,
+[data-theme="light"] body .seller-form,
+body:not(.dark):not(.dark-mode) .seller-form,
+body:not(.dark):not(.dark-mode) .seller-form * {
+  color: #000000 !important;
+}
+
+body.light .seller-form h1,
+body.light .seller-form h2,
+body.light .seller-form h3,
+[data-theme="light"] body .seller-form h1,
+[data-theme="light"] body .seller-form h2,
+[data-theme="light"] body .seller-form h3,
+body:not(.dark):not(.dark-mode) .seller-form h1,
+body:not(.dark):not(.dark-mode) .seller-form h2,
+body:not(.dark):not(.dark-mode) .seller-form h3 {
+  color: #000000 !important;
+}
+
+body.light .reviews-summary,
+body.light .reviews-summary *,
+[data-theme="light"] body .reviews-summary,
+[data-theme="light"] body .reviews-summary *,
+body:not(.dark):not(.dark-mode) .reviews-summary,
+body:not(.dark):not(.dark-mode) .reviews-summary * {
+  color: var(--primary-red) !important;
+}
+
+body.light .reviews-summary svg,
+[data-theme="light"] body .reviews-summary svg,
+body:not(.dark):not(.dark-mode) .reviews-summary svg {
+  fill: var(--primary-red) !important;
+  stroke: var(--primary-red) !important;
+}
