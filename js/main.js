@@ -44,6 +44,35 @@ if (themeToggle) {
   });
 }
 
+
+const footerLinks = [
+  { href: 'politicas-de-privacidad.html', label: 'Políticas de Privacidad' },
+  { href: 'condiciones-de-uso.html', label: 'Condiciones de Uso' },
+  { href: 'licencia-de-operacion.html', label: 'Licencia de Operación' }
+];
+
+function renderSiteFooter() {
+  const footerMarkup = `
+    <div class="container footer-content">
+      <nav class="footer-legal-nav" aria-label="Enlaces legales">
+        ${footerLinks.map((link) => `<a class="footer-legal-link" href="${link.href}">${link.label}</a>`).join('')}
+      </nav>
+      <p class="footer-text">© <span id="currentYear"></span> INMO NICARAGUA</p>
+    </div>
+  `;
+
+  let footer = document.querySelector('.site-footer');
+  if (!footer) {
+    footer = document.createElement('footer');
+    footer.className = 'site-footer';
+    document.body.appendChild(footer);
+  }
+
+  footer.innerHTML = footerMarkup;
+}
+
+renderSiteFooter();
+
 const yearElement = document.getElementById('currentYear');
 if (yearElement) {
   yearElement.textContent = new Date().getFullYear();
