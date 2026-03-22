@@ -3687,3 +3687,27 @@ body.dark-mode .section-asesoria h3,
 body.dark-mode .section-asesoria p {
   color: #ffffff !important;
 }
+
+/* Force homepage marquee/announcement bar colors across light and dark themes */
+.announcement-bar,
+.announcement-bar *,
+body.dark .announcement-bar,
+body.dark .announcement-bar *,
+body.dark-mode .announcement-bar,
+body.dark-mode .announcement-bar *,
+body.light .announcement-bar,
+body.light .announcement-bar * {
+  background-color: #FFFFFF !important;
+  color: var(--primary-red-fixed) !important;
+}
+
+.announcement-bar {
+  background: #FFFFFF !important;
+}
+
+.announcement-track span,
+body.dark .announcement-track span,
+body.dark-mode .announcement-track span,
+body.light .announcement-track span {
+  color: var(--primary-red-fixed) !important;
+}
