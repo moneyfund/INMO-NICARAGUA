@@ -1,22 +1,25 @@
 :root {
-  --bg-main: #e53935;
+  --primary-red: #d32f2f;
+  --primary-red-dark: #b71c1c;
+  --primary-red-soft: #ef5350;
+  --bg-main: #d32f2f;
   --bg-secondary: var(--bg-main);
   --bg-card: #ffffff;
   --card-bg: #ffffff;
-  --card-text: #b71c1c;
-  --section-dark: #b71c1c;
-  --footer-bg: #b71c1c;
+  --card-text: var(--primary-red-dark);
+  --section-dark: var(--primary-red-dark);
+  --footer-bg: var(--primary-red-dark);
   --text-main: #ffffff;
   --text-secondary: #4b5563;
   --text-inverse: #ffffff;
   --text-strong: #ffffff;
   --text-accent: var(--card-text);
   --text-muted-on-dark: var(--text-secondary);
-  --accent-primary: #b71c1c;
-  --accent-strong: #8f1414;
-  --accent-strong-hover: #7f1010;
-  --accent-soft: rgba(255, 255, 255, 0.14);
-  --accent-softest: rgba(255, 255, 255, 0.22);
+  --accent-primary: var(--primary-red);
+  --accent-strong: var(--primary-red-dark);
+  --accent-strong-hover: #8f1616;
+  --accent-soft: color-mix(in srgb, var(--primary-red-soft) 22%, white);
+  --accent-softest: color-mix(in srgb, var(--primary-red-soft) 34%, white);
   --accent-gold: #d4af37;
   --accent-gold-soft: #f2d06b;
   --accent-gold-bright: #ffd700;
@@ -44,12 +47,12 @@
   --glass-shadow: rgba(var(--shadow-rgb), 0.12);
   --card-shadow: rgba(0, 0, 0, 0.15);
   --card-shadow-hover: rgba(0, 0, 0, 0.22);
-  --accent-shadow: rgba(122, 26, 26, 0.18);
-  --accent-shadow-strong: rgba(122, 26, 26, 0.3);
-  --button-bg: var(--accent-primary);
-  --button-hover: var(--accent-strong);
+  --accent-shadow: rgba(211, 47, 47, 0.18);
+  --accent-shadow-strong: rgba(183, 28, 28, 0.3);
+  --button-bg: var(--primary-red);
+  --button-hover: var(--primary-red-dark);
   --button-text: var(--text-inverse);
-  --nav-mobile-bg: rgba(183, 28, 28, 0.92);
+  --nav-mobile-bg: rgba(211, 47, 47, 0.92);
   --section-banner: transparent;
   --announcement-bg: var(--section-dark);
   --surface-overlay: rgba(255, 255, 255, 0.08);
@@ -60,23 +63,27 @@
 }
 
 body.dark,
-body.dark-mode {
-  --bg-main: #4a0d0d;
+body.dark-mode,
+[data-theme="dark"] {
+  --primary-red: #7f1d1d;
+  --primary-red-dark: #5a1313;
+  --primary-red-soft: #991b1b;
+  --bg-main: #1a0f0f;
   --bg-secondary: var(--bg-main);
-  --bg-card: #7a1a1a;
+  --bg-card: #2b1515;
   --text-main: #ffffff;
-  --text-secondary: #f3caca;
+  --text-secondary: #f3d6d6;
   --text-inverse: #ffffff;
   --text-strong: #ffffff;
   --text-accent: var(--text-secondary);
   --text-muted-on-dark: var(--text-secondary);
-  --accent-primary: #f3caca;
-  --accent-strong: #ffffff;
-  --accent-strong-hover: #fbe4e4;
-  --accent-soft: rgba(255, 255, 255, 0.1);
-  --accent-softest: rgba(255, 255, 255, 0.18);
-  --bg-soft: var(--bg-main);
-  --bg-muted: var(--bg-main);
+  --accent-primary: var(--primary-red);
+  --accent-strong: var(--primary-red-dark);
+  --accent-strong-hover: #451010;
+  --accent-soft: color-mix(in srgb, var(--primary-red-soft) 32%, transparent);
+  --accent-softest: color-mix(in srgb, var(--primary-red-soft) 48%, transparent);
+  --bg-soft: color-mix(in srgb, var(--primary-red) 18%, var(--bg-main));
+  --bg-muted: color-mix(in srgb, var(--primary-red) 22%, var(--bg-main));
   --bg-input: var(--bg-card);
   --border-default: rgba(243, 202, 202, 0.24);
   --border-muted: rgba(243, 202, 202, 0.18);
@@ -86,7 +93,7 @@ body.dark-mode {
   --overlay-dark: rgba(17, 24, 39, 0.45);
   --header-border: rgba(255, 255, 255, 0.16);
   --header-border-strong: rgba(255, 255, 255, 0.2);
-  --header-scrolled: rgba(183, 28, 28, 0.24);
+  --header-scrolled: rgba(127, 29, 29, 0.32);
   --glass-card: color-mix(in srgb, var(--bg-card) 88%, transparent);
   --glass-card-strong: color-mix(in srgb, var(--bg-card) 94%, transparent);
   --glass-muted: rgba(255, 255, 255, 0.1);
@@ -98,12 +105,12 @@ body.dark-mode {
   --card-shadow-hover: rgba(0, 0, 0, 0.32);
   --accent-shadow: rgba(0, 0, 0, 0.22);
   --accent-shadow-strong: rgba(0, 0, 0, 0.35);
-  --button-bg: var(--text-inverse);
-  --button-hover: var(--accent-softest);
-  --button-text: var(--bg-main);
-  --nav-mobile-bg: color-mix(in srgb, var(--bg-main) 94%, transparent);
-  --section-banner: linear-gradient(120deg, var(--bg-main), var(--bg-main));
-  --announcement-bg: linear-gradient(90deg, var(--bg-card), var(--bg-card));
+  --button-bg: var(--primary-red);
+  --button-hover: var(--primary-red-dark);
+  --button-text: var(--text-inverse);
+  --nav-mobile-bg: color-mix(in srgb, var(--primary-red-dark) 82%, var(--bg-main));
+  --section-banner: linear-gradient(120deg, var(--bg-main), var(--primary-red-dark));
+  --announcement-bg: linear-gradient(90deg, var(--primary-red), var(--primary-red-dark));
   --surface-overlay: rgba(255, 255, 255, 0.1);
   --surface-overlay-strong: rgba(255, 255, 255, 0.16);
   --surface-border: rgba(255, 255, 255, 0.3);
@@ -2596,24 +2603,27 @@ body.dark-mode .site-header.is-scrolled {
 
 /* Professional light-mode redesign without altering dark mode */
 body:not(.dark):not(.dark-mode) {
-  --bg-main: #e53935;
+  --primary-red: #d32f2f;
+  --primary-red-dark: #b71c1c;
+  --primary-red-soft: #ef5350;
+  --bg-main: #d32f2f;
   --bg-section: transparent;
   --bg-card: #ffffff;
   --card-bg: #ffffff;
-  --card-text: #b71c1c;
-  --section-dark: #b71c1c;
-  --footer-bg: #b71c1c;
+  --card-text: var(--primary-red-dark);
+  --section-dark: var(--primary-red-dark);
+  --footer-bg: var(--primary-red-dark);
   --text-main: #ffffff;
   --text-secondary: #4b5563;
   --text-inverse: #ffffff;
   --text-strong: #ffffff;
   --text-accent: var(--card-text);
-  --accent: #c62828;
-  --accent-primary: #b71c1c;
-  --accent-strong: #8f1414;
-  --accent-strong-hover: #7f1010;
-  --accent-soft: rgba(255, 255, 255, 0.12);
-  --accent-softest: rgba(255, 255, 255, 0.22);
+  --accent: var(--primary-red);
+  --accent-primary: var(--primary-red);
+  --accent-strong: var(--primary-red-dark);
+  --accent-strong-hover: #8f1616;
+  --accent-soft: color-mix(in srgb, var(--primary-red-soft) 22%, white);
+  --accent-softest: color-mix(in srgb, var(--primary-red-soft) 34%, white);
   --bg-soft: rgba(255, 255, 255, 0.12);
   --bg-muted: transparent;
   --bg-input: #ffffff;
@@ -2634,12 +2644,12 @@ body:not(.dark):not(.dark-mode) {
   --glass-shadow: rgba(0, 0, 0, 0.12);
   --card-shadow: rgba(0, 0, 0, 0.15);
   --card-shadow-hover: rgba(0, 0, 0, 0.22);
-  --accent-shadow: rgba(0, 0, 0, 0.18);
-  --accent-shadow-strong: rgba(0, 0, 0, 0.24);
-  --button-bg: #ffffff;
-  --button-hover: #f8d7d7;
-  --button-text: #b71c1c;
-  --nav-mobile-bg: rgba(183, 28, 28, 0.92);
+  --accent-shadow: rgba(211, 47, 47, 0.18);
+  --accent-shadow-strong: rgba(183, 28, 28, 0.24);
+  --button-bg: var(--primary-red);
+  --button-hover: var(--primary-red-dark);
+  --button-text: var(--text-inverse);
+  --nav-mobile-bg: rgba(211, 47, 47, 0.92);
   --section-banner: transparent;
   --announcement-bg: var(--section-dark);
   --surface-overlay: rgba(255, 255, 255, 0.08);
