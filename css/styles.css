@@ -3620,20 +3620,43 @@ main {
   }
 }
 
-/* Homepage visual polish fixes */
-.section-asesoria,
-[data-theme="dark"] .section-asesoria,
-body.dark .section-asesoria,
-body.dark-mode .section-asesoria {
-  background: #ffffff !important;
-  color: #1a1a1a !important;
+/* Advisory card visual fixes */
+.section-asesoria {
   padding: 60px 20px;
 }
 
-.section-asesoria h2,
-.section-asesoria h3,
-.section-asesoria p,
-.section-asesoria li,
-.section-asesoria span {
-  color: #1a1a1a !important;
+.section-asesoria .highlight-card {
+  border-radius: 16px;
+  padding: 30px;
+}
+
+.section-asesoria .btn-asesoria {
+  background: #d62828 !important;
+  color: #ffffff !important;
+  border: none;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.section-asesoria .btn-asesoria:hover {
+  background: #b71c1c !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .section-asesoria,
+body.dark .section-asesoria,
+body.dark-mode .section-asesoria {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .section-asesoria h2,
+[data-theme="dark"] .section-asesoria h3,
+[data-theme="dark"] .section-asesoria p,
+body.dark .section-asesoria h2,
+body.dark .section-asesoria h3,
+body.dark .section-asesoria p,
+body.dark-mode .section-asesoria h2,
+body.dark-mode .section-asesoria h3,
+body.dark-mode .section-asesoria p {
+  color: #ffffff !important;
 }
