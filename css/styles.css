@@ -2,6 +2,7 @@
   --primary-red: #d32f2f;
   --primary-red-dark: #b71c1c;
   --primary-red-soft: #ef5350;
+  --primary-red-fixed: #d32f2f;
   --bg-main: #d32f2f;
   --bg-secondary: var(--bg-main);
   --bg-card: #ffffff;
@@ -466,10 +467,10 @@ section h2,
 }
 .announcement-bar {
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-  background: var(--announcement-bg);
-  color: var(--text-main);
+  border-top: 1px solid rgba(211, 47, 47, 0.14);
+  border-bottom: 1px solid rgba(211, 47, 47, 0.14);
+  background: #ffffff;
+  color: var(--primary-red-fixed);
   padding: 0.95rem 0;
 }
 .announcement-track {
@@ -482,6 +483,7 @@ section h2,
 .announcement-track span {
   font-weight: 500;
   white-space: nowrap;
+  color: var(--primary-red-fixed);
 }
 @keyframes scrollAnnouncements {
   from { transform: translateX(0); }
