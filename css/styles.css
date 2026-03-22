@@ -262,6 +262,7 @@ main { padding-top: var(--header-offset, 84px); }
   display: flex;
   align-items: center;
   justify-content: center;
+  isolation: isolate;
 }
 .hero-video {
   position: absolute;
@@ -270,15 +271,19 @@ main { padding-top: var(--header-offset, 84px); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: -2;
+  z-index: 0;
 }
-.hero-overlay {
+.hero::before {
+  content: "";
   position: absolute;
   inset: 0;
-  background: var(--overlay-dark);
-  z-index: -1;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
 }
-.hero-content { position: relative; color: var(--text-inverse); max-width: 760px; background: transparent; }
+.hero-overlay {
+  display: none;
+}
+.hero-content { position: relative; z-index: 2; color: var(--text-inverse); max-width: 760px; background: transparent; }
 .hero h1 { color: var(--text-inverse); font-size: clamp(2rem, 4.5vw, 3.4rem); margin: .5rem 0 1rem; }
 .eyebrow { color: var(--accent-gold-soft); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; font-size: .85rem; }
 .search-form { display: grid; grid-template-columns: 2fr 1fr auto; gap: .75rem; margin-top: 1.5rem; }
@@ -2769,12 +2774,7 @@ body:not(.dark):not(.dark-mode) .hero {
 }
 
 body:not(.dark):not(.dark-mode) .hero::before {
-  content: none;
-}
-
-body:not(.dark):not(.dark-mode) .hero-overlay {
-  display: block;
-  background: rgba(0, 0, 0, 0.3);
+  content: "";
 }
 
 body:not(.dark):not(.dark-mode) .hero-content {
@@ -3294,6 +3294,9 @@ body:not(.dark):not(.dark-mode) .agent-card:hover a {
   display: grid;
   grid-template-columns: auto 1fr auto;
   justify-content: initial;
+  background: transparent;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 @media (max-width: 720px) {
@@ -3348,6 +3351,16 @@ body:not(.dark):not(.dark-mode) .navbar-light {
   background: transparent;
   background-color: transparent;
   border-bottom: none;
+  box-shadow: none;
+}
+
+.nav-wrapper,
+.site-header .container.nav-wrapper,
+body.dark .nav-wrapper,
+body.dark-mode .nav-wrapper,
+body:not(.dark):not(.dark-mode) .nav-wrapper {
+  background: transparent;
+  background-color: transparent;
   box-shadow: none;
 }
 
@@ -3605,4 +3618,22 @@ main {
     width: 2.6rem;
     height: 2.6rem;
   }
+}
+
+/* Homepage visual polish fixes */
+.section-asesoria,
+[data-theme="dark"] .section-asesoria,
+body.dark .section-asesoria,
+body.dark-mode .section-asesoria {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  padding: 60px 20px;
+}
+
+.section-asesoria h2,
+.section-asesoria h3,
+.section-asesoria p,
+.section-asesoria li,
+.section-asesoria span {
+  color: #1a1a1a !important;
 }
