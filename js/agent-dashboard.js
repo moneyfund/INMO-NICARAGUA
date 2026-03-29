@@ -2,8 +2,8 @@ import {
   auth,
   provider,
   db,
+  storage,
   collection,
-  addDoc,
   doc,
   getDoc,
   setDoc,
@@ -15,18 +15,23 @@ import {
   serverTimestamp,
   onAuthStateChanged,
   signInWithPopup,
-  signOut
+  signOut,
+  storageRef,
+  uploadBytesResumable,
+  getDownloadURL
 } from './firebase-services.js';
+
+const imageUtils = window.inmoImageUtils;
 
 const state = {
   user: null,
   unsubscribeProperties: null,
   map: null,
   mapMarker: null,
-  existingImages: []
+  propertyImages: []
 };
 
-const fallbackPhoto = 'assets/placeholder.svg';
+const fallbackPhoto = imageUtils?.PLACEHOLDER || 'assets/placeholder.svg';
 
 function formatPropertyType(value = '') {
   const normalized = String(value || '').trim().toLowerCase();
@@ -79,19 +84,6 @@ function getProfilePayload(user) {
     whatsapp: document.getElementById('agentWhatsapp').value.trim(),
     updatedAt: serverTimestamp()
   };
-}
-
-function resetPropertyForm() {
-  document.getElementById('propertyForm').reset();
-  document.getElementById('propertyDocId').value = '';
-  state.existingImages = [];
-  setPropertyCoordinates(NaN, NaN);
-  renderImagePreview();
-
-  if (state.mapMarker && state.map) {
-    state.map.removeLayer(state.mapMarker);
-    state.mapMarker = null;
-  }
 }
 
 function updateCoordinatesLabel(lat, lng) {
@@ -158,57 +150,182 @@ function initPropertyLocationMap() {
   setPropertyCoordinates(NaN, NaN);
 }
 
-function normalizeImageUrls(urls) {
-  return Array.from(new Set(
-    urls
-      .map((url) => String(url || '').trim())
-      .filter(Boolean)
-  ));
+function createImageEntry({ url = '', file = null, source = 'url', status = 'ready', progress = 0, error = '' }) {
+  return {
+    id: crypto.randomUUID(),
+    url: String(url || '').trim(),
+    file,
+    source,
+    status,
+    progress,
+    error
+  };
 }
 
-function parseImageUrls(value) {
-  return normalizeImageUrls(String(value || '').split(/[\n,]+/));
+function setUploaderStatus(message = '') {
+  const target = document.getElementById('propertyUploaderStatus');
+  if (!target) return;
+  target.textContent = message;
 }
 
-function isValidHttpUrl(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch {
-    return false;
+function getSelectedMode() {
+  return document.querySelector('input[name="imageInputMode"]:checked')?.value || 'url';
+}
+
+function toggleImageInputMode() {
+  const mode = getSelectedMode();
+  const urlMode = document.getElementById('imageModeUrl');
+  const uploadMode = document.getElementById('imageModeUpload');
+
+  urlMode?.classList.toggle('hidden', mode !== 'url');
+  uploadMode?.classList.toggle('hidden', mode !== 'upload');
+}
+
+function getCoverImageUrl() {
+  const explicitCover = document.querySelector('input[name="propertyCoverImage"]:checked')?.value || '';
+  const urls = state.propertyImages.filter((item) => item.url).map((item) => item.url);
+  if (!urls.length) return '';
+  return urls.includes(explicitCover) ? explicitCover : urls[0];
+}
+
+function refreshImageCounter() {
+  const totalLabel = document.getElementById('propertyImagesCounter');
+  if (!totalLabel) return;
+
+  const uploaded = state.propertyImages.filter((item) => item.url).length;
+  totalLabel.textContent = `${uploaded} imagen(es) listas`;
+}
+
+function renderImagePreview() {
+  const container = document.getElementById('propertyImagesPreview');
+  if (!container) return;
+
+  refreshImageCounter();
+
+  if (!state.propertyImages.length) {
+    container.innerHTML = '<p class="empty-state uploader-empty">Agrega URLs o sube archivos para construir la galería.</p>';
+    return;
   }
+
+  const coverUrl = getCoverImageUrl();
+  container.innerHTML = state.propertyImages.map((item, index) => {
+    const previewSrc = item.url || (item.file ? URL.createObjectURL(item.file) : fallbackPhoto);
+    const errorBadge = item.error ? `<small class="uploader-error">${item.error}</small>` : '';
+    const progressBadge = item.status === 'uploading'
+      ? `<small class="uploader-progress">Subiendo: ${Math.round(item.progress)}%</small>`
+      : '';
+
+    const sourceLabel = item.source === 'upload' ? 'Archivo' : 'URL manual';
+    const uploadedClass = item.status === 'uploaded' || item.status === 'ready' ? 'is-uploaded' : '';
+    const errorClass = item.error ? 'has-error' : '';
+
+    return `
+      <article class="image-preview-card ${uploadedClass} ${errorClass}">
+        <img src="${previewSrc}" alt="Imagen ${index + 1}" loading="lazy" referrerpolicy="no-referrer">
+        <div class="image-preview-meta">
+          <strong>Imagen ${index + 1}</strong>
+          <span>${item.url || item.file?.name || 'Pendiente de carga'}</span>
+          <small>${sourceLabel}</small>
+          ${progressBadge}
+          ${errorBadge}
+        </div>
+        <div class="image-preview-actions">
+          <button type="button" data-move-image="up" data-image-id="${item.id}" ${index === 0 ? 'disabled' : ''}>↑</button>
+          <button type="button" data-move-image="down" data-image-id="${item.id}" ${index === state.propertyImages.length - 1 ? 'disabled' : ''}>↓</button>
+          <label class="cover-radio-label">
+            <input type="radio" name="propertyCoverImage" value="${item.url}" ${item.url && item.url === coverUrl ? 'checked' : ''} ${!item.url ? 'disabled' : ''}>
+            Portada
+          </label>
+          <button type="button" data-remove-image-id="${item.id}">Eliminar</button>
+        </div>
+      </article>
+    `;
+  }).join('');
 }
 
-function validateImageUrls(urls) {
-  if (!urls.length) {
-    throw new Error('Ingresa al menos una URL de imagen.');
-  }
-
-  const invalidUrls = urls.filter((url) => !isValidHttpUrl(url));
-  if (invalidUrls.length) {
-    throw new Error(`Estas URLs no son válidas: ${invalidUrls.join(', ')}`);
-  }
-}
-
-function syncImageUrlsFromInput() {
-  const input = document.getElementById('propertyImageUrls');
-  if (!input) return [];
-
-  const urls = parseImageUrls(input.value);
-  state.existingImages = urls;
+function removeImageById(imageId) {
+  state.propertyImages = state.propertyImages.filter((item) => item.id !== imageId);
   renderImagePreview();
-  return urls;
 }
 
-function updateImageUrlsInput(urls) {
-  const input = document.getElementById('propertyImageUrls');
+function moveImage(imageId, direction) {
+  const currentIndex = state.propertyImages.findIndex((item) => item.id === imageId);
+  if (currentIndex < 0) return;
+
+  const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+  if (targetIndex < 0 || targetIndex >= state.propertyImages.length) return;
+
+  const [moved] = state.propertyImages.splice(currentIndex, 1);
+  state.propertyImages.splice(targetIndex, 0, moved);
+  renderImagePreview();
+}
+
+function bindImagePreviewActions() {
+  const container = document.getElementById('propertyImagesPreview');
+  if (!container) return;
+
+  container.addEventListener('click', (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+
+    const removeId = button.dataset.removeImageId;
+    if (removeId) {
+      removeImageById(removeId);
+      return;
+    }
+
+    const moveDirection = button.dataset.moveImage;
+    const imageId = button.dataset.imageId;
+    if (moveDirection && imageId) moveImage(imageId, moveDirection);
+  });
+}
+
+function addUrlImage() {
+  const input = document.getElementById('propertyImageUrlInput');
   if (!input) return;
 
-  input.value = urls.join('\n');
-  syncImageUrlsFromInput();
+  const value = input.value.trim();
+  if (!value) {
+    setUploaderStatus('Ingresa una URL antes de agregarla.');
+    return;
+  }
+
+  if (!imageUtils?.isValidHttpUrl(value)) {
+    setUploaderStatus('La URL ingresada no es válida. Usa una URL http(s) completa.');
+    return;
+  }
+
+  if (state.propertyImages.some((item) => item.url === value)) {
+    setUploaderStatus('Esa imagen ya existe en el listado.');
+    return;
+  }
+
+  state.propertyImages.push(createImageEntry({ url: value, source: 'url', status: 'ready' }));
+  input.value = '';
+  setUploaderStatus('URL agregada correctamente.');
+  renderImagePreview();
 }
 
-function getPropertyPayload(user, profileName, imagenes = state.existingImages) {
+function handleFileSelection(event) {
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
+
+  const validFiles = files.filter((file) => file.type.startsWith('image/'));
+  if (!validFiles.length) {
+    setUploaderStatus('Selecciona archivos de imagen válidos.');
+    return;
+  }
+
+  validFiles.forEach((file) => {
+    state.propertyImages.push(createImageEntry({ file, source: 'upload', status: 'pending' }));
+  });
+
+  setUploaderStatus(`${validFiles.length} archivo(s) listos para subir.`);
+  event.target.value = '';
+  renderImagePreview();
+}
+
+function getPropertyPayload(user, profileName, images, coverImage) {
   const lat = Number(document.getElementById('propertyLat').value);
   const lng = Number(document.getElementById('propertyLng').value);
   const title = document.getElementById('propertyTitle').value.trim();
@@ -222,9 +339,11 @@ function getPropertyPayload(user, profileName, imagenes = state.existingImages) 
     precio: price,
     descripcion: description,
     description,
-    imagenes,
-    images: imagenes,
-    image: imagenes[0] || fallbackPhoto,
+    imagenes: images,
+    images,
+    coverImage,
+    image: coverImage || images[0] || fallbackPhoto,
+    imagen: coverImage || images[0] || fallbackPhoto,
     video: document.getElementById('propertyVideo').value.trim(),
     location: document.getElementById('propertyLocation').value.trim(),
     ubicacion: document.getElementById('propertyLocation').value.trim(),
@@ -247,75 +366,122 @@ function getPropertyPayload(user, profileName, imagenes = state.existingImages) 
   };
 }
 
-function renderImagePreview() {
-  const container = document.getElementById('propertyImagesPreview');
-  const totalLabel = document.getElementById('propertyImagesCounter');
-  if (!container || !totalLabel) return;
+function getPropertyDocRef(propertyId = '') {
+  if (propertyId) return doc(db, 'properties', propertyId);
+  return doc(collection(db, 'properties'));
+}
 
-  totalLabel.textContent = `${state.existingImages.length} URL(s) de imagen`;
+async function uploadPropertyFile({ agentId, propertyId, imageItem }) {
+  const safeName = imageItem.file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const filePath = `properties/${agentId}/${propertyId}/${Date.now()}-${safeName}`;
+  const ref = storageRef(storage, filePath);
 
-  if (!state.existingImages.length) {
-    container.innerHTML = '<p class="empty-state uploader-empty">Ingresa una o varias URLs para previsualizar las imágenes.</p>';
-    return;
+  return new Promise((resolve, reject) => {
+    const task = uploadBytesResumable(ref, imageItem.file, {
+      contentType: imageItem.file.type || 'image/jpeg'
+    });
+
+    task.on('state_changed', (snapshot) => {
+      const progress = snapshot.totalBytes
+        ? (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        : 0;
+
+      imageItem.status = 'uploading';
+      imageItem.progress = progress;
+      renderImagePreview();
+    }, (error) => {
+      imageItem.status = 'error';
+      imageItem.error = `Error de carga: ${error.message}`;
+      renderImagePreview();
+      reject(error);
+    }, async () => {
+      const downloadURL = await getDownloadURL(task.snapshot.ref);
+      imageItem.url = downloadURL;
+      imageItem.status = 'uploaded';
+      imageItem.progress = 100;
+      imageItem.error = '';
+      renderImagePreview();
+      resolve(downloadURL);
+    });
+  });
+}
+
+async function uploadPendingFiles(agentId, propertyId) {
+  const pendingItems = state.propertyImages.filter((item) => item.source === 'upload' && item.file && !item.url);
+  if (!pendingItems.length) return;
+
+  setUploaderStatus(`Subiendo ${pendingItems.length} archivo(s)...`);
+
+  for (const item of pendingItems) {
+    await uploadPropertyFile({ agentId, propertyId, imageItem: item });
   }
 
-  container.innerHTML = state.existingImages.map((url, index) => `
-    <article class="image-preview-card is-uploaded">
-      <img src="${url}" alt="Imagen ${index + 1}" loading="lazy" referrerpolicy="no-referrer">
-      <div class="image-preview-meta">
-        <strong>Imagen ${index + 1}</strong>
-        <span>${url}</span>
-      </div>
-      <div class="image-preview-actions">
-        <button type="button" data-remove-image-url="${encodeURIComponent(url)}">Eliminar</button>
-      </div>
-    </article>
-  `).join('');
+  setUploaderStatus('Archivos cargados correctamente.');
 }
 
-function bindImagePreviewActions() {
-  const container = document.getElementById('propertyImagesPreview');
-  if (!container) return;
+function validateFinalImages() {
+  const urls = state.propertyImages.map((item) => item.url).filter(Boolean);
+  if (!urls.length) {
+    throw new Error('Debes agregar al menos una imagen por URL o subida de archivo.');
+  }
 
-  container.addEventListener('click', (event) => {
-    const encodedUrl = event.target.dataset.removeImageUrl;
-    if (!encodedUrl) return;
+  const invalidUrls = urls.filter((url) => !imageUtils?.isValidHttpUrl(url));
+  if (invalidUrls.length) {
+    throw new Error(`Hay imágenes con URL inválida: ${invalidUrls.join(', ')}`);
+  }
 
-    const url = decodeURIComponent(encodedUrl);
-    const nextUrls = state.existingImages.filter((imageUrl) => imageUrl !== url);
-    updateImageUrlsInput(nextUrls);
-  });
+  return imageUtils.normalizeImageList(urls);
 }
 
-function bindImageUrlInput() {
-  const input = document.getElementById('propertyImageUrls');
-  if (!input) return;
-
-  input.addEventListener('input', () => {
-    syncImageUrlsFromInput();
-  });
-}
-
-async function guardarPropiedad(data, imagenes, propertyId = '') {
+async function guardarPropiedad(data, propertyId = '') {
   if (!state.user) throw new Error('Sesión no válida.');
 
-  const payload = getPropertyPayload(state.user, data.agentName, imagenes);
-  const propertiesCollection = collection(db, 'properties');
+  const propertyRef = getPropertyDocRef(propertyId);
 
   if (propertyId) {
-    const propertyRef = doc(db, 'properties', propertyId);
     const current = await getDoc(propertyRef);
     if (!current.exists() || current.data().agentId !== state.user.uid) {
       throw new Error('No tienes permisos para editar esta propiedad.');
     }
+  }
+
+  await uploadPendingFiles(state.user.uid, propertyRef.id);
+
+  const images = validateFinalImages();
+  const coverImage = (() => {
+    const selected = getCoverImageUrl();
+    return images.includes(selected) ? selected : images[0];
+  })();
+
+  const payload = getPropertyPayload(state.user, data.agentName, images, coverImage);
+
+  if (propertyId) {
     await updateDoc(propertyRef, payload);
     return propertyRef;
   }
 
-  return addDoc(propertiesCollection, {
+  await setDoc(propertyRef, {
     ...payload,
     createdAt: serverTimestamp()
-  });
+  }, { merge: true });
+
+  return propertyRef;
+}
+
+function resetPropertyForm() {
+  document.getElementById('propertyForm').reset();
+  document.getElementById('propertyDocId').value = '';
+  state.propertyImages = [];
+  setUploaderStatus('');
+  setPropertyCoordinates(NaN, NaN);
+  renderImagePreview();
+
+  if (state.mapMarker && state.map) {
+    state.map.removeLayer(state.mapMarker);
+    state.mapMarker = null;
+  }
+
+  toggleImageInputMode();
 }
 
 function fillPropertyForm(property) {
@@ -330,8 +496,14 @@ function fillPropertyForm(property) {
   document.getElementById('propertyBathrooms').value = property.bathrooms || property.banos || 0;
   document.getElementById('propertyArea').value = property.area || 0;
   document.getElementById('propertyVideo').value = property.video || '';
-  state.existingImages = normalizeImageUrls(property.images || property.imagenes || []);
-  updateImageUrlsInput(state.existingImages);
+
+  const normalizedImages = imageUtils.getPropertyImages(property);
+  state.propertyImages = normalizedImages.map((url) => createImageEntry({ url, source: 'url', status: 'ready' }));
+  renderImagePreview();
+
+  const coverUrl = imageUtils.getCoverImage(property);
+  const coverInput = document.querySelector(`input[name="propertyCoverImage"][value="${CSS.escape(coverUrl)}"]`);
+  if (coverInput) coverInput.checked = true;
 
   const lat = Number(property.lat ?? property.latitude);
   const lng = Number(property.lng ?? property.longitude);
@@ -345,9 +517,11 @@ function fillPropertyForm(property) {
 
 function propertyCard(property) {
   const statusLabel = String(property.status || 'available').toLowerCase() === 'sold' ? 'VENDIDA' : 'DISPONIBLE';
+  const coverImage = imageUtils.getCoverImage(property);
+
   return `
     <article class="property-card">
-      <img src="${property.image || property.images?.[0] || property.imagenes?.[0] || fallbackPhoto}" alt="${property.title || property.titulo || 'Propiedad'}">
+      <img src="${coverImage}" alt="${property.title || property.titulo || 'Propiedad'}">
       <div class="property-card-content">
         <p class="badge">${formatPropertyType(property.type || property.tipo)} en ${String(formatPropertyOperation(property.operation || property.operacion) || 'Venta').toLowerCase()}</p>
         <h3>${property.title || property.titulo || 'Propiedad'}</h3>
@@ -394,11 +568,9 @@ async function saveProperty(event) {
       throw new Error('Selecciona el tipo de operación antes de guardar.');
     }
 
-    const imageUrls = syncImageUrlsFromInput();
-    validateImageUrls(imageUrls);
-    setMessage('Guardando propiedad...', 'info');
+    setMessage('Guardando propiedad e imágenes...', 'info');
 
-    await guardarPropiedad({ agentName: profileName }, imageUrls, propertyId);
+    await guardarPropiedad({ agentName: profileName }, propertyId);
 
     setMessage(propertyId ? 'Propiedad actualizada correctamente.' : 'Propiedad creada correctamente.', 'success');
     resetPropertyForm();
@@ -523,14 +695,30 @@ function bindAuthControls() {
   });
 }
 
+function bindImageControls() {
+  document.querySelectorAll('input[name="imageInputMode"]').forEach((input) => {
+    input.addEventListener('change', toggleImageInputMode);
+  });
+
+  document.getElementById('addImageUrlBtn')?.addEventListener('click', addUrlImage);
+  document.getElementById('propertyImageUrlInput')?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    addUrlImage();
+  });
+
+  document.getElementById('propertyImageFiles')?.addEventListener('change', handleFileSelection);
+}
+
 function init() {
   document.getElementById('agentProfileForm')?.addEventListener('submit', saveProfile);
   document.getElementById('propertyForm')?.addEventListener('submit', saveProperty);
   document.getElementById('propertyFormReset')?.addEventListener('click', resetPropertyForm);
   initPropertyLocationMap();
   bindAuthControls();
-  bindImageUrlInput();
+  bindImageControls();
   bindImagePreviewActions();
+  toggleImageInputMode();
   renderImagePreview();
 }
 

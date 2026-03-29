@@ -20,6 +20,12 @@ import {
   where,
   serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytesResumable,
+  getDownloadURL
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCVL7tpUkyQWz_aVr9wFi2hrCBum2pLnPs',
@@ -34,12 +40,14 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 export {
   app,
   auth,
   provider,
   db,
+  storage,
   collection,
   addDoc,
   doc,
@@ -53,5 +61,8 @@ export {
   serverTimestamp,
   onAuthStateChanged,
   signInWithPopup,
-  signOut
+  signOut,
+  storageRef,
+  uploadBytesResumable,
+  getDownloadURL
 };
