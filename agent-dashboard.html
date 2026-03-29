@@ -81,10 +81,27 @@
             <input type="number" id="propertyArea" placeholder="Área m²" min="0" />
             <input type="url" id="propertyVideo" placeholder="Video URL" />
             <div class="dashboard-image-uploader">
-              <label for="propertyImageUrls" class="dashboard-label">URLs de imágenes de la propiedad</label>
-              <textarea id="propertyImageUrls" rows="4" placeholder="https://ejemplo.com/imagen-1.jpg&#10;https://ejemplo.com/imagen-2.jpg"></textarea>
-              <small class="dashboard-helper-text">Ingresa una URL por línea o separadas por coma.</small>
-              <p id="propertyImagesCounter" class="dashboard-helper-text">0 URL(s) de imagen</p>
+              <h3 class="dashboard-label">Imágenes</h3>
+              <div class="image-mode-selector" role="radiogroup" aria-label="Modo de carga de imágenes">
+                <label><input type="radio" name="imageInputMode" value="url" checked> Agregar por URL</label>
+                <label><input type="radio" name="imageInputMode" value="upload"> Subir archivos</label>
+              </div>
+
+              <div id="imageModeUrl" class="image-mode-panel">
+                <label for="propertyImageUrlInput" class="dashboard-label">URL de imagen</label>
+                <div class="image-url-row">
+                  <input type="url" id="propertyImageUrlInput" placeholder="https://ejemplo.com/imagen.jpg" />
+                  <button type="button" id="addImageUrlBtn" class="button-secondary">Agregar URL</button>
+                </div>
+              </div>
+
+              <div id="imageModeUpload" class="image-mode-panel hidden">
+                <label for="propertyImageFiles" class="dashboard-label">Subir archivos de imagen</label>
+                <input type="file" id="propertyImageFiles" accept="image/*" multiple />
+              </div>
+
+              <p id="propertyUploaderStatus" class="dashboard-helper-text" aria-live="polite"></p>
+              <p id="propertyImagesCounter" class="dashboard-helper-text">0 imagen(es) listas</p>
               <div id="propertyImagesPreview" class="image-preview-grid"></div>
             </div>
             <input type="hidden" id="propertyLat" />
@@ -113,6 +130,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="js/firebase-client.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/image-utils.js"></script>
   <script type="module" src="js/agent-dashboard.js"></script>
 </body>
 </html>

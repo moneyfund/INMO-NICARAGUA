@@ -2987,24 +2987,58 @@ body:not(.dark):not(.dark-mode) .agent-social svg {
   gap: 0.75rem;
 }
 
-.dashboard-label {
-  font-weight: 600;
+
+.image-mode-selector {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-#propertyImageUrls {
+.image-mode-selector label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+}
+
+.image-mode-panel {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.image-url-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.6rem;
+}
+
+#propertyImageUrlInput,
+#propertyImageFiles {
   width: 100%;
-  min-height: 110px;
-  padding: 0.85rem 1rem;
+  padding: 0.8rem 1rem;
   border: 1px solid var(--border-default);
   border-radius: 14px;
   background: var(--bg-card);
   color: var(--text-main);
-  resize: vertical;
 }
 
-#propertyImageUrls:focus {
-  outline: 2px solid rgba(183, 28, 28, 0.18);
-  border-color: var(--accent-primary);
+.cover-radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.uploader-progress {
+  color: #0b57d0;
+}
+
+.uploader-error {
+  color: #d93025;
+}
+
+.dashboard-label {
+  font-weight: 600;
 }
 
 .dashboard-helper-text {

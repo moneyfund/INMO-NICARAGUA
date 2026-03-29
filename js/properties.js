@@ -1,4 +1,16 @@
 let allProperties = [];
+const imageUtils = window.inmoImageUtils || {
+  PLACEHOLDER: 'assets/placeholder.svg',
+  normalizeImageList: (values = []) => Array.from(new Set((Array.isArray(values) ? values : [values]).map((item) => String(item || '').trim()).filter(Boolean))),
+  getPropertyImages: (property = {}) => {
+    const imageList = Array.isArray(property.images) ? property.images : [];
+    if (imageList.length) return imageList;
+    if (property.coverImage) return [property.coverImage];
+    return [property.image, property.imagen, ...(Array.isArray(property.imagenes) ? property.imagenes : [])].filter(Boolean);
+  },
+  getCoverImage: (property = {}) => property.coverImage || property.image || property.imagen || 'assets/placeholder.svg'
+};
+
 const PROPERTY_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
 const AGENT_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
 const FIREBASE_CONFIG = {
@@ -92,7 +104,7 @@ function normalizeProperty(property = {}, id = '') {
   const title = property.title || property.titulo || '';
   const price = Number(property.price ?? property.precio ?? 0);
   const city = property.city || property.location || property.ubicacion || '';
-  const image = property.image || (Array.isArray(property.images) ? property.images[0] : '') || '';
+  const image = imageUtils.getCoverImage(property);
   const bedrooms = Number(property.bedrooms ?? property.habitaciones ?? 0);
   const bathrooms = Number(property.bathrooms ?? property.banos ?? 0);
   const area = Number(property.area ?? 0);
@@ -228,21 +240,17 @@ function propertyCardTemplate(property) {
 }
 
 function getPropertyImages(property) {
-  const imagesFromArray = Array.isArray(property.images)
-    ? property.images
-    : [];
-
-  const normalizedImages = imagesFromArray
+  const normalizedImages = imageUtils.getPropertyImages(property)
     .map(normalizePropertyImageUrl)
     .filter(Boolean);
 
-  if (normalizedImages.length) return normalizedImages;
-
-  const legacyImage = normalizePropertyImageUrl(property.image ?? '');
-  return legacyImage ? [legacyImage] : [];
+  return normalizedImages;
 }
 
 function getPrimaryPropertyImage(property) {
+  const coverImage = normalizePropertyImageUrl(imageUtils.getCoverImage(property));
+  if (coverImage) return coverImage;
+
   const [primaryImage] = getPropertyImages(property);
   return primaryImage || PROPERTY_IMAGE_PLACEHOLDER;
 }
