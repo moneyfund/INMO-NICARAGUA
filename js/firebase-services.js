@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
   getAuth,
   GoogleAuthProvider,
@@ -22,10 +22,13 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
   getStorage,
-  ref as storageRef,
+  ref,
+  uploadBytes,
   uploadBytesResumable,
   getDownloadURL
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+
+const FIREBASE_APP_NAME = 'inmo-static-web';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCVL7tpUkyQWz_aVr9wFi2hrCBum2pLnPs',
@@ -37,11 +40,14 @@ const firebaseConfig = {
   measurementId: 'G-DXTBSYNR95'
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const storageBucketUrl = `gs://${firebaseConfig.storageBucket}`;
+
+const app = getApps().find((firebaseApp) => firebaseApp.name === FIREBASE_APP_NAME)
+  || initializeApp(firebaseConfig, FIREBASE_APP_NAME);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
-const storage = getStorage(app);
+const storage = getStorage(app, storageBucketUrl);
 
 export {
   app,
@@ -49,6 +55,8 @@ export {
   provider,
   db,
   storage,
+  firebaseConfig,
+  storageBucketUrl,
   collection,
   addDoc,
   doc,
@@ -63,7 +71,8 @@ export {
   onAuthStateChanged,
   signInWithPopup,
   signOut,
-  storageRef,
+  ref,
+  uploadBytes,
   uploadBytesResumable,
   getDownloadURL
 };
