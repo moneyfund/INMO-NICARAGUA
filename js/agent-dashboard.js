@@ -2,7 +2,6 @@ import {
   auth,
   provider,
   db,
-  storage,
   collection,
   doc,
   getDoc,
@@ -15,11 +14,9 @@ import {
   serverTimestamp,
   onAuthStateChanged,
   signInWithPopup,
-  signOut,
-  storageRef,
-  uploadBytesResumable,
-  getDownloadURL
+  signOut
 } from './firebase-services.js';
+import { uploadImage } from './storage-helpers.js';
 
 const imageUtils = window.inmoImageUtils;
 
@@ -28,7 +25,8 @@ const state = {
   unsubscribeProperties: null,
   map: null,
   mapMarker: null,
-  propertyImages: []
+  propertyImages: [],
+  isSavingProperty: false
 };
 
 const fallbackPhoto = imageUtils?.PLACEHOLDER || 'assets/placeholder.svg';
@@ -306,6 +304,10 @@ function addUrlImage() {
   renderImagePreview();
 }
 
+function fileFingerprint(file) {
+  return [file.name, file.size, file.lastModified].join('::');
+}
+
 function handleFileSelection(event) {
   const files = Array.from(event.target.files || []);
   if (!files.length) return;
@@ -316,11 +318,28 @@ function handleFileSelection(event) {
     return;
   }
 
+  const existing = new Set(
+    state.propertyImages
+      .filter((item) => item.file)
+      .map((item) => fileFingerprint(item.file))
+  );
+
+  let added = 0;
   validFiles.forEach((file) => {
+    const fingerprint = fileFingerprint(file);
+    if (existing.has(fingerprint)) return;
+    existing.add(fingerprint);
+    added += 1;
     state.propertyImages.push(createImageEntry({ file, source: 'upload', status: 'pending' }));
   });
 
-  setUploaderStatus(`${validFiles.length} archivo(s) listos para subir.`);
+  if (!added) {
+    setUploaderStatus('Los archivos seleccionados ya estaban en la lista.');
+    event.target.value = '';
+    return;
+  }
+
+  setUploaderStatus(`${added} archivo(s) listos para subir.`);
   event.target.value = '';
   renderImagePreview();
 }
@@ -372,51 +391,42 @@ function getPropertyDocRef(propertyId = '') {
 }
 
 async function uploadPropertyFile({ agentId, propertyId, imageItem }) {
-  const safeName = imageItem.file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const filePath = `properties/${agentId}/${propertyId}/${Date.now()}-${safeName}`;
-  const ref = storageRef(storage, filePath);
+  imageItem.status = 'uploading';
+  imageItem.progress = 15;
+  imageItem.error = '';
+  renderImagePreview();
 
-  return new Promise((resolve, reject) => {
-    const task = uploadBytesResumable(ref, imageItem.file, {
-      contentType: imageItem.file.type || 'image/jpeg'
-    });
-
-    task.on('state_changed', (snapshot) => {
-      const progress = snapshot.totalBytes
-        ? (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        : 0;
-
-      imageItem.status = 'uploading';
-      imageItem.progress = progress;
-      renderImagePreview();
-    }, (error) => {
-      imageItem.status = 'error';
-      imageItem.error = `Error de carga: ${error.message}`;
-      renderImagePreview();
-      reject(error);
-    }, async () => {
-      const downloadURL = await getDownloadURL(task.snapshot.ref);
-      imageItem.url = downloadURL;
-      imageItem.status = 'uploaded';
-      imageItem.progress = 100;
-      imageItem.error = '';
-      renderImagePreview();
-      resolve(downloadURL);
-    });
-  });
+  try {
+    const downloadURL = await uploadImage(imageItem.file, agentId, propertyId);
+    imageItem.url = downloadURL;
+    imageItem.status = 'uploaded';
+    imageItem.progress = 100;
+    imageItem.error = '';
+    renderImagePreview();
+    return downloadURL;
+  } catch (error) {
+    imageItem.status = 'error';
+    imageItem.error = `Error de carga: ${error.message}`;
+    imageItem.progress = 0;
+    renderImagePreview();
+    throw error;
+  }
 }
 
 async function uploadPendingFiles(agentId, propertyId) {
   const pendingItems = state.propertyImages.filter((item) => item.source === 'upload' && item.file && !item.url);
-  if (!pendingItems.length) return;
+  if (!pendingItems.length) return [];
 
   setUploaderStatus(`Subiendo ${pendingItems.length} archivo(s)...`);
 
+  const uploadedUrls = [];
   for (const item of pendingItems) {
-    await uploadPropertyFile({ agentId, propertyId, imageItem: item });
+    const url = await uploadPropertyFile({ agentId, propertyId, imageItem: item });
+    uploadedUrls.push(url);
   }
 
   setUploaderStatus('Archivos cargados correctamente.');
+  return uploadedUrls;
 }
 
 function validateFinalImages() {
@@ -548,7 +558,7 @@ async function saveProfile(event) {
 
 async function saveProperty(event) {
   event.preventDefault();
-  if (!state.user) return;
+  if (!state.user || state.isSavingProperty) return;
 
   const submitButton = event.submitter || document.querySelector('#propertyForm button[type="submit"]');
   const profileName = document.getElementById('agentName').value.trim() || state.user.displayName || 'Agente';
@@ -557,6 +567,7 @@ async function saveProperty(event) {
   const propertyOperation = document.getElementById('operacion-propiedad')?.value.trim();
 
   try {
+    state.isSavingProperty = true;
     submitButton?.setAttribute('disabled', 'disabled');
     submitButton?.classList.add('is-loading');
 
@@ -578,6 +589,7 @@ async function saveProperty(event) {
     console.error('[AgentDashboard] Error guardando propiedad.', error);
     setMessage(error.message || 'No fue posible guardar la propiedad.', 'error');
   } finally {
+    state.isSavingProperty = false;
     submitButton?.removeAttribute('disabled');
     submitButton?.classList.remove('is-loading');
   }
