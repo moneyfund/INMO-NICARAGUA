@@ -2598,6 +2598,51 @@ body.dark-mode {
   box-shadow: none;
 }
 
+/* Brand identity refinement: premium typography + consistent light red in both themes */
+.brand {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1rem, 1.6vw, 1.28rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ff6b6b;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
+}
+
+.brand:hover {
+  color: #ff8787;
+}
+
+body.dark .brand,
+body.dark-mode .brand,
+[data-theme="dark"] .brand {
+  color: #ff7f7f;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* Light mode card borders: elegant red accent without affecting dark mode */
+:root {
+  --card-border-light: rgba(185, 28, 28, 0.5);
+}
+
+html[data-theme="light"] .property-card,
+html[data-theme="light"] .agent-card,
+html[data-theme="light"] .highlight-card,
+html[data-theme="light"] .seller-benefit-card,
+html[data-theme="light"] .seller-contact-card,
+html[data-theme="light"] .agent-property-card,
+html[data-theme="light"] .review-card,
+html[data-theme="light"] .dashboard-card,
+html[data-theme="light"] .contact-form,
+html[data-theme="light"] .card {
+  border: 1px solid var(--card-border-light);
+}
+
+/* Footer social icons: black in light mode, unchanged in dark mode */
+html[data-theme="light"] .footer-social a {
+  color: #111111;
+}
+
 :root {
   --header-offset: 0px;
 }
@@ -4585,4 +4630,43 @@ body.dark-mode .map-preview-summary {
   fill: currentColor;
   opacity: 0.9;
   flex: 0 0 15px;
+}
+
+/* Final visual identity overrides */
+.site-header .brand {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1rem, 1.6vw, 1.28rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ff6b6b;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
+}
+
+.site-header .brand:hover {
+  color: #ff8787;
+}
+
+body.dark .site-header .brand,
+body.dark-mode .site-header .brand,
+[data-theme="dark"] .site-header .brand {
+  color: #ff7f7f;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="light"] .property-card,
+html[data-theme="light"] .agent-card,
+html[data-theme="light"] .highlight-card,
+html[data-theme="light"] .seller-benefit-card,
+html[data-theme="light"] .seller-contact-card,
+html[data-theme="light"] .agent-property-card,
+html[data-theme="light"] .review-card,
+html[data-theme="light"] .dashboard-card,
+html[data-theme="light"] .contact-form,
+html[data-theme="light"] .card {
+  border: 1px solid var(--card-border-light);
+}
+
+html[data-theme="light"] .footer-social a {
+  color: #111111;
 }
