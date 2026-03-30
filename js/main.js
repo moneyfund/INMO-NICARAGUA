@@ -1,6 +1,6 @@
 const menuToggle = document.getElementById('menuToggle');
 const mainNav = document.getElementById('mainNav');
-const APP_NAME = 'Diamantes Realty Group';
+const APP_NAME = 'DIAMANTES REALTY GROUP';
 
 if (menuToggle && mainNav) {
   menuToggle.addEventListener('click', () => {
