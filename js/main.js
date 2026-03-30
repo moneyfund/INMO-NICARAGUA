@@ -110,41 +110,23 @@ function initializeHeroSlider() {
   const slides = Array.from(document.querySelectorAll('.hero-slide'));
   if (!slides.length) return;
 
-  const dots = Array.from(document.querySelectorAll('.hero-slider-dot'));
   const intervalMs = 2500;
   let currentIndex = 0;
-  let sliderTimer = null;
 
   const setActiveSlide = (nextIndex = 0) => {
     currentIndex = (nextIndex + slides.length) % slides.length;
 
     slides.forEach((slide, index) => {
       slide.classList.toggle('is-active', index === currentIndex);
-    });
-
-    dots.forEach((dot, index) => {
-      dot.classList.toggle('is-active', index === currentIndex);
-      dot.setAttribute('aria-current', index === currentIndex ? 'true' : 'false');
+      slide.setAttribute('aria-hidden', index === currentIndex ? 'false' : 'true');
     });
   };
-
-  const startAutoPlay = () => {
-    clearInterval(sliderTimer);
-    sliderTimer = setInterval(() => {
-      setActiveSlide(currentIndex + 1);
-    }, intervalMs);
-  };
-
-  dots.forEach((dot) => {
-    dot.addEventListener('click', () => {
-      const nextIndex = Number.parseInt(dot.dataset.slideTo || '0', 10);
-      setActiveSlide(Number.isNaN(nextIndex) ? 0 : nextIndex);
-      startAutoPlay();
-    });
-  });
 
   setActiveSlide(0);
-  startAutoPlay();
+
+  window.setInterval(() => {
+    setActiveSlide(currentIndex + 1);
+  }, intervalMs);
 }
 
 initializeHeroSlider();
