@@ -4676,19 +4676,19 @@ body.dark-mode .map-preview-summary {
   font-size: clamp(1rem, 1.6vw, 1.28rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #ff6b6b;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
+  color: var(--primary-red-fixed) !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.28);
 }
 
 .site-header .brand:hover {
-  color: #ff8787;
+  color: var(--primary-red-fixed) !important;
 }
 
 body.dark .site-header .brand,
 body.dark-mode .site-header .brand,
 [data-theme="dark"] .site-header .brand {
-  color: #ff7f7f;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+  color: var(--primary-red-fixed) !important;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.48);
 }
 
 html[data-theme="light"] .property-card,
@@ -4706,4 +4706,53 @@ html[data-theme="light"] .card {
 
 html[data-theme="light"] .footer-social a {
   color: #111111;
+}
+
+/* ===== Brand lock: fixed red title + fixed red footer in all themes ===== */
+:root {
+  --brand-red-premium: #9e0b0f;
+}
+
+.site-header .brand,
+.site-header .brand:hover,
+.site-header .brand:focus-visible,
+body.dark .site-header .brand,
+body.dark-mode .site-header .brand,
+[data-theme="dark"] .site-header .brand {
+  color: var(--brand-red-premium) !important;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.34);
+}
+
+.site-footer,
+body.dark .site-footer,
+body.dark-mode .site-footer,
+[data-theme="dark"] .site-footer,
+body:not(.dark):not(.dark-mode) .site-footer {
+  background: var(--brand-red-premium) !important;
+  border-top: 1px solid color-mix(in srgb, var(--brand-red-premium) 72%, #ffffff) !important;
+}
+
+.site-footer .footer-text,
+.site-footer p,
+.site-footer a,
+.site-footer .footer-legal-link {
+  color: #fff6f6 !important;
+}
+
+.site-footer .footer-social-link,
+.site-footer .footer-social a,
+body:not(.dark):not(.dark-mode) .footer-social-link,
+html[data-theme="light"] .footer-social a {
+  color: #fff6f6 !important;
+  background: color-mix(in srgb, #ffffff 10%, var(--brand-red-premium)) !important;
+  border-color: rgba(255, 255, 255, 0.42) !important;
+}
+
+.site-footer .footer-social-link:hover,
+.site-footer .footer-social-link:focus-visible,
+.site-footer .footer-social a:hover,
+body:not(.dark):not(.dark-mode) .footer-social-link:hover {
+  color: #ffffff !important;
+  background: color-mix(in srgb, #ffffff 18%, var(--brand-red-premium)) !important;
+  border-color: rgba(255, 255, 255, 0.66) !important;
 }
