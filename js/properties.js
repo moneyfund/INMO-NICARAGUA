@@ -92,6 +92,42 @@ function formatPropertyOperation(value = '') {
   return labels[normalized] || '';
 }
 
+function isRentalOperation(value = '') {
+  return normalizePropertyOperation(value) === 'alquiler';
+}
+
+function getMapMarkerPriceLabel(property = {}) {
+  const price = getPriceUsd(property);
+  if (!Number.isFinite(price) || price <= 0) return 'Consultar';
+  const basePrice = `$${Math.round(price).toLocaleString('en-US')}`;
+  return isRentalOperation(property.tipoOperacion || property.operacion || property.operation) ? `${basePrice}/mes` : basePrice;
+}
+
+function getPropertyDetailUrl(property = {}) {
+  return `propiedad.html?id=${encodeURIComponent(String(property.id ?? ''))}`;
+}
+
+function escapeHtml(value = '') {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function featureIcon(iconName = '') {
+  const icons = {
+    bedrooms: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11V7.6A1.6 1.6 0 0 1 5.6 6h3.8A1.6 1.6 0 0 1 11 7.6V11h2V9.6A1.6 1.6 0 0 1 14.6 8h3.8A1.6 1.6 0 0 1 20 9.6V18h-2v-2H6v2H4v-7Zm2 3h12v-1H6v1Z"/></svg>',
+    bathrooms: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v3H8V3Zm9 5v3a5 5 0 0 1-4 4.9V19h2v2H9v-2h2v-3.1A5 5 0 0 1 7 11V8h10Zm-2 3V10H9v1a3 3 0 0 0 6 0Z"/></svg>',
+    parking: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h8a4 4 0 1 1 0 8H9v6H6V5Zm3 5h5a1 1 0 1 0 0-2H9v2Z"/></svg>',
+    area: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 6 0v2H6v4H4V4Zm10 0h6v6h-2V6h-4V4ZM4 14h2v4h4v2H4v-6Zm14 0h2v6h-6v-2h4v-4Z"/></svg>',
+    location: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12Zm0-9a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>',
+    type: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-8.5Z"/></svg>'
+  };
+  return icons[iconName] || '';
+}
+
 function normalizeProperty(property = {}, id = '') {
   const title = property.title || property.titulo || '';
   const price = getPriceUsd(property);
@@ -215,7 +251,9 @@ function propertyCardTemplate(property) {
   const status = (property.status || 'disponible').toLowerCase();
   const imageSrc = getPrimaryPropertyImage(property);
   const imageAlt = property.title || property.titulo || 'Imagen de la propiedad';
-  const detailUrl = `propiedad.html?id=${encodeURIComponent(String(property.id ?? ''))}`;
+  const detailUrl = getPropertyDetailUrl(property);
+  const locationLabel = property.city || property.ubicacion || 'Ubicación no disponible';
+  const parkingCount = Number(property.parking ?? property.garaje ?? property.garages ?? 0);
 
   return `
     <article class="property-card${featuredClass}">
@@ -223,13 +261,16 @@ function propertyCardTemplate(property) {
       <div class="property-card-content">
         <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
         <h3>${property.title || property.titulo}</h3>
-        <p>${property.city || property.ubicacion}</p>
+        <p>${locationLabel}</p>
         <p class="price">${formatDualPrice(getPriceUsd(property))}</p>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
-        <div class="property-meta">
-          <span>${property.bedrooms ?? property.habitaciones} hab.</span>
-          <span>${property.bathrooms ?? property.banos} baños</span>
-          <span>${getAreaDisplay(property)}</span>
+        <div class="property-meta property-meta-icons">
+          <span>${featureIcon('bedrooms')} ${(property.bedrooms ?? property.habitaciones) || 0} hab.</span>
+          <span>${featureIcon('bathrooms')} ${(property.bathrooms ?? property.banos) || 0} baños</span>
+          <span>${featureIcon('parking')} ${parkingCount > 0 ? `${parkingCount} parqueo` : 'Sin parqueo'}</span>
+          <span>${featureIcon('area')} ${getAreaDisplay(property)}</span>
+          <span>${featureIcon('location')} ${locationLabel}</span>
+          <span>${featureIcon('type')} ${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'}</span>
         </div>
         <p>${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
         <p><a class="text-link" href="${detailUrl}">Ver detalle</a></p>
@@ -571,6 +612,7 @@ async function renderPropertyDetail() {
   const publishedByName = agent?.name || property.agentName || 'Agente inmobiliario';
   const agentProfileUrl = buildAgentProfileUrl(agent?.id || property.agentId);
   const status = String(property.status || 'available').toLowerCase();
+  const detailParkingCount = Number(property.parking ?? property.garaje ?? property.garages ?? 0);
 
   const galleryMarkup = galleryImages.length > 1
     ? `
@@ -597,10 +639,12 @@ async function renderPropertyDetail() {
         <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <p>${property.descripcion}</p>
-        <ul class="checklist">
-          <li>${property.habitaciones} habitaciones</li>
-          <li>${property.banos} baños</li>
-          <li>${getAreaDisplay(property)}</li>
+        <ul class="checklist property-feature-list">
+          <li>${featureIcon('bedrooms')} ${(property.habitaciones ?? property.bedrooms) || 0} habitaciones</li>
+          <li>${featureIcon('bathrooms')} ${(property.banos ?? property.bathrooms) || 0} baños</li>
+          <li>${featureIcon('parking')} ${detailParkingCount > 0 ? `${detailParkingCount} parqueo(s)` : 'Sin parqueo'}</li>
+          <li>${featureIcon('area')} ${getAreaDisplay(property)}</li>
+          <li>${featureIcon('location')} ${property.ubicacion || property.city || 'Ubicación no disponible'}</li>
         </ul>
         <p><strong>Publicado por</strong><br>${publishedByName}</p>
         <a class="button-outline" href="${agentProfileUrl}">Para más información aquí</a>
@@ -703,17 +747,95 @@ function renderGlobalMap(properties) {
   }).addTo(map);
 
   const bounds = [];
+  const pointerMedia = window.matchMedia('(hover: none), (pointer: coarse)');
+  let activeMarker = null;
+  let activePopup = null;
+
+  const setMarkerActiveState = (marker, isActive) => {
+    const markerElement = marker.getElement();
+    if (!markerElement) return;
+    markerElement.classList.toggle('is-active', isActive);
+  };
+
+  const buildPreviewMarkup = (property) => {
+    const summary = String(property.description || property.descripcion || '').trim();
+    const shortSummary = summary.length > 92 ? `${summary.slice(0, 89)}...` : summary;
+    const locationLabel = property.city || property.ubicacion || 'Ubicación no disponible';
+    const image = getPrimaryPropertyImage(property);
+    const detailUrl = getPropertyDetailUrl(property);
+    const safeTitle = escapeHtml(property.titulo || property.title || 'Propiedad');
+
+    return `
+      <a class="map-preview-card" href="${detailUrl}" aria-label="Abrir propiedad ${safeTitle}">
+        <img src="${image}" alt="${safeTitle}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
+        <div class="map-preview-content">
+          <p class="map-preview-price">${getMapMarkerPriceLabel(property)}</p>
+          <h3>${safeTitle}</h3>
+          <p class="map-preview-location">${escapeHtml(locationLabel)}</p>
+          ${shortSummary ? `<p class="map-preview-summary">${escapeHtml(shortSummary)}</p>` : ''}
+        </div>
+      </a>
+    `;
+  };
+
+  const clearActiveMarker = () => {
+    if (activeMarker) setMarkerActiveState(activeMarker, false);
+    activeMarker = null;
+  };
   geolocated.forEach((property) => {
     const markerPosition = getPropertyCoordinates(property);
     if (!markerPosition) return;
     bounds.push(markerPosition);
 
-    L.marker(markerPosition).addTo(map)
-      .bindPopup(`
-        <strong>${property.titulo}</strong><br>
-        ${formatDualPrice(getPriceUsd(property))}<br>
-        <a href="propiedad.html?id=${encodeURIComponent(String(property.id ?? ''))}">Ver propiedad</a>
-      `);
+    const operation = normalizePropertyOperation(property.tipoOperacion || property.operacion || property.operation);
+    const markerIcon = L.divIcon({
+      className: 'map-price-marker-wrapper',
+      html: `<div class="map-price-marker map-price-marker--${operation || 'venta'}">${getMapMarkerPriceLabel(property)}</div>`,
+      iconSize: [106, 36],
+      iconAnchor: [53, 18]
+    });
+    const marker = L.marker(markerPosition, { icon: markerIcon }).addTo(map);
+    const previewPopup = L.popup({
+      closeButton: false,
+      autoPan: true,
+      autoClose: false,
+      className: 'map-preview-popup',
+      offset: [0, -26]
+    }).setContent(buildPreviewMarkup(property));
+
+    marker.on('mouseover', () => {
+      clearActiveMarker();
+      setMarkerActiveState(marker, true);
+      activeMarker = marker;
+      marker.bindPopup(previewPopup).openPopup();
+      activePopup = previewPopup;
+    });
+
+    marker.on('mouseout', () => {
+      if (pointerMedia.matches) return;
+      setTimeout(() => {
+        if (activePopup && map.hasLayer(activePopup) && !document.querySelector('.map-preview-card:hover')) {
+          map.closePopup(activePopup);
+          clearActiveMarker();
+          activePopup = null;
+        }
+      }, 120);
+    });
+
+    marker.on('click', () => {
+      const detailUrl = getPropertyDetailUrl(property);
+      if (pointerMedia.matches) {
+        const isAlreadyActive = activeMarker === marker;
+        clearActiveMarker();
+        setMarkerActiveState(marker, true);
+        activeMarker = marker;
+        marker.bindPopup(previewPopup).openPopup();
+        activePopup = previewPopup;
+        if (isAlreadyActive) window.location.href = detailUrl;
+        return;
+      }
+      window.location.href = detailUrl;
+    });
   });
 
   map.fitBounds(bounds, { padding: [40, 40] });
