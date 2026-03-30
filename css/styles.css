@@ -4756,3 +4756,155 @@ body:not(.dark):not(.dark-mode) .footer-social-link:hover {
   background: color-mix(in srgb, #ffffff 18%, var(--brand-red-premium)) !important;
   border-color: rgba(255, 255, 255, 0.66) !important;
 }
+
+/* ===== Hero background-only rotation + compact search refinements (2026-03-30) ===== */
+.hero {
+  min-height: clamp(560px, 78vh, 860px);
+  max-height: none;
+  height: auto;
+}
+
+.hero-slider,
+.hero-slide,
+.hero-slide img {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.hero-slide {
+  transition: opacity 1100ms ease;
+  will-change: opacity;
+}
+
+.hero-content {
+  max-width: 700px;
+  padding: clamp(1rem, 1.8vw, 1.5rem);
+}
+
+.hero .search-form {
+  margin-top: 1.1rem;
+  grid-template-columns: minmax(220px, 1.7fr) minmax(170px, 1fr) auto;
+  gap: 0.58rem;
+}
+
+.hero .hero-operation-tabs {
+  padding: 0.32rem;
+  gap: 0.3rem;
+}
+
+.hero .hero-operation-tab {
+  min-width: 112px;
+  padding: 0.48rem 0.82rem;
+  font-size: 0.89rem;
+}
+
+.hero .search-form input,
+.hero .search-form select {
+  min-height: 41px;
+  padding: 0.58rem 0.72rem;
+  font-size: 0.92rem;
+}
+
+.hero .search-form button {
+  min-height: 41px;
+  padding: 0.58rem 0.95rem;
+  font-size: 0.91rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    min-height: 68vh;
+  }
+
+  .hero .search-form {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    margin-top: 0.95rem;
+  }
+
+  .hero .hero-operation-tabs {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .hero .hero-operation-tab {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.46rem 0.72rem;
+    font-size: 0.86rem;
+  }
+
+  .hero .search-form input,
+  .hero .search-form select,
+  .hero .search-form button {
+    min-height: 39px;
+    padding: 0.5rem 0.68rem;
+    font-size: 0.88rem;
+  }
+
+  .hero-content {
+    max-width: 620px;
+    padding: 0.9rem;
+  }
+
+  .hero h1 {
+    margin-bottom: 0.78rem;
+  }
+
+  .hero p {
+    margin-top: 0;
+    margin-bottom: 0.65rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    min-height: 74vh;
+  }
+
+  .hero-content {
+    margin-top: 1rem;
+    padding: 0.8rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.6rem, 7.8vw, 2.05rem);
+    line-height: 1.2;
+  }
+
+  .hero .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hero p {
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .hero .search-form {
+    gap: 0.44rem;
+  }
+
+  .hero .hero-operation-tabs {
+    padding: 0.24rem;
+    border-radius: 12px;
+  }
+
+  .hero .hero-operation-tab {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.52rem;
+    border-radius: 9px;
+  }
+
+  .hero .search-form input,
+  .hero .search-form select,
+  .hero .search-form button {
+    min-height: 37px;
+    padding: 0.46rem 0.64rem;
+    font-size: 0.84rem;
+    border-radius: 10px;
+  }
+}
