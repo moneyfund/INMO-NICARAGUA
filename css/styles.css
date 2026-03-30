@@ -3998,16 +3998,24 @@ p, li, label, input, textarea, select, button, a {
 .section { padding: clamp(3.8rem, 6vw, 5.4rem) 0; }
 
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
   background: var(--bg-navbar) !important;
   border-bottom: 1px solid var(--border-default);
   box-shadow: var(--shadow-sm);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .site-header.is-scrolled,
-.site-header.scrolled { background: var(--bg-navbar) !important; }
+.site-header.scrolled {
+  background: var(--bg-navbar) !important;
+  border-bottom: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
 
 .brand { color: var(--text-primary) !important; font-weight: 700; letter-spacing: 0.08em; }
 .brand span { color: var(--action-primary) !important; }
