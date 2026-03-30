@@ -73,19 +73,18 @@ async function getModularFirestore() {
   return modularFirestorePromise;
 }
 
-function formatPropertyType(value = '') {
-  const normalized = String(value || '').trim().toLowerCase();
-  const labels = {
-    casa: 'Casa',
-    apartamento: 'Apartamento',
-    terreno: 'Terreno',
-    bodega: 'Bodega'
-  };
-  return labels[normalized] || '';
-}
 
+const propertyUtils = window.inmoPropertyUtils || {};
+const normalizePropertyType = (value = '') => propertyUtils.normalizePropertyType ? propertyUtils.normalizePropertyType(value) : String(value || '').trim().toLowerCase();
+const getPropertyTypeLabel = (value = '') => propertyUtils.getPropertyTypeLabel ? propertyUtils.getPropertyTypeLabel(value) : '';
+const normalizePropertyOperation = (value = '') => propertyUtils.normalizeOperation ? propertyUtils.normalizeOperation(value) : String(value || '').trim().toLowerCase();
+const formatDualPrice = (usd) => propertyUtils.formatDualPrice ? propertyUtils.formatDualPrice(usd) : `$${Number(usd || 0).toLocaleString()} USD`;
+const getPriceUsd = (property = {}) => propertyUtils.getPriceUsd ? propertyUtils.getPriceUsd(property) : Number(property.price ?? property.precio ?? 0);
+const getAreaDisplay = (property = {}) => propertyUtils.getAreaDisplay ? propertyUtils.getAreaDisplay(property) : `${property.area || 0} m²`;
+const getPricePerAreaUsd = (property = {}) => propertyUtils.getPricePerAreaUsd ? propertyUtils.getPricePerAreaUsd(property) : NaN;
+const formatPricePerArea = (value, unit) => propertyUtils.formatPricePerArea ? propertyUtils.formatPricePerArea(value, unit) : '';
 function formatPropertyOperation(value = '') {
-  const normalized = String(value || '').trim().toLowerCase();
+  const normalized = normalizePropertyOperation(value);
   const labels = {
     venta: 'Venta',
     alquiler: 'Alquiler'
@@ -93,22 +92,15 @@ function formatPropertyOperation(value = '') {
   return labels[normalized] || '';
 }
 
-function normalizePropertyType(value = '') {
-  return String(value || '').trim().toLowerCase();
-}
-
-function normalizePropertyOperation(value = '') {
-  return String(value || '').trim().toLowerCase();
-}
-
 function normalizeProperty(property = {}, id = '') {
   const title = property.title || property.titulo || '';
-  const price = Number(property.price ?? property.precio ?? 0);
+  const price = getPriceUsd(property);
   const city = property.city || property.location || property.ubicacion || '';
   const image = imageUtils.getCoverImage(property);
   const bedrooms = Number(property.bedrooms ?? property.habitaciones ?? 0);
   const bathrooms = Number(property.bathrooms ?? property.banos ?? 0);
-  const area = Number(property.area ?? 0);
+  const normalizedAreaValue = propertyUtils.getAreaValue ? propertyUtils.getAreaValue(property) : Number(property.area ?? 0);
+  const area = Number.isFinite(normalizedAreaValue) ? normalizedAreaValue : (property.area || '');
   const type = normalizePropertyType(property.type || property.tipo || '');
   const operation = normalizePropertyOperation(property.operation || property.operacion || '');
   const description = property.description || property.descripcion || '';
@@ -131,10 +123,14 @@ function normalizeProperty(property = {}, id = '') {
     area,
     type,
     tipo: type,
-    typeLabel: formatPropertyType(type),
+    priceUsd: Number.isFinite(price) ? price : null,
+    typeLabel: getPropertyTypeLabel(type),
     operation,
     operacion: operation,
     operationLabel: formatPropertyOperation(operation),
+    areaValue: Number.isFinite(normalizedAreaValue) ? normalizedAreaValue : null,
+    areaUnit: propertyUtils.normalizeAreaUnit ? propertyUtils.normalizeAreaUnit(property.areaUnit || '') : (property.areaUnit || ''),
+    pricePerAreaUsd: Number.isFinite(getPricePerAreaUsd(property)) ? getPricePerAreaUsd(property) : null,
     description,
     descripcion: description
   };
@@ -224,16 +220,17 @@ function propertyCardTemplate(property) {
     <article class="property-card${featuredClass}">
       <img src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
       <div class="property-card-content">
-        <p class="badge">${property.typeLabel || formatPropertyType(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
+        <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
         <h3>${property.title || property.titulo}</h3>
         <p>${property.city || property.ubicacion}</p>
-        <p class="price">$${Number(property.price ?? property.precio ?? 0).toLocaleString()}</p>
+        <p class="price">${formatDualPrice(getPriceUsd(property))}</p>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <div class="property-meta">
           <span>${property.bedrooms ?? property.habitaciones} hab.</span>
           <span>${property.bathrooms ?? property.banos} baños</span>
-          <span>${property.area} m²</span>
+          <span>${getAreaDisplay(property)}</span>
         </div>
+        <p>${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
         <p><a class="text-link" href="${detailUrl}">Ver detalle</a></p>
       </div>
     </article>
@@ -273,7 +270,7 @@ function renderCategory(properties, gridId, filterFn) {
 }
 
 function renderTerrenos(properties) {
-  renderCategory(properties, 'terrenosGrid', (property) => normalizePropertyType(property.tipo) === 'terreno');
+  renderCategory(properties, 'terrenosGrid', (property) => normalizePropertyType(property.tipo) === 'land');
 }
 
 function renderAlquileres(properties) {
@@ -348,7 +345,7 @@ function renderAgentFilterBanner(agentId, agents = []) {
 
 function applyFilters(properties) {
   const locationInput = document.getElementById('filterLocation')?.value.trim().toLowerCase() || '';
-  const typeInput = document.getElementById('filterType')?.value || '';
+  const typeInput = normalizePropertyType(document.getElementById('filterType')?.value || '');
   const operationInput = normalizePropertyOperation(document.getElementById('filterOperation')?.value || '');
   const budgetInput = Number(document.getElementById('filterBudget')?.value || 0);
 
@@ -356,7 +353,7 @@ function applyFilters(properties) {
     const matchesLocation = !locationInput || String(property.ubicacion || '').toLowerCase().includes(locationInput);
     const matchesType = !typeInput || normalizePropertyType(property.tipo) === typeInput;
     const matchesOperation = !operationInput || normalizePropertyOperation(property.operacion) === operationInput;
-    const matchesBudget = !budgetInput || Number(property.precio || 0) <= budgetInput;
+    const matchesBudget = !budgetInput || Number(getPriceUsd(property) || 0) <= budgetInput;
     return matchesLocation && matchesType && matchesOperation && matchesBudget;
   });
 }
@@ -589,18 +586,20 @@ async function renderPropertyDetail() {
         ${galleryMarkup}
       </section>
       <div>
-        <p class="badge">${property.typeLabel || formatPropertyType(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
+        <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
         <h1>${property.titulo}</h1>
         <p>${property.ubicacion}</p>
-        <p><strong>${property.typeLabel || formatPropertyType(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
-        <p class="price">$${Number(property.precio || 0).toLocaleString()}</p>
+        <p><strong>${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
+        <p class="price">${formatDualPrice(getPriceUsd(property))}</p>
+        <p><strong>Área:</strong> ${getAreaDisplay(property)}</p>
+        <p><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
         <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <p>${property.descripcion}</p>
         <ul class="checklist">
           <li>${property.habitaciones} habitaciones</li>
           <li>${property.banos} baños</li>
-          <li>${property.area} m² de construcción</li>
+          <li>${getAreaDisplay(property)}</li>
         </ul>
         <p><strong>Publicado por</strong><br>${publishedByName}</p>
         <a class="button-outline" href="${agentProfileUrl}">Para más información aquí</a>
@@ -711,6 +710,7 @@ function renderGlobalMap(properties) {
     L.marker(markerPosition).addTo(map)
       .bindPopup(`
         <strong>${property.titulo}</strong><br>
+        ${formatDualPrice(getPriceUsd(property))}<br>
         <a href="propiedad.html?id=${encodeURIComponent(String(property.id ?? ''))}">Ver propiedad</a>
       `);
   });

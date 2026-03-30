@@ -30,16 +30,15 @@ const state = {
 };
 
 const fallbackPhoto = imageUtils?.PLACEHOLDER || 'assets/placeholder.svg';
+const propertyUtils = window.inmoPropertyUtils || {};
+const normalizePropertyType = (value = '') => propertyUtils.normalizePropertyType ? propertyUtils.normalizePropertyType(value) : String(value || '').trim().toLowerCase();
+const getPropertyTypeLabel = (value = '') => propertyUtils.getPropertyTypeLabel ? propertyUtils.getPropertyTypeLabel(value) : value;
+const formatDualPrice = (usd) => propertyUtils.formatDualPrice ? propertyUtils.formatDualPrice(usd) : `$${Number(usd || 0).toLocaleString()} USD`;
+const calculatePricePerArea = (priceUsd, areaValue) => propertyUtils.calculatePricePerArea ? propertyUtils.calculatePricePerArea(priceUsd, areaValue) : NaN;
+const formatPricePerArea = (value, unit) => propertyUtils.formatPricePerArea ? propertyUtils.formatPricePerArea(value, unit) : '';
 
 function formatPropertyType(value = '') {
-  const normalized = String(value || '').trim().toLowerCase();
-  const labels = {
-    casa: 'Casa',
-    apartamento: 'Apartamento',
-    terreno: 'Terreno',
-    bodega: 'Bodega'
-  };
-  return labels[normalized] || '';
+  return getPropertyTypeLabel(value);
 }
 
 function formatPropertyOperation(value = '') {
@@ -350,6 +349,10 @@ function getPropertyPayload(user, profileName, images, coverImage) {
   const title = document.getElementById('propertyTitle').value.trim();
   const price = Number(document.getElementById('propertyPrice').value || 0);
   const description = document.getElementById('propertyDescription').value.trim();
+  const type = normalizePropertyType(document.getElementById('tipo-propiedad').value.trim());
+  const areaValue = Number(document.getElementById('propertyArea').value || 0);
+  const areaUnit = document.getElementById('propertyAreaUnit').value.trim();
+  const pricePerAreaUsd = calculatePricePerArea(price, areaValue);
 
   return {
     title,
@@ -366,15 +369,19 @@ function getPropertyPayload(user, profileName, images, coverImage) {
     video: document.getElementById('propertyVideo').value.trim(),
     location: document.getElementById('propertyLocation').value.trim(),
     ubicacion: document.getElementById('propertyLocation').value.trim(),
-    type: document.getElementById('tipo-propiedad').value.trim(),
-    tipo: document.getElementById('tipo-propiedad').value.trim(),
+    priceUsd: price,
+    type,
+    tipo: type,
     operation: document.getElementById('operacion-propiedad').value.trim(),
     operacion: document.getElementById('operacion-propiedad').value.trim(),
     bedrooms: Number(document.getElementById('propertyBedrooms').value || 0),
     habitaciones: Number(document.getElementById('propertyBedrooms').value || 0),
     bathrooms: Number(document.getElementById('propertyBathrooms').value || 0),
     banos: Number(document.getElementById('propertyBathrooms').value || 0),
-    area: Number(document.getElementById('propertyArea').value || 0),
+    area: areaValue,
+    areaValue,
+    areaUnit,
+    pricePerAreaUsd: Number.isFinite(pricePerAreaUsd) ? pricePerAreaUsd : null,
     lat: Number.isFinite(lat) ? lat : null,
     lng: Number.isFinite(lng) ? lng : null,
     agenteId: user.uid,
@@ -492,6 +499,7 @@ function resetPropertyForm() {
   }
 
   toggleImageInputMode();
+  updatePricePerAreaPreview();
 }
 
 function fillPropertyForm(property) {
@@ -500,11 +508,12 @@ function fillPropertyForm(property) {
   document.getElementById('propertyPrice').value = property.price || property.precio || '';
   document.getElementById('propertyLocation').value = property.location || property.ubicacion || '';
   document.getElementById('propertyDescription').value = property.description || property.descripcion || '';
-  document.getElementById('tipo-propiedad').value = (property.type || property.tipo || '').toLowerCase();
+  document.getElementById('tipo-propiedad').value = normalizePropertyType(property.type || property.tipo || '');
   document.getElementById('operacion-propiedad').value = (property.operation || property.operacion || '').toLowerCase();
   document.getElementById('propertyBedrooms').value = property.bedrooms || property.habitaciones || 0;
   document.getElementById('propertyBathrooms').value = property.bathrooms || property.banos || 0;
-  document.getElementById('propertyArea').value = property.area || 0;
+  document.getElementById('propertyArea').value = property.areaValue || property.area || '';
+  document.getElementById('propertyAreaUnit').value = (property.areaUnit || 'metros').toLowerCase();
   document.getElementById('propertyVideo').value = property.video || '';
 
   const normalizedImages = imageUtils.getPropertyImages(property);
@@ -523,6 +532,8 @@ function fillPropertyForm(property) {
   } else {
     setPropertyCoordinates(NaN, NaN);
   }
+
+  updatePricePerAreaPreview();
 }
 
 function propertyCard(property) {
@@ -536,7 +547,8 @@ function propertyCard(property) {
         <p class="badge">${formatPropertyType(property.type || property.tipo)} en ${String(formatPropertyOperation(property.operation || property.operacion) || 'Venta').toLowerCase()}</p>
         <h3>${property.title || property.titulo || 'Propiedad'}</h3>
         <p>${property.location || property.ubicacion || ''}</p>
-        <p class="price">$${Number(property.price || property.precio || 0).toLocaleString()}</p>
+        <p class="price">${formatDualPrice(property.priceUsd ?? property.price ?? property.precio)}</p>
+        <p>${formatPricePerArea(property.pricePerAreaUsd ?? calculatePricePerArea(property.priceUsd ?? property.price ?? property.precio, property.areaValue ?? property.area), property.areaUnit)}</p>
         <p class="property-status-tag">${statusLabel}</p>
         <div class="agent-actions">
           <button type="button" data-edit-property="${property.id}">Editar</button>
@@ -565,6 +577,9 @@ async function saveProperty(event) {
   const propertyId = document.getElementById('propertyDocId').value;
   const propertyType = document.getElementById('tipo-propiedad')?.value.trim();
   const propertyOperation = document.getElementById('operacion-propiedad')?.value.trim();
+  const propertyPrice = Number(document.getElementById('propertyPrice')?.value || 0);
+  const areaValue = Number(document.getElementById('propertyArea')?.value || 0);
+  const areaUnit = document.getElementById('propertyAreaUnit')?.value.trim();
 
   try {
     state.isSavingProperty = true;
@@ -577,6 +592,19 @@ async function saveProperty(event) {
 
     if (!propertyOperation) {
       throw new Error('Selecciona el tipo de operación antes de guardar.');
+    }
+
+
+    if (!Number.isFinite(propertyPrice) || propertyPrice <= 0) {
+      throw new Error('Ingresa un precio válido mayor que 0 USD.');
+    }
+
+    if (!Number.isFinite(areaValue) || areaValue <= 0) {
+      throw new Error('Ingresa un área válida mayor que 0.');
+    }
+
+    if (!areaUnit) {
+      throw new Error('Selecciona la unidad de área de la propiedad.');
     }
 
     setMessage('Guardando propiedad e imágenes...', 'info');
@@ -707,6 +735,28 @@ function bindAuthControls() {
   });
 }
 
+
+function updatePricePerAreaPreview() {
+  const dualPriceNode = document.getElementById('propertyDualPricePreview');
+  const perAreaNode = document.getElementById('propertyPricePerAreaPreview');
+  const price = Number(document.getElementById('propertyPrice')?.value || 0);
+  const areaValue = Number(document.getElementById('propertyArea')?.value || 0);
+  const areaUnit = document.getElementById('propertyAreaUnit')?.value || '';
+
+  if (dualPriceNode) dualPriceNode.textContent = formatDualPrice(price);
+
+  const value = calculatePricePerArea(price, areaValue);
+  if (!perAreaNode) return;
+  perAreaNode.textContent = formatPricePerArea(value, areaUnit);
+}
+
+function bindCalculatedFields() {
+  ['propertyPrice', 'propertyArea', 'propertyAreaUnit'].forEach((fieldId) => {
+    document.getElementById(fieldId)?.addEventListener('input', updatePricePerAreaPreview);
+    document.getElementById(fieldId)?.addEventListener('change', updatePricePerAreaPreview);
+  });
+}
+
 function bindImageControls() {
   document.querySelectorAll('input[name="imageInputMode"]').forEach((input) => {
     input.addEventListener('change', toggleImageInputMode);
@@ -730,8 +780,10 @@ function init() {
   bindAuthControls();
   bindImageControls();
   bindImagePreviewActions();
+  bindCalculatedFields();
   toggleImageInputMode();
   renderImagePreview();
+  updatePricePerAreaPreview();
 }
 
 window.addEventListener('DOMContentLoaded', init);

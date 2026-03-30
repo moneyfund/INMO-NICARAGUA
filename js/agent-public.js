@@ -1,5 +1,11 @@
 const imageUtils = window.inmoImageUtils;
 const fallbackPhoto = imageUtils?.PLACEHOLDER || 'assets/placeholder.svg';
+const propertyUtils = window.inmoPropertyUtils || {};
+const getPropertyTypeLabel = (value = '') => propertyUtils.getPropertyTypeLabel ? propertyUtils.getPropertyTypeLabel(value) : value;
+const formatDualPrice = (usd) => propertyUtils.formatDualPrice ? propertyUtils.formatDualPrice(usd) : `$${Number(usd || 0).toLocaleString()} USD`;
+const formatPricePerArea = (value, unit) => propertyUtils.formatPricePerArea ? propertyUtils.formatPricePerArea(value, unit) : '';
+const calculatePricePerArea = (price, area) => propertyUtils.calculatePricePerArea ? propertyUtils.calculatePricePerArea(price, area) : NaN;
+const getAreaDisplay = (property = {}) => propertyUtils.getAreaDisplay ? propertyUtils.getAreaDisplay(property) : `${property.area || 0} m²`;
 
 const socialIcons = {
   instagram: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5a4.25 4.25 0 0 0 4.25 4.25h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5a4.25 4.25 0 0 0-4.25-4.25h-8.5Zm8.9 2.35a1.15 1.15 0 1 1 0 2.3 1.15 1.15 0 0 1 0-2.3ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg>',
@@ -41,10 +47,12 @@ function propertyCard(property) {
     <article class="property-card">
       <img src="${imageUtils.getCoverImage(property)}" alt="${property.title || property.titulo || 'Propiedad'}">
       <div class="property-card-content">
-        <p class="badge">${property.type || property.tipo || 'Propiedad'}</p>
+        <p class="badge">${getPropertyTypeLabel(property.type || property.tipo) || 'Propiedad'}</p>
         <h3>${property.title || property.titulo || 'Propiedad'}</h3>
         <p>${property.location || property.ubicacion || ''}</p>
-        <p class="price">$${Number(property.price || property.precio || 0).toLocaleString()}</p>
+        <p class="price">${formatDualPrice(property.priceUsd ?? property.price ?? property.precio)}</p>
+        <p>Área: ${getAreaDisplay(property)}</p>
+        <p>${formatPricePerArea(property.pricePerAreaUsd ?? calculatePricePerArea(property.priceUsd ?? property.price ?? property.precio, property.areaValue ?? property.area), property.areaUnit)}</p>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <a class="text-link" href="propiedad.html?id=${encodeURIComponent(property.id)}">Ver detalle</a>
       </div>
