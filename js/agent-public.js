@@ -54,7 +54,7 @@ function propertyCard(property) {
         <p>Área: ${getAreaDisplay(property)}</p>
         <p>${formatPricePerArea(property.pricePerAreaUsd ?? calculatePricePerArea(property.priceUsd ?? property.price ?? property.precio, property.areaValue ?? property.area), property.areaUnit)}</p>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
-        <a class="text-link" href="propiedad.html?id=${encodeURIComponent(property.id)}">Ver detalle</a>
+        <a class="btn-primary-property" href="propiedad.html?id=${encodeURIComponent(property.id)}">Ver detalle</a>
       </div>
     </article>
   `;

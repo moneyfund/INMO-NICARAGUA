@@ -273,7 +273,7 @@ function propertyCardTemplate(property) {
           <span>${featureIcon('type')} ${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'}</span>
         </div>
         <p>${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
-        <p><a class="text-link" href="${detailUrl}">Ver detalle</a></p>
+        <p><a class="btn-primary-property" href="${detailUrl}">Ver detalle</a></p>
       </div>
     </article>
   `;
