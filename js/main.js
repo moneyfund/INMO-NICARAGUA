@@ -1,5 +1,6 @@
 const menuToggle = document.getElementById('menuToggle');
 const mainNav = document.getElementById('mainNav');
+const APP_NAME = 'Diamantes Realty Group';
 
 if (menuToggle && mainNav) {
   menuToggle.addEventListener('click', () => {
@@ -80,10 +81,10 @@ function renderSiteFooter() {
       <nav class="footer-legal-nav" aria-label="Enlaces legales">
         ${footerLinks.map((link) => `<a class="footer-legal-link" href="${link.href}">${link.label}</a>`).join('')}
       </nav>
-      <div class="footer-social" aria-label="Redes sociales de INMO NICARAGUA">
+      <div class="footer-social" aria-label="Redes sociales de Diamantes Realty Group">
         ${footerSocialLinks.map((link) => `<a class="footer-social-link" href="${link.href}" ${link.href.startsWith('mailto:') ? '' : 'target="_blank" rel="noopener noreferrer"'} aria-label="${link.label}" title="${link.label}">${link.icon}</a>`).join('')}
       </div>
-      <p class="footer-text">© <span id="currentYear"></span> INMO NICARAGUA</p>
+      <p class="footer-text">© <span id="currentYear"></span> ${APP_NAME}</p>
     </div>
   `;
 

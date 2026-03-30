@@ -59,7 +59,7 @@ function agentCardTemplate(agent) {
     <article class="agent-card reveal-on-scroll">
       <img class="agent-photo" src="${photo}" alt="${agent.name}">
       <div class="agent-content">
-        <h2>${agent.name || 'Agente INMO NICARAGUA'}</h2>
+        <h2>${agent.name || 'Agente Diamantes Realty Group'}</h2>
         <p>${agent.description || ''}</p>
         ${agent.phone ? `<p><strong>Tel:</strong> <a class="text-link" href="tel:${String(agent.phone).replace(/\s+/g, '')}">${agent.phone}</a></p>` : ''}
         ${agent.email ? `<p><strong>Email:</strong> <a class="text-link" href="mailto:${agent.email}">${agent.email}</a></p>` : ''}

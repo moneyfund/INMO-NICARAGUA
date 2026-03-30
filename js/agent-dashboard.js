@@ -71,7 +71,7 @@ function authMarkup(user) {
 
 function getProfilePayload(user) {
   return {
-    name: document.getElementById('agentName').value.trim() || user.displayName || 'Agente INMO NICARAGUA',
+    name: document.getElementById('agentName').value.trim() || user.displayName || 'Agente Diamantes Realty Group',
     photo: document.getElementById('agentPhoto').value.trim() || user.photoURL || fallbackPhoto,
     description: document.getElementById('agentDescription').value.trim(),
     email: document.getElementById('agentEmail').value.trim() || user.email || '',
