@@ -1,5 +1,4 @@
-import { storage } from './firebase-services.js';
-import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+import { storage, ref, uploadBytes, getDownloadURL } from './firebase-services.js';
 
 export async function uploadImage(file, agentId, propertyId) {
   if (!file) throw new Error('Archivo de imagen no válido.');
@@ -10,8 +9,8 @@ export async function uploadImage(file, agentId, propertyId) {
   const fileName = `${Date.now()}-${safeName}`;
   const path = `properties/${agentId}/${propertyId}/${fileName}`;
 
-  const storageRef = ref(storage, path);
-  const snapshot = await uploadBytes(storageRef, file, {
+  const fileRef = ref(storage, path);
+  const snapshot = await uploadBytes(fileRef, file, {
     contentType: file.type || 'image/jpeg'
   });
 
