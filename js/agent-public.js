@@ -110,9 +110,27 @@ function renderAgentPropertiesMap(properties) {
   map.fitBounds(bounds, { padding: [35, 35] });
 }
 
+
+function getAgentRole(agent = {}) {
+  return agent.role || agent.cargo || agent.position || '';
+}
+
+function getAgentLocation(agent = {}) {
+  return agent.location || agent.ubicacion || agent.city || '';
+}
+
+function getAgentBasicInfo(agent = {}) {
+  return [
+    getAgentRole(agent),
+    getAgentLocation(agent)
+  ].filter(Boolean);
+}
+
 function renderAgentProfile(agent, properties) {
   const container = document.getElementById('agentPublicContent');
   const photo = agent.photo || fallbackPhoto;
+  const basicInfo = getAgentBasicInfo(agent);
+  const totalProperties = properties.length;
 
   const socialLinks = [
     socialLinkTemplate(agent.facebook, 'Facebook', 'facebook'),
@@ -123,31 +141,36 @@ function renderAgentProfile(agent, properties) {
 
   container.innerHTML = `
     <article class="agent-public-profile">
-      <img class="agent-public-photo" src="${photo}" alt="${agent.name || 'Agente'}">
       <div class="agent-public-summary">
+        <img class="agent-public-photo" src="${photo}" alt="${agent.name || 'Agente'}">
         <h2>${agent.name || 'Agente Diamantes Realty Group'}</h2>
-        <p>${agent.description || 'Este agente todavía no ha agregado una descripción en su perfil.'}</p>
-        ${agent.phone ? `<p><strong>Tel:</strong> <a class="text-link" href="tel:${String(agent.phone).replace(/\s+/g, '')}">${agent.phone}</a></p>` : ''}
-        ${agent.email ? `<p><strong>Email:</strong> <a class="text-link" href="mailto:${agent.email}">${agent.email}</a></p>` : ''}
+        ${basicInfo.length ? `<p class="agent-public-basic-info">${basicInfo.join(' · ')}</p>` : ''}
+        <p class="agent-public-description">${agent.description || 'Este agente todavía no ha agregado una descripción en su perfil.'}</p>
+        ${(agent.phone || agent.email) ? `
+          <div class="agent-public-contact">
+            ${agent.phone ? `<p><strong>Tel:</strong> <a class="text-link" href="tel:${String(agent.phone).replace(/\s+/g, '')}">${agent.phone}</a></p>` : ''}
+            ${agent.email ? `<p><strong>Email:</strong> <a class="text-link" href="mailto:${agent.email}">${agent.email}</a></p>` : ''}
+          </div>
+        ` : ''}
         ${socialLinks.length ? `<div class="agent-public-social" aria-label="Redes sociales de ${agent.name || 'agente'}">${socialLinks.join('')}</div>` : ''}
       </div>
       <aside class="agent-public-stats">
         <h3>Resumen</h3>
-        <p><strong>${properties.length}</strong> propiedades publicadas.</p>
+        <p><strong>${totalProperties}</strong> propiedades publicadas.</p>
         <p>Explora ubicaciones y detalles en el listado inferior.</p>
       </aside>
     </article>
 
-    <section class="agent-public-map-section">
-      <h2>Mapa de propiedades del agente</h2>
-      <div id="agentPropertiesMap" class="properties-map-full" aria-label="Mapa de propiedades del agente"></div>
-    </section>
-
     <section>
       <h2>Propiedades del agente</h2>
       <div class="properties-grid">
-        ${properties.length ? properties.map(propertyCard).join('') : '<p class="empty-state">Este agente aún no tiene propiedades publicadas.</p>'}
+        ${totalProperties ? properties.map(propertyCard).join('') : '<p class="empty-state">Este agente aún no tiene propiedades publicadas.</p>'}
       </div>
+    </section>
+
+    <section class="agent-public-map-section">
+      <h2>Mapa de propiedades del agente</h2>
+      <div id="agentPropertiesMap" class="properties-map-full" aria-label="Mapa de propiedades del agente"></div>
     </section>
   `;
 

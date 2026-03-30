@@ -5015,3 +5015,125 @@ body:not(.dark):not(.dark-mode) .footer-social-link:hover {
     margin: 0.6rem;
   }
 }
+
+/* Agent public profile layout refresh (mobile-first) */
+.agent-public-page .agent-public-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: clamp(1rem, 4vw, 1.5rem);
+}
+
+.agent-public-page .agent-public-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.agent-public-page .agent-public-photo {
+  width: clamp(132px, 38vw, 170px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  margin: 0 auto 0.35rem;
+  border: 4px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.agent-public-page .agent-public-summary h2 {
+  margin: 0;
+}
+
+.agent-public-page .agent-public-basic-info {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  opacity: 0.84;
+}
+
+.agent-public-page .agent-public-description {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.agent-public-page .agent-public-contact {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.agent-public-page .agent-public-contact p {
+  margin: 0;
+}
+
+.agent-public-page .agent-public-social {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.35rem;
+}
+
+.agent-public-page .agent-public-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 999px;
+}
+
+.agent-public-page .agent-public-social-link span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.agent-public-page .agent-public-social-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+.agent-public-page .agent-public-stats {
+  width: 100%;
+  margin: 0;
+  border-radius: 16px;
+  padding: 1.1rem;
+}
+
+@media (min-width: 769px) {
+  .agent-public-page .agent-public-profile {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+
+  .agent-public-page .agent-public-summary {
+    flex: 1 1 auto;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .agent-public-page .agent-public-photo {
+    margin: 0 0 0.45rem;
+  }
+
+  .agent-public-page .agent-public-social {
+    justify-content: flex-start;
+  }
+
+  .agent-public-page .agent-public-stats {
+    width: min(280px, 34%);
+  }
+}
