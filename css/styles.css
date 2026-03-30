@@ -5137,3 +5137,61 @@ body:not(.dark):not(.dark-mode) .footer-social-link:hover {
     width: min(280px, 34%);
   }
 }
+
+/* CTA principal para tarjetas de propiedades */
+.btn-primary-property {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin-top: 0.95rem;
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: var(--primary-red-fixed);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.btn-primary-property:hover,
+.btn-primary-property:focus-visible {
+  background: var(--primary-red-dark);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary-property:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-red-fixed) 45%, #ffffff);
+  outline-offset: 2px;
+}
+
+.property-card .btn-primary-property {
+  margin-top: 1rem;
+}
+
+body.dark .btn-primary-property,
+body.dark-mode .btn-primary-property {
+  background: var(--primary-red-fixed);
+  color: #fff;
+}
+
+body.dark .btn-primary-property:hover,
+body.dark .btn-primary-property:focus-visible,
+body.dark-mode .btn-primary-property:hover,
+body.dark-mode .btn-primary-property:focus-visible {
+  background: var(--primary-red-dark);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .btn-primary-property {
+    width: 100%;
+    min-height: 46px;
+  }
+}
