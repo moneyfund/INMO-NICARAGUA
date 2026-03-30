@@ -31,7 +31,8 @@ const fields = {
   description: document.getElementById('description'),
   latitude: document.getElementById('latitude'),
   longitude: document.getElementById('longitude'),
-  agentId: document.getElementById('propertyAgent')
+  agentId: document.getElementById('propertyAgent'),
+  operation: document.getElementById('propertyOperation')
 };
 
 const imagesContainer = document.getElementById('imagesContainer');
@@ -262,6 +263,7 @@ function fillForm(property) {
 
   fields.description.value = property.description || property.descripcion || '';
   fields.agentId.value = property.agentId || '';
+  if (fields.operation) fields.operation.value = String(property.tipoOperacion || property.operation || property.operacion || 'venta').toLowerCase();
 
   const images = getImagesFromProperty(property);
   resetImageFields(images.length ? images : ['']);
@@ -290,6 +292,7 @@ function buildPropertyPayload(existing = {}) {
   const area = Number(fields.size.value || 0);
   const images = getImageUrlsFromForm();
   const selectedAgentId = fields.agentId.value;
+  const operation = String(fields.operation?.value || 'venta').trim().toLowerCase();
 
   return {
     ...existing,
@@ -303,6 +306,9 @@ function buildPropertyPayload(existing = {}) {
     descripcion: description,
     type,
     tipo: type,
+    operation,
+    operacion: operation,
+    tipoOperacion: operation,
     bedrooms,
     habitaciones: bedrooms,
     bathrooms,

@@ -288,6 +288,32 @@ main { padding-top: var(--header-offset, 84px); }
 .hero h1 { color: var(--text-inverse); font-size: clamp(2rem, 4.5vw, 3.4rem); margin: .5rem 0 1rem; }
 .eyebrow { color: var(--accent-gold-soft); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; font-size: .85rem; }
 .search-form { display: grid; grid-template-columns: 2fr 1fr auto; gap: .75rem; margin-top: 1.5rem; }
+.hero-operation-tabs {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  gap: .45rem;
+  padding: .35rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(185, 28, 28, 0.2);
+  width: fit-content;
+}
+.hero-operation-tab {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid transparent;
+  padding: .5rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.hero-operation-tab:hover {
+  background: rgba(185, 28, 28, 0.12);
+}
+.hero-operation-tab.is-active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(185, 28, 28, 0.28);
+}
 .search-form input, .search-form select, .search-form button,
 .filter-grid input, .filter-grid select, .filter-grid button,
 .contact-form input, .contact-form textarea, .contact-form button {
@@ -949,6 +975,28 @@ body.dark-mode button:hover {
   background: var(--accent-strong-hover);
 }
 
+body.dark .hero-operation-tabs,
+body.dark-mode .hero-operation-tabs {
+  background: rgba(42, 20, 20, 0.92);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+body.dark .hero-operation-tab,
+body.dark-mode .hero-operation-tab {
+  color: #fca5a5;
+}
+
+body.dark .hero-operation-tab:hover,
+body.dark-mode .hero-operation-tab:hover {
+  background: rgba(127, 29, 29, 0.55);
+}
+
+body.dark .hero-operation-tab.is-active,
+body.dark-mode .hero-operation-tab.is-active {
+  background: #991b1b;
+  color: #fff;
+}
+
 body.dark .search-form input,
 body.dark,
 body.dark-mode .search-form select,
@@ -1020,6 +1068,7 @@ body.dark-mode .site-nav {
 }
 @media (max-width: 900px) {
   .search-form, .filter-grid, .split-grid, .detail-grid { grid-template-columns: 1fr; }
+  .hero-operation-tabs { width: 100%; justify-content: center; }
   .agent-card {
     grid-template-columns: 1fr;
   }
