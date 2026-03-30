@@ -1,4 +1,4 @@
-# INMO NICARAGUA
+# Diamantes Realty Group
 
 Sitio web inmobiliario profesional desarrollado con HTML, CSS y JavaScript vanilla.
 
