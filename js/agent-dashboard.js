@@ -374,6 +374,7 @@ function getPropertyPayload(user, profileName, images, coverImage) {
     tipo: type,
     operation: document.getElementById('operacion-propiedad').value.trim(),
     operacion: document.getElementById('operacion-propiedad').value.trim(),
+    tipoOperacion: document.getElementById('operacion-propiedad').value.trim(),
     bedrooms: Number(document.getElementById('propertyBedrooms').value || 0),
     habitaciones: Number(document.getElementById('propertyBedrooms').value || 0),
     bathrooms: Number(document.getElementById('propertyBathrooms').value || 0),
@@ -509,7 +510,7 @@ function fillPropertyForm(property) {
   document.getElementById('propertyLocation').value = property.location || property.ubicacion || '';
   document.getElementById('propertyDescription').value = property.description || property.descripcion || '';
   document.getElementById('tipo-propiedad').value = normalizePropertyType(property.type || property.tipo || '');
-  document.getElementById('operacion-propiedad').value = (property.operation || property.operacion || '').toLowerCase();
+  document.getElementById('operacion-propiedad').value = (property.tipoOperacion || property.operation || property.operacion || '').toLowerCase();
   document.getElementById('propertyBedrooms').value = property.bedrooms || property.habitaciones || 0;
   document.getElementById('propertyBathrooms').value = property.bathrooms || property.banos || 0;
   document.getElementById('propertyArea').value = property.areaValue || property.area || '';
@@ -544,7 +545,7 @@ function propertyCard(property) {
     <article class="property-card">
       <img src="${coverImage}" alt="${property.title || property.titulo || 'Propiedad'}">
       <div class="property-card-content">
-        <p class="badge">${formatPropertyType(property.type || property.tipo)} en ${String(formatPropertyOperation(property.operation || property.operacion) || 'Venta').toLowerCase()}</p>
+        <p class="badge">${formatPropertyType(property.type || property.tipo)} en ${String(formatPropertyOperation(property.tipoOperacion || property.operation || property.operacion) || 'Venta').toLowerCase()}</p>
         <h3>${property.title || property.titulo || 'Propiedad'}</h3>
         <p>${property.location || property.ubicacion || ''}</p>
         <p class="price">${formatDualPrice(property.priceUsd ?? property.price ?? property.precio)}</p>

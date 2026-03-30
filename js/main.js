@@ -107,14 +107,34 @@ if (yearElement) {
 
 const heroSearchForm = document.getElementById('heroSearchForm');
 if (heroSearchForm) {
+  const operationInput = document.getElementById('heroOperationInput');
+  const operationTabs = Array.from(heroSearchForm.querySelectorAll('.hero-operation-tab'));
+
+  const setHeroOperation = (operation = '') => {
+    if (operationInput) operationInput.value = operation;
+    operationTabs.forEach((tab) => {
+      const isActive = tab.dataset.operation === operation;
+      tab.classList.toggle('is-active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+  };
+
+  operationTabs.forEach((tab) => {
+    tab.addEventListener('click', () => setHeroOperation(tab.dataset.operation || ''));
+  });
+
+  setHeroOperation(operationInput?.value || '');
+
   heroSearchForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const location = document.getElementById('searchInput').value.trim();
     const type = document.getElementById('typeInput').value;
+    const operation = operationInput?.value || '';
 
     const params = new URLSearchParams();
     if (location) params.set('ubicacion', location);
     if (type) params.set('tipo', type);
+    if (operation) params.set('operacion', operation);
 
     window.location.href = `propiedades.html?${params.toString()}`;
   });

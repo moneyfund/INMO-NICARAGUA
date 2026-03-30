@@ -40,6 +40,12 @@
         <h1>Encuentra tú propiedad ideal en Nicaragua </h1>
         <p>Explora residencias frente al mar, fincas exclusivas y oportunidades de inversión en ubicaciones privilegiadas.</p>
         <form class="search-form" id="heroSearchForm">
+          <div class="hero-operation-tabs" role="tablist" aria-label="Tipo de operación">
+            <button type="button" class="hero-operation-tab is-active" data-operation="" role="tab" aria-selected="true">Todas</button>
+            <button type="button" class="hero-operation-tab" data-operation="venta" role="tab" aria-selected="false">Comprar</button>
+            <button type="button" class="hero-operation-tab" data-operation="alquiler" role="tab" aria-selected="false">Alquiler</button>
+          </div>
+          <input type="hidden" id="heroOperationInput" value="" />
           <input type="text" id="searchInput" placeholder="Ciudad o zona (Ej: San Juan del Sur)" aria-label="Buscar ubicación" />
           <select id="typeInput" aria-label="Tipo de propiedad">
             <option value="">Tipo de propiedad</option>

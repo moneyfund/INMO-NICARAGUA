@@ -102,7 +102,7 @@ function normalizeProperty(property = {}, id = '') {
   const normalizedAreaValue = propertyUtils.getAreaValue ? propertyUtils.getAreaValue(property) : Number(property.area ?? 0);
   const area = Number.isFinite(normalizedAreaValue) ? normalizedAreaValue : (property.area || '');
   const type = normalizePropertyType(property.type || property.tipo || '');
-  const operation = normalizePropertyOperation(property.operation || property.operacion || '');
+  const operation = normalizePropertyOperation(property.tipoOperacion || property.operation || property.operacion || '');
   const description = property.description || property.descripcion || '';
 
   return {
@@ -127,6 +127,7 @@ function normalizeProperty(property = {}, id = '') {
     typeLabel: getPropertyTypeLabel(type),
     operation,
     operacion: operation,
+    tipoOperacion: operation,
     operationLabel: formatPropertyOperation(operation),
     areaValue: Number.isFinite(normalizedAreaValue) ? normalizedAreaValue : null,
     areaUnit: propertyUtils.normalizeAreaUnit ? propertyUtils.normalizeAreaUnit(property.areaUnit || '') : (property.areaUnit || ''),
@@ -317,7 +318,7 @@ function getInitialFilters() {
   return {
     ubicacion: params.get('ubicacion') || '',
     tipo: normalizePropertyType(params.get('tipo') || ''),
-    operacion: normalizePropertyOperation(params.get('operacion') || ''),
+    operacion: normalizePropertyOperation(params.get('operacion') || params.get('tipoOperacion') || ''),
     agent: params.get('agent') || ''
   };
 }
@@ -352,7 +353,7 @@ function applyFilters(properties) {
   return properties.filter((property) => {
     const matchesLocation = !locationInput || String(property.ubicacion || '').toLowerCase().includes(locationInput);
     const matchesType = !typeInput || normalizePropertyType(property.tipo) === typeInput;
-    const matchesOperation = !operationInput || normalizePropertyOperation(property.operacion) === operationInput;
+    const matchesOperation = !operationInput || normalizePropertyOperation(property.tipoOperacion || property.operacion || property.operation) === operationInput;
     const matchesBudget = !budgetInput || Number(getPriceUsd(property) || 0) <= budgetInput;
     return matchesLocation && matchesType && matchesOperation && matchesBudget;
   });
@@ -770,7 +771,13 @@ function renderGlobalMap(properties) {
 
         if (filterLocationValue) params.set('ubicacion', filterLocationValue); else params.delete('ubicacion');
         if (filterTypeValue) params.set('tipo', filterTypeValue); else params.delete('tipo');
-        if (filterOperationValue) params.set('operacion', filterOperationValue); else params.delete('operacion');
+        if (filterOperationValue) {
+          params.set('operacion', filterOperationValue);
+          params.set('tipoOperacion', filterOperationValue);
+        } else {
+          params.delete('operacion');
+          params.delete('tipoOperacion');
+        }
 
         const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
         window.history.replaceState({}, '', nextUrl);

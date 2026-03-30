@@ -51,7 +51,10 @@
   }
 
   function normalizeOperation(value = '') {
-    return String(value || '').trim().toLowerCase();
+    const normalized = String(value || '').trim().toLowerCase();
+    if (normalized === 'comprar' || normalized === 'venta') return 'venta';
+    if (normalized === 'renta' || normalized === 'alquiler') return 'alquiler';
+    return normalized;
   }
 
   function convertUsdToNio(usd) {
