@@ -62,15 +62,19 @@
           <form id="propertyForm" class="dashboard-form">
             <input type="hidden" id="propertyDocId" />
             <input type="text" id="propertyTitle" placeholder="Título" required />
-            <input type="number" id="propertyPrice" placeholder="Precio" min="1" required />
+            <input type="number" id="propertyPrice" placeholder="Precio (USD)" min="1" step="0.01" required />
+            <p id="propertyDualPricePreview" class="dashboard-helper-text">Precio no disponible</p>
             <input type="text" id="propertyLocation" placeholder="Ubicación" required />
             <textarea id="propertyDescription" rows="4" placeholder="Descripción"></textarea>
             <select id="tipo-propiedad" required>
               <option value="">Seleccionar tipo</option>
-              <option value="casa">Casa</option>
-              <option value="apartamento">Apartamento</option>
-              <option value="terreno">Terreno</option>
-              <option value="bodega">Bodega</option>
+              <option value="house">Casa</option>
+              <option value="apartment">Apartamento</option>
+              <option value="land">Terreno</option>
+              <option value="warehouse">Bodega</option>
+              <option value="farm">Finca</option>
+              <option value="quinta">Quinta</option>
+              <option value="beach_house">Casa cerca del mar</option>
             </select>
             <select id="operacion-propiedad" required>
               <option value="">Tipo de operación</option>
@@ -79,7 +83,13 @@
             </select>
             <input type="number" id="propertyBedrooms" placeholder="Habitaciones" min="0" />
             <input type="number" id="propertyBathrooms" placeholder="Baños" min="0" />
-            <input type="number" id="propertyArea" placeholder="Área m²" min="0" />
+            <input type="number" id="propertyArea" placeholder="Cantidad de área" min="0.01" step="0.01" required />
+            <select id="propertyAreaUnit" required>
+              <option value="metros">metros</option>
+              <option value="varas">varas</option>
+              <option value="manzanas">manzanas</option>
+            </select>
+            <p id="propertyPricePerAreaPreview" class="dashboard-helper-text">Precio por área no disponible</p>
             <input type="url" id="propertyVideo" placeholder="Video URL" />
             <div class="dashboard-image-uploader">
               <h3 class="dashboard-label">Imágenes</h3>
@@ -132,6 +142,7 @@
   <script src="js/firebase-client.js"></script>
   <script src="js/main.js"></script>
   <script src="js/image-utils.js"></script>
+  <script src="js/property-utils.js"></script>
   <script type="module" src="js/agent-dashboard.js"></script>
 </body>
 </html>
