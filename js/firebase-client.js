@@ -18,7 +18,8 @@
       enabled: false,
       db: null,
       auth: null,
-      provider: null
+      provider: null,
+      storage: null
     };
     document.dispatchEvent(new CustomEvent('inmo:firebase-ready', { detail: window.inmoFirebase }));
     return;
@@ -26,19 +27,23 @@
 
   const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
   const authAvailable = typeof firebase.auth === 'function';
+  const firestoreAvailable = typeof firebase.firestore === 'function';
+  const storageAvailable = typeof firebase.storage === 'function';
 
   console.info(`[Firebase] Inicializado en proyecto: ${firebaseConfig.projectId}`);
   console.info('[Firebase] Servicios activos:', {
     auth: authAvailable,
-    firestore: typeof firebase.firestore === 'function'
+    firestore: firestoreAvailable,
+    storage: storageAvailable
   });
 
   window.inmoFirebase = {
     enabled: true,
     app,
-    db: firebase.firestore(),
+    db: firestoreAvailable ? firebase.firestore() : null,
     auth: authAvailable ? firebase.auth() : null,
     provider: authAvailable ? new firebase.auth.GoogleAuthProvider() : null,
+    storage: storageAvailable ? firebase.storage() : null,
     currentUser: null
   };
 
