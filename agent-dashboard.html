@@ -128,6 +128,33 @@
         </article>
       </div>
 
+
+
+      <article id="sharedListsCard" class="dashboard-card hidden">
+        <h2>Listas compartidas</h2>
+        <p class="dashboard-helper-text">Selecciona propiedades activas, crea una lista privada y comparte un enlace único con tu cliente.</p>
+
+        <form id="sharedListForm" class="dashboard-form shared-list-form">
+          <input type="text" id="sharedListTitle" placeholder="Título de la lista" required />
+          <input type="text" id="sharedListClientName" placeholder="Nombre del cliente (opcional)" />
+          <textarea id="sharedListNotes" rows="3" placeholder="Notas internas (opcional)"></textarea>
+          <div class="dashboard-form-actions">
+            <span id="sharedSelectedCounter" class="dashboard-helper-text">0 propiedades seleccionadas</span>
+            <button type="submit" id="createSharedListBtn" class="button-secondary">Crear lista compartida</button>
+          </div>
+          <p id="sharedListFeedback" class="dashboard-helper-text" aria-live="polite"></p>
+        </form>
+
+        <div class="shared-inventory-header">
+          <h3>Inventario disponible</h3>
+          <input type="search" id="sharedInventorySearch" placeholder="Buscar por título o ubicación" />
+        </div>
+        <div id="sharedInventoryList" class="properties-grid"></div>
+
+        <h3>Mis listas creadas</h3>
+        <div id="sharedListsHistory" class="shared-history-list"></div>
+      </article>
+
       <article id="agentPropertiesCard" class="dashboard-card hidden">
         <h2>Mis propiedades</h2>
         <div id="agentPropertiesList" class="properties-grid"></div>

@@ -11,6 +11,8 @@ import {
   onSnapshot,
   query,
   where,
+  getDocs,
+  orderBy,
   serverTimestamp,
   onAuthStateChanged,
   signInWithPopup,
@@ -26,7 +28,11 @@ const state = {
   map: null,
   mapMarker: null,
   propertyImages: [],
-  isSavingProperty: false
+  isSavingProperty: false,
+  sharedSelectedPropertyIds: new Set(),
+  sharedInventory: [],
+  agentProfile: null,
+  unsubscribeSharedLists: null
 };
 
 const fallbackPhoto = imageUtils?.PLACEHOLDER || 'assets/placeholder.svg';
@@ -565,7 +571,9 @@ async function saveProfile(event) {
   event.preventDefault();
   if (!state.user) return;
 
-  await setDoc(doc(db, 'agents', state.user.uid), getProfilePayload(state.user), { merge: true });
+  const payload = getProfilePayload(state.user);
+  await setDoc(doc(db, 'agents', state.user.uid), payload, { merge: true });
+  state.agentProfile = { ...(state.agentProfile || {}), ...payload };
   setMessage('Perfil actualizado correctamente.', 'success');
 }
 
@@ -666,7 +674,9 @@ async function loadProfile(user) {
   document.getElementById('agentFacebook').value = profile.facebook || '';
   document.getElementById('agentTiktok').value = profile.tiktok || '';
   document.getElementById('agentWhatsapp').value = profile.whatsapp || '';
+  state.agentProfile = profile;
 }
+
 
 function listenOwnProperties(user) {
   if (state.unsubscribeProperties) state.unsubscribeProperties();
@@ -698,11 +708,283 @@ function listenOwnProperties(user) {
   });
 }
 
+
+function normalizePropertyForShare(data = {}, id = '') {
+  const title = data.title || data.titulo || 'Propiedad';
+  const location = data.location || data.ubicacion || 'Ubicación no disponible';
+  const type = normalizePropertyType(data.type || data.tipo || '');
+  const operation = (data.operation || data.operacion || data.tipoOperacion || 'venta').toLowerCase();
+  const price = Number(data.priceUsd ?? data.price ?? data.precio ?? 0);
+  const status = String(data.status || 'available').toLowerCase();
+  const bedrooms = Number(data.bedrooms ?? data.habitaciones ?? 0);
+  const bathrooms = Number(data.bathrooms ?? data.banos ?? 0);
+  const areaValue = Number(data.areaValue ?? data.area ?? 0);
+  const areaUnit = data.areaUnit || 'metros';
+  const coverImage = imageUtils.getCoverImage(data);
+
+  return {
+    id,
+    ...data,
+    title,
+    location,
+    type,
+    operation,
+    price,
+    status,
+    bedrooms,
+    bathrooms,
+    areaValue,
+    areaUnit,
+    coverImage
+  };
+}
+
+function setSharedFeedback(message = '', type = 'info') {
+  const node = document.getElementById('sharedListFeedback');
+  if (!node) return;
+  node.textContent = message;
+  node.dataset.type = type;
+}
+
+function updateSharedCounter() {
+  const counter = document.getElementById('sharedSelectedCounter');
+  if (!counter) return;
+  counter.textContent = `${state.sharedSelectedPropertyIds.size} propiedades seleccionadas`;
+}
+
+function escapeHtml(value = '') {
+  return String(value || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function getSharedLink(token = '') {
+  return `${window.location.origin}/share.html?token=${encodeURIComponent(token)}`;
+}
+
+function renderSharedInventory() {
+  const list = document.getElementById('sharedInventoryList');
+  const search = document.getElementById('sharedInventorySearch');
+  if (!list) return;
+
+  const term = String(search?.value || '').trim().toLowerCase();
+  const filtered = state.sharedInventory.filter((property) => {
+    if (!term) return true;
+    return `${property.title} ${property.location}`.toLowerCase().includes(term);
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = '<p class="empty-state">No hay propiedades que coincidan con la búsqueda.</p>';
+    return;
+  }
+
+  list.innerHTML = filtered.map((property) => {
+    const checked = state.sharedSelectedPropertyIds.has(property.id) ? 'checked' : '';
+    const statusLabel = property.status === 'sold' ? '<span class="property-status-tag">VENDIDA</span>' : '';
+    const perArea = formatPricePerArea(calculatePricePerArea(property.price, property.areaValue), property.areaUnit);
+
+    return `
+      <article class="property-card shared-select-card">
+        <label class="shared-select-checkbox">
+          <input type="checkbox" data-share-property-id="${property.id}" ${checked}>
+          <span>Seleccionar</span>
+        </label>
+        <img src="${property.coverImage || fallbackPhoto}" alt="${escapeHtml(property.title)}" loading="lazy">
+        <div class="property-card-content">
+          <p class="badge">${formatPropertyType(property.type)} en ${formatPropertyOperation(property.operation).toLowerCase()}</p>
+          <h3>${escapeHtml(property.title)}</h3>
+          <p>${escapeHtml(property.location)}</p>
+          <p class="price">${formatDualPrice(property.price)}</p>
+          <p>${perArea}</p>
+          ${statusLabel}
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  list.querySelectorAll('[data-share-property-id]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const propertyId = input.dataset.sharePropertyId;
+      if (!propertyId) return;
+
+      if (input.checked) state.sharedSelectedPropertyIds.add(propertyId);
+      else state.sharedSelectedPropertyIds.delete(propertyId);
+
+      updateSharedCounter();
+    });
+  });
+}
+
+async function loadShareInventory() {
+  if (!state.user) return;
+
+  const snapshot = await getDocs(collection(db, 'properties'));
+  const properties = snapshot.docs
+    .map((item) => normalizePropertyForShare(item.data(), item.id))
+    .filter((property) => property.status !== 'sold');
+
+  state.sharedInventory = properties;
+  renderSharedInventory();
+}
+
+function generateShareToken() {
+  const randomBlock = crypto.randomUUID().replaceAll('-', '').slice(0, 12);
+  return `share_${randomBlock}`;
+}
+
+async function createSharedList(event) {
+  event.preventDefault();
+  if (!state.user) return;
+
+  if (!state.sharedSelectedPropertyIds.size) {
+    setSharedFeedback('Debes seleccionar al menos una propiedad.', 'error');
+    return;
+  }
+
+  const title = document.getElementById('sharedListTitle')?.value.trim();
+  if (!title) {
+    setSharedFeedback('El título de la lista es obligatorio.', 'error');
+    return;
+  }
+
+  const profile = state.agentProfile || {};
+  const whatsapp = profile.whatsapp || profile.phone || '';
+  if (!whatsapp) {
+    setSharedFeedback('Completa teléfono o WhatsApp en tu perfil para compartir listas.', 'error');
+    return;
+  }
+
+  const sharedRef = doc(collection(db, 'sharedPropertyLists'));
+  const token = generateShareToken();
+
+  await setDoc(sharedRef, {
+    token,
+    title,
+    createdByAgentId: state.user.uid,
+    createdByAgentName: profile.name || state.user.displayName || 'Agente',
+    createdByAgentPhone: profile.phone || '',
+    createdByAgentPhoto: profile.photo || state.user.photoURL || fallbackPhoto,
+    createdByAgentEmail: profile.email || state.user.email || '',
+    createdByAgentWhatsapp: whatsapp,
+    clientName: document.getElementById('sharedListClientName')?.value.trim() || '',
+    propertyIds: Array.from(state.sharedSelectedPropertyIds),
+    status: 'active',
+    notes: document.getElementById('sharedListNotes')?.value.trim() || '',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
+  const sharedLink = getSharedLink(token);
+  setSharedFeedback(`Lista creada. Link: ${sharedLink}`, 'success');
+  try {
+    await navigator.clipboard.writeText(sharedLink);
+    setSharedFeedback('Lista creada y link copiado al portapapeles.', 'success');
+  } catch (error) {
+    // no-op when clipboard is unavailable
+  }
+
+  state.sharedSelectedPropertyIds.clear();
+  document.getElementById('sharedListForm')?.reset();
+  updateSharedCounter();
+  renderSharedInventory();
+}
+
+function renderSharedHistory(items = []) {
+  const container = document.getElementById('sharedListsHistory');
+  if (!container) return;
+
+  if (!items.length) {
+    container.innerHTML = '<p class="empty-state">Todavía no has creado listas compartidas.</p>';
+    return;
+  }
+
+  container.innerHTML = items.map((item) => {
+    const date = item.createdAt?.toDate ? item.createdAt.toDate().toLocaleString('es-NI') : 'Fecha pendiente';
+    const total = Array.isArray(item.propertyIds) ? item.propertyIds.length : 0;
+    const link = getSharedLink(item.token);
+    const statusLabel = item.status === 'inactive' ? 'Inactiva' : 'Activa';
+
+    return `
+      <article class="shared-history-item">
+        <div>
+          <h4>${escapeHtml(item.title || 'Lista sin título')}</h4>
+          <p>${date} · ${total} propiedades · ${statusLabel}</p>
+        </div>
+        <div class="shared-history-actions">
+          <button type="button" data-share-copy="${item.token}">Copiar link</button>
+          <button type="button" data-share-toggle="${item.id}" data-next-status="${item.status === 'active' ? 'inactive' : 'active'}">${item.status === 'active' ? 'Desactivar' : 'Activar'}</button>
+          <button type="button" data-share-delete="${item.id}">Eliminar</button>
+        </div>
+        <p class="shared-link-preview">${link}</p>
+      </article>
+    `;
+  }).join('');
+
+  container.querySelectorAll('[data-share-copy]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const token = button.dataset.shareCopy;
+      if (!token) return;
+      const link = getSharedLink(token);
+      try {
+        await navigator.clipboard.writeText(link);
+        setSharedFeedback('Link copiado correctamente.', 'success');
+      } catch (error) {
+        setSharedFeedback(link, 'info');
+      }
+    });
+  });
+
+  container.querySelectorAll('[data-share-toggle]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const listId = button.dataset.shareToggle;
+      const nextStatus = button.dataset.nextStatus;
+      if (!listId || !nextStatus) return;
+      await updateDoc(doc(db, 'sharedPropertyLists', listId), { status: nextStatus, updatedAt: serverTimestamp() });
+      setSharedFeedback(`Lista ${nextStatus === 'active' ? 'activada' : 'desactivada'} correctamente.`, 'success');
+    });
+  });
+
+  container.querySelectorAll('[data-share-delete]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const listId = button.dataset.shareDelete;
+      if (!listId) return;
+      await deleteDoc(doc(db, 'sharedPropertyLists', listId));
+      setSharedFeedback('Lista eliminada.', 'success');
+    });
+  });
+}
+
+function listenOwnSharedLists(user) {
+  if (state.unsubscribeSharedLists) state.unsubscribeSharedLists();
+
+  const sharedQuery = query(
+    collection(db, 'sharedPropertyLists'),
+    where('createdByAgentId', '==', user.uid),
+    orderBy('createdAt', 'desc')
+  );
+
+  state.unsubscribeSharedLists = onSnapshot(sharedQuery, (snapshot) => {
+    const lists = snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() }));
+    renderSharedHistory(lists);
+  });
+}
+
+function bindSharedListModule() {
+  document.getElementById('sharedListForm')?.addEventListener('submit', createSharedList);
+  document.getElementById('sharedInventorySearch')?.addEventListener('input', renderSharedInventory);
+  updateSharedCounter();
+}
+
 function updateLayoutForAuth(user) {
   const dashboard = document.getElementById('agentDashboard');
   if (dashboard) dashboard.classList.toggle('hidden', !user);
   document.getElementById('agentPropertiesCard')?.classList.toggle('hidden', !user);
+  document.getElementById('sharedListsCard')?.classList.toggle('hidden', !user);
 }
+
 
 function bindAuthControls() {
   const authBox = document.getElementById('agentAuthBox');
@@ -713,12 +995,20 @@ function bindAuthControls() {
     updateLayoutForAuth(user);
 
     if (!user) {
+      state.sharedInventory = [];
+      state.sharedSelectedPropertyIds.clear();
+      state.agentProfile = null;
+      if (state.unsubscribeSharedLists) state.unsubscribeSharedLists();
+      renderSharedInventory();
+      renderSharedHistory([]);
       setMessage('Inicia sesión para administrar tu perfil y propiedades.', 'info');
       return;
     }
 
     await loadProfile(user);
     listenOwnProperties(user);
+    listenOwnSharedLists(user);
+    await loadShareInventory();
     setMessage('Sesión activa. Solo puedes editar tus propios datos.', 'success');
 
     const logoutBtn = document.getElementById('logoutBtn');
@@ -780,6 +1070,7 @@ function init() {
   initPropertyLocationMap();
   bindAuthControls();
   bindImageControls();
+  bindSharedListModule();
   bindImagePreviewActions();
   bindCalculatedFields();
   toggleImageInputMode();
