@@ -33,6 +33,29 @@ service cloud.firestore {
       allow update, delete: if isSignedIn() && resource.data.userEmail == request.auth.token.email;
     }
 
+
+    match /sharedPropertyLists/{listId} {
+      allow read: if resource.data.status == 'active'
+        || (isSignedIn() && resource.data.createdByAgentId == request.auth.uid)
+        || isAdmin();
+
+      allow create: if isSignedIn()
+        && request.resource.data.createdByAgentId == request.auth.uid
+        && request.resource.data.token is string
+        && request.resource.data.token.size() >= 12
+        && request.resource.data.propertyIds is list
+        && request.resource.data.status in ['active', 'inactive'];
+
+      allow update: if isSignedIn() && (
+          (resource.data.createdByAgentId == request.auth.uid
+            && request.resource.data.createdByAgentId == resource.data.createdByAgentId
+            && request.resource.data.token == resource.data.token)
+          || isAdmin()
+        );
+
+      allow delete: if isSignedIn() && (resource.data.createdByAgentId == request.auth.uid || isAdmin());
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
