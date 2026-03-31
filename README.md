@@ -60,3 +60,14 @@ firebase deploy --only firestore:rules
 - Usa enlaces directos que terminen en `.jpg`, `.jpeg`, `.png` o `.webp`.
 - Evita URLs de Facebook (`facebook.com`, `fbcdn.net`), porque suelen bloquear la carga directa de imágenes.
 - El frontend mantiene fallback automático para imágenes inválidas usando `assets/placeholder.svg`.
+
+
+## Despliegue en Vercel
+
+El proyecto incluye `vercel.json` para despliegue estático con URLs limpias y reescrituras de rutas públicas (`/propiedades`, `/propiedad`, `/agentes`, `/agente`, `/mapa`, `/admin`, etc.) hacia sus archivos HTML correspondientes.
+
+Puntos importantes:
+
+- `cleanUrls: true` permite usar rutas sin `.html`.
+- `rewrites` evita errores 404 en páginas internas al refrescar.
+- No se altera la integración con Firebase/Firestore: las variables y configuración se mantienen en `js/firebase-client.js` y `assets/js/firebase-config.js`.
