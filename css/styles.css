@@ -5308,7 +5308,9 @@ body.dark-mode .btn-primary-property:focus-visible {
 }
 
 .detail-gallery {
-  min-height: 320px;
+  border-radius: 14px;
+  aspect-ratio: 16 / 10;
+  align-self: start;
 }
 
 .property-gallery::after,
@@ -5318,9 +5320,9 @@ body.dark-mode .btn-primary-property:focus-visible {
   inset: 0;
   background-image: url('../assets/marca de agua.png');
   background-repeat: no-repeat;
-  background-size: clamp(92px, 24%, 180px);
-  background-position: right 14px bottom 14px;
-  opacity: 0.22;
+  background-size: clamp(120px, 28%, 240px);
+  background-position: center;
+  opacity: 0.18;
   pointer-events: none;
   z-index: 2;
 }
@@ -5335,8 +5337,8 @@ body.dark-mode .btn-primary-property:focus-visible {
 }
 
 .detail-gallery-main-image {
-  min-height: 320px;
-  max-height: 520px;
+  min-height: 0;
+  max-height: min(72vh, 620px);
 }
 
 .gallery-nav {
@@ -5393,15 +5395,45 @@ body.dark-mode .gallery-nav {
   }
 
   .detail-gallery {
-    min-height: 250px;
+    aspect-ratio: 4 / 3;
   }
 
   .detail-gallery-main-image {
-    min-height: 250px;
+    max-height: min(58vh, 420px);
   }
 
   .gallery-nav {
     width: 36px;
     height: 36px;
   }
+}
+
+.detail-grid {
+  align-items: start;
+}
+
+.detail-sidebar {
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+}
+
+body:not(.dark):not(.dark-mode) .detail-sidebar h1,
+body:not(.dark):not(.dark-mode) .detail-sidebar h2,
+body:not(.dark):not(.dark-mode) .detail-sidebar h3,
+body:not(.dark):not(.dark-mode) .detail-sidebar .property-status-tag,
+body:not(.dark):not(.dark-mode) .detail-sidebar .price {
+  color: #9e0b0f !important;
+}
+
+body:not(.dark):not(.dark-mode) .detail-sidebar p,
+body:not(.dark):not(.dark-mode) .detail-sidebar li,
+body:not(.dark):not(.dark-mode) .detail-sidebar strong,
+body:not(.dark):not(.dark-mode) .detail-sidebar .badge,
+body:not(.dark):not(.dark-mode) .detail-sidebar .button-outline {
+  color: #7a1619 !important;
+}
+
+body:not(.dark):not(.dark-mode) .detail-sidebar .property-feature-list svg {
+  color: #9e0b0f !important;
 }

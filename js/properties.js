@@ -619,7 +619,7 @@ async function renderPropertyDetail() {
         <img class="detail-gallery-main-image" src="${getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
         ${galleryMarkup}
       </section>
-      <div>
+      <div class="detail-sidebar">
         <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
         <h1>${property.titulo}</h1>
         <p>${property.ubicacion}</p>
