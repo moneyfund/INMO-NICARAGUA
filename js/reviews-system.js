@@ -5,7 +5,7 @@ import {
   addDoc,
   query,
   where,
-  getDocs,
+  onSnapshot,
   serverTimestamp
 } from 'firebase/firestore';
 import {
@@ -33,7 +33,9 @@ const googleProvider = new GoogleAuthProvider();
 const state = {
   propertyId: '',
   user: null,
-  rating: 0
+  rating: 0,
+  isInitialized: false,
+  activeReviewUnsubscribes: []
 };
 
 function getPropertyIdFromUrl() {
@@ -56,9 +58,36 @@ function stars(rating) {
 }
 
 function formatDate(createdAt) {
-  const date = createdAt?.toDate ? createdAt.toDate() : null;
-  if (!date) return 'Fecha pendiente';
-  return new Intl.DateTimeFormat('es-NI', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+  if (createdAt?.toDate) {
+    return new Intl.DateTimeFormat('es-NI', { dateStyle: 'medium', timeStyle: 'short' }).format(createdAt.toDate());
+  }
+
+  if (createdAt instanceof Date) {
+    return new Intl.DateTimeFormat('es-NI', { dateStyle: 'medium', timeStyle: 'short' }).format(createdAt);
+  }
+
+  if (typeof createdAt === 'string' || typeof createdAt === 'number') {
+    const parsed = new Date(createdAt);
+    if (!Number.isNaN(parsed.getTime())) {
+      return new Intl.DateTimeFormat('es-NI', { dateStyle: 'medium', timeStyle: 'short' }).format(parsed);
+    }
+  }
+
+  return 'Fecha pendiente';
+}
+
+function normalizeReview(docData = {}, id = '', source = '') {
+  const rating = Math.max(0, Math.min(5, Number(docData.rating || 0)));
+  return {
+    id,
+    source,
+    propertyId: String(docData.propertyId || docData.propertyID || '').trim(),
+    userName: docData.userName || docData.authorName || docData.name || 'Usuario',
+    userPhoto: docData.userPhoto || docData.photoURL || docData.avatar || '',
+    comment: docData.comment || docData.content || docData.review || '',
+    rating,
+    createdAt: docData.createdAt || docData.date || null
+  };
 }
 
 function setMessage(message, type = '') {
@@ -96,7 +125,7 @@ function renderShell() {
       <p class="review-form-message" data-new-review-message></p>
     </form>
     <div class="reviews-list" data-new-reviews-list>
-      <p class="reviews-empty">Aún no hay opiniones para esta propiedad.</p>
+      <p class="reviews-empty">Aún no hay reseñas para esta propiedad</p>
     </div>
   `;
 
@@ -163,7 +192,7 @@ function renderReviews(reviews) {
   averageStars.textContent = stars(Math.round(averageValue));
 
   if (!total) {
-    list.innerHTML = '<p class="reviews-empty">Aún no hay opiniones para esta propiedad.</p>';
+    list.innerHTML = '<p class="reviews-empty">Aún no hay reseñas para esta propiedad</p>';
     return;
   }
 
@@ -182,28 +211,79 @@ function renderReviews(reviews) {
             <small>${formatDate(review.createdAt)}</small>
           </div>
         </header>
-        <p>"${comment}"</p>
+        <p>${comment}</p>
       </article>
     `;
   }).join('');
 }
 
-async function loadReviews() {
-  const reviewQuery = query(
-    collection(db, 'reviews'),
-    where('propertyId', '==', state.propertyId)
-  );
+function sortReviews(items = []) {
+  return [...items].sort((a, b) => {
+    const timeA = a.createdAt?.seconds || (a.createdAt instanceof Date ? a.createdAt.getTime() : 0);
+    const timeB = b.createdAt?.seconds || (b.createdAt instanceof Date ? b.createdAt.getTime() : 0);
+    return timeB - timeA;
+  });
+}
 
-  const snapshot = await getDocs(reviewQuery);
-  const reviews = snapshot.docs
-    .map((reviewDoc) => ({ id: reviewDoc.id, ...reviewDoc.data() }))
-    .sort((a, b) => {
-      const timeA = a.createdAt?.seconds || 0;
-      const timeB = b.createdAt?.seconds || 0;
-      return timeB - timeA;
+function clearReviewSubscriptions() {
+  state.activeReviewUnsubscribes.forEach((unsubscribe) => {
+    try {
+      unsubscribe();
+    } catch (error) {
+      console.warn('No se pudo cerrar suscripción de reseñas:', error);
+    }
+  });
+  state.activeReviewUnsubscribes = [];
+}
+
+function subscribeToReviews() {
+  const reviewBuckets = {
+    topLevel: [],
+    topLevelAlt: [],
+    nested: []
+  };
+
+  const updateView = () => {
+    const merged = [...reviewBuckets.topLevel, ...reviewBuckets.topLevelAlt, ...reviewBuckets.nested];
+    const uniqueByKey = new Map();
+
+    merged.forEach((item) => {
+      const key = `${item.userName}-${item.comment}-${item.rating}-${item.createdAt?.seconds || item.createdAt || ''}`;
+      uniqueByKey.set(key, item);
     });
 
-  renderReviews(reviews);
+    renderReviews(sortReviews(Array.from(uniqueByKey.values())));
+  };
+
+  const topLevelQuery = query(collection(db, 'reviews'), where('propertyId', '==', state.propertyId));
+  const topLevelAltQuery = query(collection(db, 'reviews'), where('propertyID', '==', state.propertyId));
+  const nestedCollectionRef = collection(db, 'properties', state.propertyId, 'reviews');
+
+  const unsubTop = onSnapshot(topLevelQuery, (snapshot) => {
+    reviewBuckets.topLevel = snapshot.docs.map((docSnap) => normalizeReview(docSnap.data(), docSnap.id, 'reviews'));
+    updateView();
+  }, (error) => {
+    console.error('Error leyendo reseñas en /reviews (propertyId):', error);
+  });
+
+  const unsubTopAlt = onSnapshot(topLevelAltQuery, (snapshot) => {
+    reviewBuckets.topLevelAlt = snapshot.docs.map((docSnap) => normalizeReview(docSnap.data(), docSnap.id, 'reviews'));
+    updateView();
+  }, () => {
+    reviewBuckets.topLevelAlt = [];
+    updateView();
+  });
+
+  const unsubNested = onSnapshot(nestedCollectionRef, (snapshot) => {
+    reviewBuckets.nested = snapshot.docs
+      .map((docSnap) => normalizeReview({ propertyId: state.propertyId, ...docSnap.data() }, docSnap.id, 'properties/reviews'));
+    updateView();
+  }, () => {
+    reviewBuckets.nested = [];
+    updateView();
+  });
+
+  state.activeReviewUnsubscribes = [unsubTop, unsubTopAlt, unsubNested];
 }
 
 function bindReviewForm() {
@@ -238,45 +318,66 @@ function bindReviewForm() {
       return;
     }
 
-    try {
-      await addDoc(collection(db, 'reviews'), {
-        propertyId: state.propertyId,
-        userId: state.user.uid,
-        userName: state.user.displayName || 'Usuario',
-        userPhoto: state.user.photoURL || '',
-        rating: state.rating,
-        comment,
-        createdAt: serverTimestamp()
-      });
+    const payload = {
+      propertyId: state.propertyId,
+      userId: state.user.uid,
+      userName: state.user.displayName || 'Usuario',
+      userPhoto: state.user.photoURL || '',
+      rating: state.rating,
+      comment,
+      content: comment,
+      createdAt: serverTimestamp()
+    };
 
+    try {
+      await addDoc(collection(db, 'reviews'), payload);
       form.reset();
       state.rating = 0;
       refreshStarSelection();
       setMessage('Reseña enviada correctamente.', 'is-success');
-      await loadReviews();
     } catch (error) {
-      console.error('Review save error:', error);
-      setMessage('No se pudo guardar la reseña. Inténtalo de nuevo.', 'is-error');
+      console.warn('No se pudo guardar en /reviews, intentando subcolección.', error);
+      try {
+        await addDoc(collection(db, 'properties', state.propertyId, 'reviews'), {
+          ...payload,
+          propertyId: state.propertyId
+        });
+        form.reset();
+        state.rating = 0;
+        refreshStarSelection();
+        setMessage('Reseña enviada correctamente.', 'is-success');
+      } catch (nestedError) {
+        console.error('Review save error:', nestedError);
+        setMessage('No se pudo guardar la reseña. Inténtalo de nuevo.', 'is-error');
+      }
     }
   });
 }
 
 async function initReviewSystem() {
-  state.propertyId = getPropertyIdFromUrl();
-  if (!state.propertyId) return;
+  const nextPropertyId = getPropertyIdFromUrl();
+  if (!nextPropertyId) return;
+
+  state.propertyId = nextPropertyId;
 
   if (!renderShell()) return;
 
+  clearReviewSubscriptions();
   bindReviewForm();
   refreshStarSelection();
+  subscribeToReviews();
 
-  onAuthStateChanged(auth, (user) => {
-    state.user = user;
+  if (!state.isInitialized) {
+    onAuthStateChanged(auth, (user) => {
+      state.user = user;
+      renderAuthBox();
+    });
+    state.isInitialized = true;
+  } else {
     renderAuthBox();
-  });
-
-  await loadReviews();
+  }
 }
 
 window.addEventListener('propertyDetailReady', initReviewSystem);
 window.addEventListener('DOMContentLoaded', initReviewSystem);
+window.addEventListener('beforeunload', clearReviewSubscriptions);
