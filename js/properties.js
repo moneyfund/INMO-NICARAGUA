@@ -348,7 +348,7 @@ function propertyCardTemplate(property) {
       <div class="property-card-content">
         <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
         <h3>${property.title || property.titulo}</h3>
-        <p>${locationLabel}</p>
+        <p class="property-location">${locationLabel}</p>
         <p class="price">${formatDualPrice(getPriceUsd(property))}</p>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <div class="property-meta property-meta-icons">
@@ -359,8 +359,8 @@ function propertyCardTemplate(property) {
           <span>${featureIcon('location')} ${locationLabel}</span>
           <span>${featureIcon('type')} ${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'}</span>
         </div>
-        <p>${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
-        <p><a class="btn-primary-property" href="${detailUrl}">Ver detalle</a></p>
+        <p class="property-price-area">${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
+        <div class="property-card-actions"><a class="btn-primary-property" href="${detailUrl}">Ver detalle</a></div>
       </div>
     </article>
   `;

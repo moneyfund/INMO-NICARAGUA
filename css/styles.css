@@ -6495,34 +6495,36 @@ body.dark-mode.home-page,
 /* === 2026-03-31 Compact property cards (listing view) === */
 #propertiesGrid.properties-grid {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.85rem;
+  gap: 0.78rem;
 }
 
 #propertiesGrid .property-card {
   border-radius: 14px;
+  min-height: 0;
+  height: auto;
 }
 
 #propertiesGrid .property-cover {
-  aspect-ratio: 16 / 7.5;
+  aspect-ratio: 16 / 8.1;
   border-radius: 14px 14px 0 0;
 }
 
 #propertiesGrid .property-card-content {
-  padding: 0.7rem 0.78rem 0.78rem;
-  gap: 0.4rem;
+  padding: 0.64rem 0.72rem 0.68rem;
+  gap: 0.3rem;
 }
 
 #propertiesGrid .badge {
   font-size: 0.66rem;
-  line-height: 1.22;
-  padding: 0.22rem 0.46rem;
+  line-height: 1.16;
+  padding: 0.18rem 0.42rem;
   width: fit-content;
 }
 
 #propertiesGrid .property-card h3 {
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.24;
+  font-size: 0.96rem;
+  line-height: 1.18;
 }
 
 #propertiesGrid .property-card p {
@@ -6530,40 +6532,58 @@ body.dark-mode.home-page,
 }
 
 #propertiesGrid .property-card p:not(.price):not(.badge) {
-  font-size: 0.82rem;
-  line-height: 1.3;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+#propertiesGrid .property-location {
+  font-size: 0.79rem;
+  line-height: 1.18;
 }
 
 #propertiesGrid .price {
-  font-size: 1rem;
-  line-height: 1.2;
+  font-size: 0.98rem;
+  line-height: 1.12;
 }
 
 #propertiesGrid .property-status-tag {
   font-size: 0.65rem;
-  padding: 0.2rem 0.44rem;
+  padding: 0.16rem 0.4rem;
   width: fit-content;
+  line-height: 1.1;
 }
 
 #propertiesGrid .property-meta.property-meta-icons {
-  gap: 0.34rem 0.5rem;
+  margin-top: 0.06rem;
+  gap: 0.28rem 0.42rem;
 }
 
 #propertiesGrid .property-meta-icons span {
-  font-size: 0.74rem;
-  gap: 0.24rem;
+  font-size: 0.72rem;
+  line-height: 1.15;
+  gap: 0.22rem;
 }
 
 #propertiesGrid .property-meta-icons svg {
-  width: 12px;
-  height: 12px;
-  flex: 0 0 12px;
+  width: 11px;
+  height: 11px;
+  flex: 0 0 11px;
+}
+
+#propertiesGrid .property-price-area {
+  font-size: 0.76rem;
+  line-height: 1.16;
+}
+
+#propertiesGrid .property-card-actions {
+  margin-top: 0.04rem;
 }
 
 #propertiesGrid .btn-primary-property {
-  margin-top: 0.08rem;
-  padding: 0.42rem 0.78rem;
-  font-size: 0.78rem;
+  margin-top: 0;
+  padding: 0.36rem 0.7rem;
+  font-size: 0.74rem;
+  line-height: 1.1;
 }
 
 @media (min-width: 1200px) {
@@ -6575,38 +6595,38 @@ body.dark-mode.home-page,
 @media (max-width: 900px) {
   #propertiesGrid.properties-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.78rem;
+    gap: 0.72rem;
   }
 }
 
 @media (max-width: 640px) {
   #propertiesGrid.properties-grid {
     grid-template-columns: 1fr;
-    gap: 0.72rem;
+    gap: 0.66rem;
   }
 
   #propertiesGrid .property-cover {
-    aspect-ratio: 16 / 8.5;
+    aspect-ratio: 16 / 8.9;
   }
 
   #propertiesGrid .property-card-content {
-    padding: 0.66rem 0.72rem 0.72rem;
-    gap: 0.35rem;
+    padding: 0.58rem 0.64rem 0.64rem;
+    gap: 0.26rem;
   }
 
   #propertiesGrid .property-card h3 {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   #propertiesGrid .property-card p:not(.price):not(.badge) {
-    font-size: 0.79rem;
+    font-size: 0.77rem;
   }
 
   #propertiesGrid .price {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   #propertiesGrid .property-meta-icons span {
-    font-size: 0.72rem;
+    font-size: 0.69rem;
   }
 }
