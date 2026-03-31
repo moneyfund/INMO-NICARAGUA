@@ -10,6 +10,7 @@ const imageUtils = window.inmoImageUtils || {
   },
   getCoverImage: (property = {}) => property.coverImage || property.image || property.imagen || 'assets/placeholder.svg'
 };
+const videoUtils = window.inmoVideoUtils || {};
 
 const PROPERTY_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
 const AGENT_IMAGE_PLACEHOLDER = 'assets/placeholder.svg';
@@ -114,6 +115,65 @@ function escapeHtml(value = '') {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
+}
+
+function buildPropertyVideoSectionMarkup(property = {}) {
+  const videoData = videoUtils.getPropertyVideoData ? videoUtils.getPropertyVideoData(property) : null;
+  if (!videoData) return '';
+
+  if (videoData.type === 'youtube' && videoData.embedUrl) {
+    return `
+      <section class="property-video-section" aria-label="Video de la propiedad">
+        <header class="property-video-header">
+          <p class="property-video-eyebrow">Contenido multimedia</p>
+          <h2>Video de la propiedad</h2>
+        </header>
+        <div class="property-video-frame-wrapper">
+          <iframe
+            src="${videoData.embedUrl}"
+            title="Video de YouTube de la propiedad ${escapeHtml(property.titulo || property.title || '')}"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </section>
+    `;
+  }
+
+  if (videoData.type === 'tiktok') {
+    const tiktokEmbedUrl = videoData.embedUrl || '';
+    const iframeMarkup = tiktokEmbedUrl
+      ? `
+        <div class="property-video-frame-wrapper is-tiktok">
+          <iframe
+            src="${tiktokEmbedUrl}"
+            title="Video de TikTok de la propiedad ${escapeHtml(property.titulo || property.title || '')}"
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="encrypted-media; picture-in-picture; web-share"
+          ></iframe>
+        </div>
+      `
+      : '';
+
+    return `
+      <section class="property-video-section" aria-label="Video de la propiedad">
+        <header class="property-video-header">
+          <p class="property-video-eyebrow">Contenido multimedia</p>
+          <h2>Recorrido en video</h2>
+        </header>
+        ${iframeMarkup}
+        <div class="property-video-fallback">
+          <p>Si tu navegador restringe el embed de TikTok, puedes abrir el video directamente.</p>
+          <a class="button-outline" href="${videoData.url}" target="_blank" rel="noopener noreferrer">Ver video en TikTok</a>
+        </div>
+      </section>
+    `;
+  }
+
+  return '';
 }
 
 function featureIcon(iconName = '') {
@@ -606,6 +666,7 @@ async function renderPropertyDetail() {
   const agentProfileUrl = buildAgentProfileUrl(agent?.id || property.agentId);
   const status = String(property.status || 'available').toLowerCase();
   const detailParkingCount = Number(property.parking ?? property.garaje ?? property.garages ?? 0);
+  const propertyVideoMarkup = buildPropertyVideoSectionMarkup(property);
 
   const galleryMarkup = buildGalleryControlsMarkup(galleryImages);
 
@@ -640,6 +701,7 @@ async function renderPropertyDetail() {
         ${hasAgentLink ? `<a class="button-outline" href="${agentProfileUrl}">Para más información aquí</a>` : ''}
       </div>
     </div>
+    ${propertyVideoMarkup}
     <section class="detail-map-section">
       <h2>Ubicación de la propiedad</h2>
       <div id="propertyMap" class="property-map"></div>

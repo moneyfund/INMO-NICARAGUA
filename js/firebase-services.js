@@ -21,7 +21,8 @@ import {
   getDocs,
   orderBy,
   documentId,
-  serverTimestamp
+  serverTimestamp,
+  deleteField
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
   getStorage,
@@ -74,6 +75,7 @@ export {
   orderBy,
   documentId,
   serverTimestamp,
+  deleteField,
   onAuthStateChanged,
   signInWithPopup,
   signOut,

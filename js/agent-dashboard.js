@@ -13,6 +13,7 @@ import {
   where,
   getDocs,
   orderBy,
+  deleteField,
   serverTimestamp,
   onAuthStateChanged,
   signInWithPopup,
@@ -37,6 +38,7 @@ const state = {
 
 const fallbackPhoto = imageUtils?.PLACEHOLDER || 'assets/placeholder.svg';
 const propertyUtils = window.inmoPropertyUtils || {};
+const videoUtils = window.inmoVideoUtils || {};
 const normalizePropertyType = (value = '') => propertyUtils.normalizePropertyType ? propertyUtils.normalizePropertyType(value) : String(value || '').trim().toLowerCase();
 const getPropertyTypeLabel = (value = '') => propertyUtils.getPropertyTypeLabel ? propertyUtils.getPropertyTypeLabel(value) : value;
 const formatDualPrice = (usd) => propertyUtils.formatDualPrice ? propertyUtils.formatDualPrice(usd) : `$${Number(usd || 0).toLocaleString()} USD`;
@@ -349,7 +351,7 @@ function handleFileSelection(event) {
   renderImagePreview();
 }
 
-function getPropertyPayload(user, profileName, images, coverImage) {
+function getPropertyPayload(user, profileName, images, coverImage, videoData) {
   const lat = Number(document.getElementById('propertyLat').value);
   const lng = Number(document.getElementById('propertyLng').value);
   const title = document.getElementById('propertyTitle').value.trim();
@@ -360,7 +362,7 @@ function getPropertyPayload(user, profileName, images, coverImage) {
   const areaUnit = document.getElementById('propertyAreaUnit').value.trim();
   const pricePerAreaUsd = calculatePricePerArea(price, areaValue);
 
-  return {
+  const payload = {
     title,
     titulo: title,
     price,
@@ -372,7 +374,6 @@ function getPropertyPayload(user, profileName, images, coverImage) {
     coverImage,
     image: coverImage || images[0] || fallbackPhoto,
     imagen: coverImage || images[0] || fallbackPhoto,
-    video: document.getElementById('propertyVideo').value.trim(),
     location: document.getElementById('propertyLocation').value.trim(),
     ubicacion: document.getElementById('propertyLocation').value.trim(),
     priceUsd: price,
@@ -397,6 +398,17 @@ function getPropertyPayload(user, profileName, images, coverImage) {
     status: 'available',
     updatedAt: serverTimestamp()
   };
+
+  if (videoData) {
+    payload.video = {
+      type: videoData.type,
+      url: videoData.url
+    };
+    payload.videoType = videoData.type;
+    payload.videoUrl = videoData.url;
+  }
+
+  return payload;
 }
 
 function getPropertyDocRef(propertyId = '') {
@@ -477,15 +489,22 @@ async function guardarPropiedad(data, propertyId = '') {
     return images.includes(selected) ? selected : images[0];
   })();
 
-  const payload = getPropertyPayload(state.user, data.agentName, images, coverImage);
+  const payload = getPropertyPayload(state.user, data.agentName, images, coverImage, data.videoData || null);
+  const videoFields = data.videoData
+    ? {}
+    : (propertyId ? { video: deleteField(), videoType: deleteField(), videoUrl: deleteField() } : {});
 
   if (propertyId) {
-    await updateDoc(propertyRef, payload);
+    await updateDoc(propertyRef, {
+      ...payload,
+      ...videoFields
+    });
     return propertyRef;
   }
 
   await setDoc(propertyRef, {
     ...payload,
+    ...videoFields,
     createdAt: serverTimestamp()
   }, { merge: true });
 
@@ -521,7 +540,9 @@ function fillPropertyForm(property) {
   document.getElementById('propertyBathrooms').value = property.bathrooms || property.banos || 0;
   document.getElementById('propertyArea').value = property.areaValue || property.area || '';
   document.getElementById('propertyAreaUnit').value = (property.areaUnit || 'metros').toLowerCase();
-  document.getElementById('propertyVideo').value = property.video || '';
+  const propertyVideo = videoUtils.getPropertyVideoData ? videoUtils.getPropertyVideoData(property) : null;
+  document.getElementById('propertyVideoType').value = propertyVideo?.type || '';
+  document.getElementById('propertyVideoUrl').value = propertyVideo?.url || '';
 
   const normalizedImages = imageUtils.getPropertyImages(property);
   state.propertyImages = normalizedImages.map((url) => createImageEntry({ url, source: 'url', status: 'ready' }));
@@ -589,6 +610,8 @@ async function saveProperty(event) {
   const propertyPrice = Number(document.getElementById('propertyPrice')?.value || 0);
   const areaValue = Number(document.getElementById('propertyArea')?.value || 0);
   const areaUnit = document.getElementById('propertyAreaUnit')?.value.trim();
+  const videoType = document.getElementById('propertyVideoType')?.value || '';
+  const videoUrl = document.getElementById('propertyVideoUrl')?.value || '';
 
   try {
     state.isSavingProperty = true;
@@ -616,9 +639,20 @@ async function saveProperty(event) {
       throw new Error('Selecciona la unidad de área de la propiedad.');
     }
 
+    const videoValidation = videoUtils.validatePropertyVideoForm
+      ? videoUtils.validatePropertyVideoForm({ type: videoType, url: videoUrl })
+      : { valid: true, value: null };
+
+    if (!videoValidation.valid) {
+      throw new Error(videoValidation.message || 'El video configurado no es válido.');
+    }
+
     setMessage('Guardando propiedad e imágenes...', 'info');
 
-    await guardarPropiedad({ agentName: profileName }, propertyId);
+    await guardarPropiedad({
+      agentName: profileName,
+      videoData: videoValidation.value
+    }, propertyId);
 
     setMessage(propertyId ? 'Propiedad actualizada correctamente.' : 'Propiedad creada correctamente.', 'success');
     resetPropertyForm();
