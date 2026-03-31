@@ -6809,36 +6809,42 @@ body:not(.dark):not(.dark-mode) .home-page .premium-search .hero-search-submit {
   }
 }
 
-/* === Home mobile alignment fix (navbar + hero/content frame) === */
-@media (max-width: 640px) {
+/* === Home mobile structural alignment (single frame system: navbar + home content) === */
+@media (max-width: 900px) {
   .home-page {
-    --mobile-frame-gutter: 1rem;
+    --home-mobile-frame: clamp(14px, 4vw, 20px);
+  }
+
+  .home-page .site-header .container.nav-wrapper,
+  .home-page .container {
+    width: min(1120px, calc(100% - (var(--home-mobile-frame) * 2)));
+    margin-inline: auto;
+    padding-inline: 0;
   }
 
   .home-page .site-header .container.nav-wrapper {
     grid-template-columns: minmax(0, 1fr) auto auto;
     min-height: 72px;
-    gap: 0.55rem;
-    width: min(1120px, calc(100% - (var(--mobile-frame-gutter) * 2)));
-    padding-inline: 0;
+    gap: clamp(0.45rem, 1.6vw, 0.7rem);
   }
 
   .home-page .brand {
     min-width: 0;
     gap: 0.45rem;
     letter-spacing: 0.04em;
-    font-size: 0.8rem;
+    font-size: clamp(0.74rem, 2.6vw, 0.9rem);
   }
 
   .home-page .brand span {
     min-width: 0;
+    max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .home-page .brand-logo {
-    height: 42px;
+    height: clamp(38px, 9vw, 44px);
   }
 
   .home-page .menu-toggle,
@@ -6853,21 +6859,19 @@ body:not(.dark):not(.dark-mode) .home-page .premium-search .hero-search-submit {
   }
 
   .home-page .menu-toggle {
-    font-size: 1.15rem;
+    font-size: 1.08rem;
   }
 
   .home-page .theme-toggle {
-    font-size: 0.9rem;
+    font-size: 0.86rem;
     justify-self: end;
   }
 
   .home-page .site-nav {
-    right: var(--mobile-frame-gutter);
-    max-width: calc(100vw - (var(--mobile-frame-gutter) * 2));
-  }
-
-  .home-page .container {
-    width: min(1120px, calc(100% - (var(--mobile-frame-gutter) * 2)));
+    left: var(--home-mobile-frame);
+    right: var(--home-mobile-frame);
+    width: auto;
+    max-width: none;
   }
 
   .home-page .hero-content {
@@ -6881,7 +6885,11 @@ body:not(.dark):not(.dark-mode) .home-page .premium-search .hero-search-submit {
     padding: 0.95rem;
   }
 
-  .home-page .featured-properties-slider,
+  .home-page .featured-properties-slider {
+    grid-template-columns: none;
+    max-width: 100%;
+  }
+
   .home-page .category-coverflow {
     max-width: 100%;
   }
