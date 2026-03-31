@@ -681,27 +681,31 @@ async function renderPropertyDetail() {
   const galleryMarkup = buildGalleryControlsMarkup(galleryImages);
 
   detailContainer.innerHTML = `
-    <div class="detail-grid">
-      <section class="detail-gallery" data-gallery-images='${JSON.stringify(galleryImages)}' data-gallery-label="${property.titulo || 'Imagen de la propiedad'}">
-        <div class="gallery-viewport">
-          <img class="detail-gallery-main-image" src="${galleryImages[0] || getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
-          ${buildGalleryWatermarkMarkup()}
-          ${galleryMarkup}
-        </div>
-      </section>
-      <div>
-        <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
-        <h1>${property.titulo}</h1>
-        <p>${property.ubicacion}</p>
-        <p><strong>${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
-        <p class="price">${formatDualPrice(getPriceUsd(property))}</p>
-        <div class="property-main-actions">
-          <div id="propertyLikeMount" class="property-like-mount" aria-live="polite"></div>
-          <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
-        </div>
-        <p><strong>Área:</strong> ${getAreaDisplay(property)}</p>
-        <p><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
-        ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
+    <div class="detail-layout">
+      <div class="detail-grid">
+        <section class="detail-gallery" data-gallery-images='${JSON.stringify(galleryImages)}' data-gallery-label="${property.titulo || 'Imagen de la propiedad'}">
+          <div class="gallery-viewport">
+            <img class="detail-gallery-main-image" src="${galleryImages[0] || getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
+            ${buildGalleryWatermarkMarkup()}
+            ${galleryMarkup}
+          </div>
+        </section>
+        <section class="detail-summary-card">
+          <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
+          <h1>${property.titulo}</h1>
+          <p>${property.ubicacion}</p>
+          <p><strong>${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
+          <p class="price">${formatDualPrice(getPriceUsd(property))}</p>
+          <div class="property-main-actions">
+            <div id="propertyLikeMount" class="property-like-mount" aria-live="polite"></div>
+            <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
+          </div>
+          <p><strong>Área:</strong> ${getAreaDisplay(property)}</p>
+          <p><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
+          ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
+        </section>
+      </div>
+      <section class="detail-extended-card">
         <p>${property.descripcion}</p>
         <ul class="checklist property-feature-list">
           <li>${featureIcon('bedrooms')} ${(property.habitaciones ?? property.bedrooms) || 0} habitaciones</li>
@@ -712,7 +716,7 @@ async function renderPropertyDetail() {
         </ul>
         ${publishedByName ? `<p><strong>Publicado por</strong><br>${publishedByName}</p>` : ''}
         ${hasAgentLink ? `<a class="button-outline" href="${agentProfileUrl}">Para más información aquí</a>` : ''}
-      </div>
+      </section>
     </div>
     ${propertyVideoMarkup}
     <section class="detail-map-section">
