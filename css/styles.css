@@ -6797,6 +6797,73 @@ body.dark-mode.home-page,
   }
 }
 
+/* === Home mobile alignment fix (navbar + hero/content frame) === */
+@media (max-width: 640px) {
+  .home-page .site-header .container.nav-wrapper {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    min-height: 72px;
+    gap: 0.55rem;
+    padding-inline: 1rem;
+  }
+
+  .home-page .brand {
+    min-width: 0;
+    gap: 0.45rem;
+    letter-spacing: 0.04em;
+    font-size: 0.8rem;
+  }
+
+  .home-page .brand span {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .home-page .brand-logo {
+    height: 42px;
+  }
+
+  .home-page .menu-toggle,
+  .home-page .theme-toggle {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    flex: 0 0 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .home-page .menu-toggle {
+    font-size: 1.15rem;
+  }
+
+  .home-page .theme-toggle {
+    font-size: 0.9rem;
+    justify-self: end;
+  }
+
+  .home-page .site-nav {
+    right: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+
+  .home-page .container {
+    width: min(1120px, calc(100% - 2rem));
+  }
+
+  .home-page .hero-content {
+    width: 100%;
+    max-width: none;
+  }
+
+  .home-page .premium-search {
+    width: 100%;
+    padding: 0.95rem;
+  }
+}
+
 /* === 2026-03-31 Compact property cards (listing view) === */
 #propertiesGrid.properties-grid {
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
