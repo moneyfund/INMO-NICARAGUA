@@ -5716,3 +5716,239 @@ body.dark-mode .gallery-nav {
     height: 44px;
   }
 }
+
+/* ===== Premium visual refresh (2026) ===== */
+:root {
+  --premium-bg: #f5f2ec;
+  --premium-surface: #fffdfa;
+  --premium-surface-soft: #f7efe5;
+  --premium-text: #2b1a1b;
+  --premium-text-muted: #6b5a59;
+  --premium-border: rgba(125, 48, 45, 0.18);
+  --premium-shadow: 0 22px 55px rgba(70, 27, 28, 0.12);
+  --premium-shadow-soft: 0 12px 32px rgba(70, 27, 28, 0.08);
+}
+
+body:not(.dark):not(.dark-mode) {
+  background: radial-gradient(circle at 15% 8%, #fff9f3 0%, var(--premium-bg) 45%, #f2ece3 100%) !important;
+  color: var(--premium-text);
+}
+
+body:not(.dark):not(.dark-mode) h1,
+body:not(.dark):not(.dark-mode) h2,
+body:not(.dark):not(.dark-mode) h3,
+body:not(.dark):not(.dark-mode) p,
+body:not(.dark):not(.dark-mode) li,
+body:not(.dark):not(.dark-mode) label,
+body:not(.dark):not(.dark-mode) .section-header,
+body:not(.dark):not(.dark-mode) .page-banner p,
+body:not(.dark):not(.dark-mode) .page-banner h1 {
+  color: var(--premium-text) !important;
+}
+
+body:not(.dark):not(.dark-mode) .site-header {
+  border-bottom: 1px solid rgba(93, 35, 35, 0.12);
+  background: rgba(245, 242, 236, 0.82);
+  backdrop-filter: blur(14px);
+}
+
+body:not(.dark):not(.dark-mode) .site-header.is-scrolled,
+body:not(.dark):not(.dark-mode) .site-header.scrolled {
+  background: rgba(245, 242, 236, 0.95);
+  box-shadow: 0 14px 36px rgba(70, 27, 28, 0.14);
+}
+
+body:not(.dark):not(.dark-mode) .brand,
+body:not(.dark):not(.dark-mode) .site-nav a { color: var(--premium-text); }
+
+.hero {
+  min-height: min(86vh, 820px);
+  border-radius: 0 0 38px 38px;
+}
+
+.hero-overlay {
+  background: linear-gradient(108deg, rgba(26, 13, 14, 0.78), rgba(75, 24, 26, 0.46) 55%, rgba(22, 10, 12, 0.75));
+}
+
+.hero-content {
+  padding: clamp(1.1rem, 3vw, 2.4rem);
+  border-radius: 24px;
+  background: rgba(21, 12, 13, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.22);
+}
+
+.search-form {
+  gap: 0.85rem;
+  margin-top: 1.8rem;
+}
+
+.search-form input,
+.search-form select,
+.search-form button,
+.filter-grid input,
+.filter-grid select,
+.filter-grid button,
+.contact-form input,
+.contact-form textarea,
+.contact-form button,
+.seller-form input,
+.seller-form select,
+.seller-form textarea,
+.seller-form button,
+.seller-agent-select {
+  min-height: 48px;
+  border-radius: 12px;
+}
+
+.section { padding: clamp(2.5rem, 6vw, 4.8rem) 0; }
+.section-header { margin-bottom: 1.5rem; }
+.section-header h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); }
+
+.page-banner {
+  padding: clamp(4.6rem, 12vw, 7rem) 0 clamp(1.8rem, 5vw, 3rem);
+}
+
+.page-banner .container,
+.section-properties.container,
+.map-page-header .container {
+  background: var(--premium-surface);
+  border: 1px solid var(--premium-border);
+  border-radius: 22px;
+  padding: clamp(1.1rem, 2.8vw, 2rem);
+  box-shadow: var(--premium-shadow-soft);
+}
+
+.properties-grid { gap: 1.35rem; }
+
+.property-card {
+  border: 1px solid var(--premium-border);
+  border-radius: 18px;
+  box-shadow: var(--premium-shadow-soft);
+}
+
+.property-card:hover {
+  box-shadow: var(--premium-shadow);
+  transform: translateY(-8px);
+}
+
+.property-card-content {
+  padding: 1.05rem 1.1rem 1.2rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.badge {
+  background: linear-gradient(90deg, rgba(158, 11, 15, 0.1), rgba(200, 158, 80, 0.17));
+  color: #7c2426;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.price {
+  font-size: clamp(1.2rem, 2.2vw, 1.45rem);
+  color: #8f1616;
+}
+
+.property-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.property-meta-icons span {
+  display: flex;
+  align-items: center;
+  gap: 0.32rem;
+  font-size: 0.88rem;
+}
+
+.detail-grid,
+.agent-public-profile,
+.seller-layout {
+  gap: 1.4rem;
+}
+
+.detail-grid > div,
+.detail-gallery,
+.agent-public-profile,
+.agent-public-stats,
+.contact-form,
+.seller-form,
+.seller-contact-card,
+.map-page-section,
+.properties-map-full {
+  border-radius: 20px;
+  border: 1px solid var(--premium-border);
+  background: var(--premium-surface);
+  box-shadow: var(--premium-shadow-soft);
+}
+
+.detail-grid > div { padding: 1.1rem; }
+.property-feature-list li { margin-bottom: 0.5rem; }
+
+.agents-grid { gap: 1.35rem; }
+.agent-card,
+.agent-property-card {
+  border-color: var(--premium-border);
+}
+
+.agent-content { padding: 1.15rem; }
+.agent-role { color: #823536; }
+
+.footer-legal-nav { row-gap: 0.5rem; }
+.site-footer {
+  margin-top: 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(160deg, #71171a 0%, #8f1d21 58%, #531012 100%);
+}
+
+body.dark .hero-content,
+body.dark-mode .hero-content,
+[data-theme="dark"] .hero-content {
+  background: rgba(14, 9, 9, 0.48);
+  border-color: rgba(247, 208, 208, 0.2);
+}
+
+body.dark .property-card,
+body.dark .detail-grid > div,
+body.dark .detail-gallery,
+body.dark .agent-public-profile,
+body.dark .agent-public-stats,
+body.dark .contact-form,
+body.dark .seller-form,
+body.dark .seller-contact-card,
+body.dark .properties-map-full,
+body.dark-mode .property-card,
+body.dark-mode .detail-grid > div,
+body.dark-mode .detail-gallery,
+body.dark-mode .agent-public-profile,
+body.dark-mode .agent-public-stats,
+body.dark-mode .contact-form,
+body.dark-mode .seller-form,
+body.dark-mode .seller-contact-card,
+body.dark-mode .properties-map-full {
+  background: color-mix(in srgb, var(--bg-card) 94%, #000);
+  border-color: rgba(241, 180, 180, 0.2);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.38);
+}
+
+@media (max-width: 900px) {
+  .property-meta { grid-template-columns: 1fr; }
+  .hero { border-radius: 0 0 24px 24px; }
+}
+
+@media (max-width: 720px) {
+  .hero-content { padding: 1rem; }
+  .page-banner .container,
+  .section-properties.container,
+  .map-page-header .container { padding: 1rem; border-radius: 16px; }
+  .detail-grid > div,
+  .detail-gallery,
+  .agent-public-profile,
+  .agent-public-stats,
+  .contact-form,
+  .seller-form,
+  .seller-contact-card,
+  .properties-map-full { border-radius: 16px; }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/propiedades", "destination": "/propiedades.html" },
+    { "source": "/propiedad", "destination": "/propiedad.html" },
+    { "source": "/agentes", "destination": "/agentes.html" },
+    { "source": "/agente", "destination": "/agente.html" },
+    { "source": "/agent", "destination": "/agent.html" },
+    { "source": "/mapa", "destination": "/mapa.html" },
+    { "source": "/contacto", "destination": "/contacto.html" },
+    { "source": "/nosotros", "destination": "/nosotros.html" },
+    { "source": "/quieres-vender", "destination": "/quieres-vender.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin-login", "destination": "/admin-login.html" },
+    { "source": "/agent-dashboard", "destination": "/agent-dashboard.html" },
+    { "source": "/share", "destination": "/share.html" },
+    { "source": "/share-property", "destination": "/share-property.html" },
+    { "source": "/access-denied", "destination": "/access-denied.html" },
+    { "source": "/politicas-de-privacidad", "destination": "/politicas-de-privacidad.html" },
+    { "source": "/condiciones-de-uso", "destination": "/condiciones-de-uso.html" },
+    { "source": "/licencia-de-operacion", "destination": "/licencia-de-operacion.html" }
+  ]
+}
