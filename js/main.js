@@ -126,7 +126,7 @@ function initializeHeroSlider() {
   const slides = Array.from(document.querySelectorAll('.hero-slide'));
   if (!slides.length) return;
 
-  const intervalMs = 2500;
+  const intervalMs = 3000;
   let currentIndex = 0;
 
   const setActiveSlide = (nextIndex = 0) => {
