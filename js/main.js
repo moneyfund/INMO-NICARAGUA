@@ -88,19 +88,6 @@ function renderSiteFooter() {
 
       <div class="footer-columns">
         <div>
-          <h4>Explora</h4>
-          <a href="index.html">Inicio</a>
-          <a href="propiedades.html">Propiedades</a>
-          <a href="mapa.html">Mapa</a>
-          <a href="agentes.html">Agentes</a>
-        </div>
-        <div>
-          <h4>Servicios</h4>
-          <a href="quieres-vender.html">Vender propiedad</a>
-          <a href="contacto.html">Asesoría personalizada</a>
-          <a href="nosotros.html">Nosotros</a>
-        </div>
-        <div>
           <h4>Legal</h4>
           ${footerLinks.map((link) => `<a class="footer-legal-link" href="${link.href}">${link.label}</a>`).join('')}
         </div>
