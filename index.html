@@ -166,13 +166,19 @@
     <section class="section section-properties container premium-properties">
       <div class="section-header section-header-tabs">
         <h2>Propiedades destacadas</h2>
-        <div class="listing-tabs">
-          <a href="propiedades.html?operacion=venta">Venta</a>
-          <a href="propiedades.html?operacion=alquiler">Alquiler</a>
-          <a href="propiedades.html?featured=1">Premium</a>
+        <div class="featured-header-actions">
+          <div class="listing-tabs">
+            <a href="propiedades.html?operacion=venta">Venta</a>
+            <a href="propiedades.html?operacion=alquiler">Alquiler</a>
+            <a href="propiedades.html?featured=1">Premium</a>
+          </div>
+          <div class="coverflow-controls" aria-label="Navegación del carrusel de propiedades destacadas">
+            <button type="button" class="coverflow-arrow" data-featured-prev aria-label="Propiedad anterior">←</button>
+            <button type="button" class="coverflow-arrow" data-featured-next aria-label="Siguiente propiedad">→</button>
+          </div>
         </div>
       </div>
-      <div id="featuredGrid" class="properties-grid"></div>
+      <div id="featuredGrid" class="properties-grid featured-properties-slider" role="region" aria-roledescription="carousel" aria-label="Carrusel de propiedades destacadas"></div>
     </section>
 
     <section class="section container editorial-feature">

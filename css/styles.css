@@ -6451,8 +6451,46 @@ body.dark-mode.home-page,
 }
 
 .home-page .section-header-tabs { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.home-page .featured-header-actions {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 .home-page .listing-tabs { display: flex; gap: .6rem; }
 .home-page .listing-tabs a { padding: .45rem .8rem; border:1px solid var(--premium-border); border-radius: 999px; color: var(--premium-text); }
+
+.home-page .premium-properties {
+  padding-block: 2.1rem;
+}
+
+.home-page .premium-properties .section-header {
+  margin-bottom: 1rem;
+}
+
+.home-page .featured-properties-slider {
+  --featured-columns: 3;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - (var(--featured-columns) - 1) * 1.2rem) / var(--featured-columns));
+  gap: 1.2rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding-bottom: .2rem;
+  scrollbar-width: none;
+}
+
+.home-page .featured-properties-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.home-page .featured-properties-slider .property-card {
+  height: 100%;
+  scroll-snap-align: start;
+}
 
 .home-page .editorial-grid,
 .home-page .sell-grid,
@@ -6514,6 +6552,7 @@ body.dark-mode.home-page,
   .home-page .editorial-grid,
   .home-page .sell-grid,
   .home-page .map-highlight-card { grid-template-columns: 1fr; }
+  .home-page .featured-properties-slider { --featured-columns: 2; }
 }
 
 @media (max-width: 640px) {
@@ -6523,6 +6562,9 @@ body.dark-mode.home-page,
   .home-page .reviews-grid,
   .site-footer .footer-columns { grid-template-columns: 1fr; }
   .home-page .premium-categories-header { align-items: flex-start; flex-direction: column; }
+  .home-page .featured-header-actions { width: 100%; justify-content: space-between; }
+  .home-page .premium-properties { padding-block: 1.4rem; }
+  .home-page .featured-properties-slider { --featured-columns: 1; gap: .9rem; }
   .home-page .category-coverflow {
     --card-width: min(300px, 82vw);
     --card-height: clamp(230px, 62vw, 280px);

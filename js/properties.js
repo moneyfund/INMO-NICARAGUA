@@ -385,8 +385,53 @@ function getPrimaryPropertyImage(property) {
 function renderFeatured(properties) {
   const featuredGrid = document.getElementById('featuredGrid');
   if (!featuredGrid) return;
-  featuredGrid.innerHTML = properties.slice(0, 3).map(propertyCardTemplate).join('');
+  featuredGrid.innerHTML = properties.slice(0, 12).map(propertyCardTemplate).join('');
   applyCardRevealAnimation(featuredGrid);
+  initializeFeaturedSlider(featuredGrid);
+}
+
+function initializeFeaturedSlider(slider) {
+  if (!slider) return;
+
+  const cards = Array.from(slider.querySelectorAll('.property-card'));
+  const prevButton = document.querySelector('[data-featured-prev]');
+  const nextButton = document.querySelector('[data-featured-next]');
+  if (!cards.length || !prevButton || !nextButton) return;
+
+  const getStepSize = () => {
+    const cardWidth = cards[0]?.getBoundingClientRect().width || slider.clientWidth;
+    const styles = window.getComputedStyle(slider);
+    const gap = Number.parseFloat(styles.columnGap || styles.gap || '0') || 0;
+    return cardWidth + gap;
+  };
+
+  const getVisibleCount = () => {
+    const rootStyles = window.getComputedStyle(slider);
+    return Number.parseInt(rootStyles.getPropertyValue('--featured-columns'), 10) || 1;
+  };
+
+  const slideBy = (direction = 1) => {
+    const step = getStepSize() * getVisibleCount() * direction;
+    slider.scrollBy({ left: step, behavior: 'smooth' });
+  };
+
+  prevButton.onclick = () => slideBy(-1);
+  nextButton.onclick = () => slideBy(1);
+
+  let pointerStartX = null;
+  slider.onpointerdown = (event) => {
+    pointerStartX = event.clientX;
+  };
+  slider.onpointerup = (event) => {
+    if (pointerStartX === null) return;
+    const delta = event.clientX - pointerStartX;
+    pointerStartX = null;
+    if (Math.abs(delta) < 40) return;
+    slideBy(delta < 0 ? 1 : -1);
+  };
+  slider.onpointercancel = () => {
+    pointerStartX = null;
+  };
 }
 
 function renderCategory(properties, gridId, filterFn) {
