@@ -6648,6 +6648,10 @@ body.dark-mode.home-page,
 }
 
 @media (max-width: 640px) {
+  .home-page .container {
+    width: min(1120px, calc(100% - 2.5rem));
+  }
+
   .home-page .premium-search { grid-template-columns: 1fr; }
   .home-page .agents-grid,
   .home-page .reviews-grid,
@@ -6655,9 +6659,19 @@ body.dark-mode.home-page,
   .home-page .premium-categories-header { align-items: flex-start; flex-direction: column; }
   .home-page .featured-header-actions { width: 100%; justify-content: space-between; }
   .home-page .premium-properties { padding-block: 1.4rem; }
-  .home-page .featured-properties-slider { --featured-columns: 1; gap: .9rem; }
+  .home-page .featured-properties-slider {
+    --featured-columns: 1;
+    grid-auto-columns: 100%;
+    gap: .9rem;
+  }
   .home-page .section.section-properties.container.premium-properties {
-    padding: .72rem .76rem .86rem;
+    padding: .72rem 0 .86rem;
+  }
+  .home-page #featuredGrid .property-card {
+    min-width: 0;
+  }
+  .home-page #featuredGrid .property-card.is-featured {
+    border-width: 1px;
   }
   .home-page #featuredGrid .property-cover {
     aspect-ratio: 16 / 10.4;
