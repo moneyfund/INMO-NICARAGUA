@@ -6083,6 +6083,42 @@ body:not(.dark):not(.dark-mode) .site-nav a { color: var(--premium-text); }
 .detail-grid > div { padding: 1.1rem; }
 .property-feature-list li { margin-bottom: 0.5rem; }
 
+.detail-summary-card,
+.detail-extended-card {
+  border-radius: 20px;
+  border: 1px solid var(--premium-border);
+  background: var(--premium-surface);
+  box-shadow: var(--premium-shadow-soft);
+}
+
+.detail-summary-card {
+  padding: 1.1rem;
+  display: grid;
+  gap: 0.62rem;
+}
+
+.detail-extended-card {
+  margin-top: 1.4rem;
+  padding: clamp(1rem, 2vw, 1.4rem);
+  display: grid;
+  gap: 1rem;
+}
+
+.detail-extended-block h2 {
+  margin-bottom: 0.5rem;
+  font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+}
+
+.detail-extended-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.85rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--premium-border);
+}
+
 .agents-grid { gap: 1.35rem; }
 .agent-card,
 .agent-property-card {
@@ -6109,6 +6145,8 @@ body.dark-mode .hero-content,
 body.dark .property-card,
 body.dark .detail-grid > div,
 body.dark .detail-gallery,
+body.dark .detail-summary-card,
+body.dark .detail-extended-card,
 body.dark .agent-public-profile,
 body.dark .agent-public-stats,
 body.dark .contact-form,
@@ -6118,6 +6156,8 @@ body.dark .properties-map-full,
 body.dark-mode .property-card,
 body.dark-mode .detail-grid > div,
 body.dark-mode .detail-gallery,
+body.dark-mode .detail-summary-card,
+body.dark-mode .detail-extended-card,
 body.dark-mode .agent-public-profile,
 body.dark-mode .agent-public-stats,
 body.dark-mode .contact-form,
@@ -6141,6 +6181,8 @@ body.dark-mode .properties-map-full {
   .map-page-header .container { padding: 1rem; border-radius: 16px; }
   .detail-grid > div,
   .detail-gallery,
+  .detail-summary-card,
+  .detail-extended-card,
   .agent-public-profile,
   .agent-public-stats,
   .contact-form,

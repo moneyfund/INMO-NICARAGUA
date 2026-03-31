@@ -681,7 +681,7 @@ async function renderPropertyDetail() {
   const galleryMarkup = buildGalleryControlsMarkup(galleryImages);
 
   detailContainer.innerHTML = `
-    <div class="detail-grid">
+    <div class="detail-grid detail-grid--top">
       <section class="detail-gallery" data-gallery-images='${JSON.stringify(galleryImages)}' data-gallery-label="${property.titulo || 'Imagen de la propiedad'}">
         <div class="gallery-viewport">
           <img class="detail-gallery-main-image" src="${galleryImages[0] || getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
@@ -689,8 +689,9 @@ async function renderPropertyDetail() {
           ${galleryMarkup}
         </div>
       </section>
-      <div>
+      <section class="detail-summary-card" aria-label="Resumen principal de la propiedad">
         <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
+        ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <h1>${property.titulo}</h1>
         <p>${property.ubicacion}</p>
         <p><strong>${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
@@ -701,8 +702,15 @@ async function renderPropertyDetail() {
         </div>
         <p><strong>Área:</strong> ${getAreaDisplay(property)}</p>
         <p><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
-        ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
+      </section>
+    </div>
+    <section class="detail-extended-card" aria-label="Información extendida de la propiedad">
+      <div class="detail-extended-block">
+        <h2>Descripción de la propiedad</h2>
         <p>${property.descripcion}</p>
+      </div>
+      <div class="detail-extended-block">
+        <h2>Características de la propiedad</h2>
         <ul class="checklist property-feature-list">
           <li>${featureIcon('bedrooms')} ${(property.habitaciones ?? property.bedrooms) || 0} habitaciones</li>
           <li>${featureIcon('bathrooms')} ${(property.banos ?? property.bathrooms) || 0} baños</li>
@@ -710,10 +718,12 @@ async function renderPropertyDetail() {
           <li>${featureIcon('area')} ${getAreaDisplay(property)}</li>
           <li>${featureIcon('location')} ${property.ubicacion || property.city || 'Ubicación no disponible'}</li>
         </ul>
+      </div>
+      <div class="detail-extended-footer">
         ${publishedByName ? `<p><strong>Publicado por</strong><br>${publishedByName}</p>` : ''}
         ${hasAgentLink ? `<a class="button-outline" href="${agentProfileUrl}">Para más información aquí</a>` : ''}
       </div>
-    </div>
+    </section>
     ${propertyVideoMarkup}
     <section class="detail-map-section">
       <h2>Ubicación de la propiedad</h2>
