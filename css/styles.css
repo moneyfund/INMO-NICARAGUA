@@ -6863,7 +6863,7 @@ body:not(.dark):not(.dark-mode) .home-page .premium-search .hero-search-submit {
 
   .home-page .site-nav {
     right: var(--mobile-frame-gutter);
-    max-width: calc(100vw - (var(--mobile-frame-gutter) * 2));
+    max-width: calc(100% - (var(--mobile-frame-gutter) * 2));
   }
 
   .home-page .container {
@@ -7125,5 +7125,78 @@ body:not(.dark):not(.dark-mode) .home-page .premium-search .hero-search-submit {
 
   .site-footer .footer-columns {
     gap: 0.5rem;
+  }
+}
+
+/* === 2026-03-31 Definitive mobile frame alignment (home + navbar) === */
+@media (max-width: 720px) {
+  .home-page {
+    --mobile-frame-gutter: 16px;
+  }
+
+  .home-page .container,
+  .home-page .site-header .container.nav-wrapper {
+    width: min(1120px, calc(100% - (var(--mobile-frame-gutter) * 2)));
+    margin-inline: auto;
+  }
+
+  .home-page .site-header .container.nav-wrapper {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    min-height: 72px;
+    gap: 0.5rem;
+    padding-inline: 0;
+  }
+
+  .home-page .brand {
+    min-width: 0;
+    gap: 0.45rem;
+    font-size: clamp(0.72rem, 2.9vw, 0.9rem);
+    letter-spacing: 0.03em;
+  }
+
+  .home-page .brand span {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .home-page .brand-logo {
+    height: 40px;
+    max-width: 40px;
+  }
+
+  .home-page .menu-toggle,
+  .home-page .theme-toggle {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    padding: 0;
+  }
+
+  .home-page .site-nav {
+    right: var(--mobile-frame-gutter);
+    max-width: calc(100% - (var(--mobile-frame-gutter) * 2));
+  }
+
+  .home-page .hero-content {
+    width: 100%;
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  .home-page .section.section-properties.container.premium-properties {
+    padding-inline: 0;
+  }
+
+  .home-page .featured-properties-slider,
+  .home-page #featuredGrid.featured-properties-slider {
+    grid-auto-columns: 100%;
+    gap: 0.9rem;
+    padding-inline: 0;
+  }
+
+  .home-page .featured-properties-slider .property-card {
+    min-width: 0;
   }
 }
