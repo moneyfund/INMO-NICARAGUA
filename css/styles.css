@@ -6491,16 +6491,39 @@ body.dark-mode.home-page,
 
 .site-footer {
   background: #0f172a;
-  color: #e2e8f0;
+  color: #fff;
   margin-top: 4rem;
   padding: 3rem 0;
 }
 .site-footer .footer-content { display: grid; gap: 1rem; }
 .site-footer .footer-brand-row { display:flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .site-footer .footer-cta { padding: .65rem 1rem; background: var(--premium-red); color:#fff; border-radius: 10px; }
-.site-footer .footer-columns { display:grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap:1rem; }
+.site-footer .footer-columns { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:1rem; }
 .site-footer .footer-columns h4 { margin: 0 0 .5rem; color: #fff; font-family: Inter, sans-serif; }
-.site-footer .footer-columns a { color:#cbd5e1; display:block; margin:.25rem 0; }
+.site-footer .footer-columns a { color:#fff; display:block; margin:.25rem 0; }
+.site-footer .footer-brand-row h3,
+.site-footer .footer-brand-row p,
+.site-footer .footer-text,
+.site-footer .footer-legal-link,
+.site-footer .footer-columns h4 {
+  color: #fff;
+}
+.site-footer .footer-columns a:hover,
+.site-footer .footer-columns a:focus-visible,
+.site-footer .footer-legal-link:hover,
+.site-footer .footer-legal-link:focus-visible {
+  color: rgba(255, 255, 255, 0.8);
+}
+.site-footer .footer-social {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .65rem;
+}
+.site-footer .footer-social-link {
+  color: #fff;
+}
 
 @media (max-width: 960px) {
   .home-page .premium-search { grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -6532,6 +6555,10 @@ body.dark-mode.home-page,
   .home-page .coverflow-card { border-radius: 22px; }
   .home-page .coverflow-overlay { padding: .9rem 1rem; }
   .site-footer .footer-brand-row { flex-direction: column; }
+  .site-footer .footer-social {
+    justify-content: flex-start;
+    gap: .6rem;
+  }
 }
 
 /* === 2026-03-31 Compact property cards (listing view) === */
