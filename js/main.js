@@ -160,6 +160,122 @@ function initializeHeroSlider() {
 
 initializeHeroSlider();
 
+function initializeCategoryCoverflow() {
+  const coverflow = document.getElementById('categoryCoverflow');
+  if (!coverflow) return;
+
+  const cards = Array.from(coverflow.querySelectorAll('[data-category-card]'));
+  const prevButton = document.querySelector('[data-coverflow-prev]');
+  const nextButton = document.querySelector('[data-coverflow-next]');
+
+  if (!cards.length) return;
+
+  let activeIndex = 0;
+  let autoPlayId = null;
+  let pointerStartX = null;
+
+  const loopIndex = (index) => (index + cards.length) % cards.length;
+
+  const getOffset = (index) => {
+    const rawOffset = index - activeIndex;
+    const wrappedOffset = rawOffset > cards.length / 2
+      ? rawOffset - cards.length
+      : rawOffset < -cards.length / 2
+        ? rawOffset + cards.length
+        : rawOffset;
+    return wrappedOffset;
+  };
+
+  const render = () => {
+    cards.forEach((card, index) => {
+      const offset = getOffset(index);
+      const absOffset = Math.abs(offset);
+
+      const scale = absOffset === 0 ? 1 : absOffset === 1 ? 0.84 : 0.7;
+      const x = offset * (absOffset <= 1 ? 41 : 50);
+      const y = absOffset === 0 ? 0 : absOffset === 1 ? 14 : 24;
+      const rotate = offset * -7;
+
+      card.style.transform = `translateX(calc(-50% + ${x}%)) translateY(${y}px) scale(${scale}) rotateY(${rotate}deg)`;
+      card.style.opacity = absOffset === 0 ? '1' : absOffset === 1 ? '.62' : '.26';
+      card.style.zIndex = String(30 - absOffset);
+
+      card.classList.toggle('is-active', absOffset === 0);
+      card.classList.toggle('is-side', absOffset === 1);
+      card.classList.toggle('is-far', absOffset >= 2);
+      card.setAttribute('aria-hidden', absOffset > 1 ? 'true' : 'false');
+      card.setAttribute('tabindex', absOffset === 0 ? '0' : '-1');
+    });
+  };
+
+  const setActive = (nextIndex) => {
+    activeIndex = loopIndex(nextIndex);
+    render();
+  };
+
+  const next = () => setActive(activeIndex + 1);
+  const prev = () => setActive(activeIndex - 1);
+
+  const stopAutoplay = () => {
+    if (!autoPlayId) return;
+    clearInterval(autoPlayId);
+    autoPlayId = null;
+  };
+
+  const startAutoplay = () => {
+    stopAutoplay();
+    autoPlayId = window.setInterval(next, 5500);
+  };
+
+  prevButton?.addEventListener('click', () => {
+    prev();
+    startAutoplay();
+  });
+
+  nextButton?.addEventListener('click', () => {
+    next();
+    startAutoplay();
+  });
+
+  cards.forEach((card, index) => {
+    card.addEventListener('focus', () => {
+      if (index !== activeIndex) setActive(index);
+      stopAutoplay();
+    });
+
+    card.addEventListener('mouseenter', stopAutoplay);
+    card.addEventListener('mouseleave', startAutoplay);
+  });
+
+  coverflow.addEventListener('pointerdown', (event) => {
+    pointerStartX = event.clientX;
+  });
+
+  coverflow.addEventListener('pointerup', (event) => {
+    if (pointerStartX === null) return;
+    const delta = event.clientX - pointerStartX;
+    pointerStartX = null;
+
+    if (Math.abs(delta) < 40) return;
+
+    if (delta < 0) {
+      next();
+    } else {
+      prev();
+    }
+
+    startAutoplay();
+  });
+
+  coverflow.addEventListener('pointercancel', () => {
+    pointerStartX = null;
+  });
+
+  render();
+  startAutoplay();
+}
+
+initializeCategoryCoverflow();
 
 function updateHeaderOnScroll() {
   if (!siteHeader) return;

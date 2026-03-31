@@ -118,17 +118,48 @@
       </div>
     </section>
 
-    <section class="section container premium-categories">
-      <div class="section-header">
+    <section class="section container premium-categories" aria-label="Vitrina premium de categorías">
+      <div class="section-header premium-categories-header">
         <h2>Categorías destacadas</h2>
+        <div class="coverflow-controls" aria-label="Navegación del carrusel de categorías">
+          <button type="button" class="coverflow-arrow" data-coverflow-prev aria-label="Categoría anterior">←</button>
+          <button type="button" class="coverflow-arrow" data-coverflow-next aria-label="Siguiente categoría">→</button>
+        </div>
       </div>
-      <div class="categories-grid">
-        <a class="category-card" href="propiedades.html?tipo=house"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80" alt="Casas" /><span><strong>Casas</strong><small>126 propiedades</small><em>Explorar</em></span></a>
-        <a class="category-card" href="propiedades.html?tipo=apartment"><img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80" alt="Apartamentos" /><span><strong>Apartamentos</strong><small>84 propiedades</small><em>Explorar</em></span></a>
-        <a class="category-card" href="propiedades.html?tipo=land"><img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80" alt="Terrenos" /><span><strong>Terrenos</strong><small>64 oportunidades</small><em>Explorar</em></span></a>
-        <a class="category-card" href="propiedades.html?tipo=warehouse"><img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80" alt="Bodegas" /><span><strong>Bodegas</strong><small>29 propiedades</small><em>Explorar</em></span></a>
-        <a class="category-card" href="propiedades.html?operacion=alquiler"><img src="https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?auto=format&fit=crop&w=1200&q=80" alt="Alquileres" /><span><strong>Alquileres</strong><small>73 disponibles</small><em>Explorar</em></span></a>
-        <a class="category-card" href="propiedades.html?tipo=inversion"><img src="https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80" alt="Inversión" /><span><strong>Inversión</strong><small>35 proyectos</small><em>Explorar</em></span></a>
+
+      <div class="category-coverflow" id="categoryCoverflow" role="region" aria-roledescription="carousel" aria-label="Categorías inmobiliarias premium">
+        <a class="coverflow-card" href="propiedades.html?tipo=house" data-category-card>
+          <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80" alt="Casas modernas premium" />
+          <span class="coverflow-overlay"><strong>Casas</strong><em>Saber más</em></span>
+        </a>
+        <a class="coverflow-card" href="propiedades.html?tipo=apartment" data-category-card>
+          <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1400&q=80" alt="Apartamentos premium" />
+          <span class="coverflow-overlay"><strong>Apartamentos</strong><em>Saber más</em></span>
+        </a>
+        <a class="coverflow-card" href="propiedades.html?tipo=land" data-category-card>
+          <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=80" alt="Terrenos con alta plusvalía" />
+          <span class="coverflow-overlay"><strong>Terrenos</strong><em>Saber más</em></span>
+        </a>
+        <a class="coverflow-card" href="propiedades.html?tipo=warehouse" data-category-card>
+          <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1400&q=80" alt="Bodegas comerciales" />
+          <span class="coverflow-overlay"><strong>Bodegas</strong><em>Saber más</em></span>
+        </a>
+        <a class="coverflow-card" href="propiedades.html?operacion=alquiler" data-category-card>
+          <img src="https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?auto=format&fit=crop&w=1400&q=80" alt="Propiedades en alquiler" />
+          <span class="coverflow-overlay"><strong>Alquileres</strong><em>Saber más</em></span>
+        </a>
+        <a class="coverflow-card" href="propiedades.html?vista=1" data-category-card>
+          <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80" alt="Propiedades con vista panorámica" />
+          <span class="coverflow-overlay"><strong>Propiedades con vista</strong><em>Saber más</em></span>
+        </a>
+        <a class="coverflow-card" href="propiedades.html?destacada=1" data-category-card>
+          <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1400&q=80" alt="Propiedades exclusivas" />
+          <span class="coverflow-overlay"><strong>Exclusivas</strong><em>Saber más</em></span>
+        </a>
+        <a class="coverflow-card" href="propiedades.html?tipo=inversion" data-category-card>
+          <img src="https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1400&q=80" alt="Propiedades de inversión" />
+          <span class="coverflow-overlay"><strong>Inversión</strong><em>Saber más</em></span>
+        </a>
       </div>
     </section>
 
