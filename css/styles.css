@@ -630,7 +630,7 @@ section h2,
 .filter-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr auto; gap: .75rem; margin-bottom: 1.5rem; }
 .empty-state { text-align: center; margin-top: 1rem; color: var(--text-inverse); }
 
-.detail-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; }
+.detail-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; align-items: start; }
 .detail-gallery {
   position: relative;
   border-radius: 12px;
@@ -5308,7 +5308,8 @@ body.dark-mode .btn-primary-property:focus-visible {
 }
 
 .detail-gallery {
-  min-height: 320px;
+  min-height: 0;
+  height: fit-content;
 }
 
 .property-gallery::after,
@@ -5335,8 +5336,9 @@ body.dark-mode .btn-primary-property:focus-visible {
 }
 
 .detail-gallery-main-image {
-  min-height: 320px;
-  max-height: 520px;
+  height: auto;
+  min-height: 0;
+  max-height: none;
 }
 
 .gallery-nav {
@@ -5404,11 +5406,11 @@ body.dark-mode .gallery-nav {
   }
 
   .detail-gallery {
-    min-height: 250px;
+    min-height: 0;
   }
 
   .detail-gallery-main-image {
-    min-height: 250px;
+    min-height: 0;
   }
 
   .gallery-nav {
