@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=2" />
+  <link rel="stylesheet" href="css/styles.css?v=3" />
 </head>
 <body class="home-page">
-  <header class="site-header">
+  <header class="site-header premium-header">
     <div class="container nav-wrapper">
       <a class="brand" href="index.html">Diamantes Realty Group</a>
       <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
@@ -30,7 +30,7 @@
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero premium-hero">
       <div class="hero-slider" aria-hidden="true">
         <figure class="hero-slide is-active" data-location="San Juan del Sur">
           <img src="https://images.unsplash.com/photo-1674560155398-8f1754145f31?auto=format&fit=crop&w=2200&q=80" alt="Playa de San Juan del Sur, Nicaragua" loading="eager" fetchpriority="high" />
@@ -41,22 +41,19 @@
         <figure class="hero-slide" data-location="León">
           <img src="https://images.unsplash.com/photo-1711041541974-46f5302a2646?auto=format&fit=crop&w=2200&q=80" alt="Catedral de León, Nicaragua" loading="lazy" />
         </figure>
-        <figure class="hero-slide" data-location="Ometepe">
-          <img src="https://images.unsplash.com/photo-1578991624414-276ef23a534f?auto=format&fit=crop&w=2200&q=80" alt="Volcanes de Ometepe, Nicaragua" loading="lazy" />
-        </figure>
       </div>
       <div class="hero-overlay"></div>
       <div class="container hero-content">
-        <p class="eyebrow">Portafolio inmobiliario premium</p>
-        <h1>Encuentra tu propiedad ideal en Nicaragua</h1>
-        <p>Explora residencias frente al mar, fincas exclusivas y oportunidades de inversión en ubicaciones privilegiadas.</p>
-        <form class="search-form" id="heroSearchForm">
+        <p class="eyebrow">Real Estate Boutique en Nicaragua</p>
+        <h1>Una experiencia inmobiliaria corporativa, elegante y enfocada en resultados</h1>
+        <p>Descubre residencias, terrenos, propiedades comerciales y oportunidades de inversión con asesoría especializada de alto nivel.</p>
+
+        <form class="search-form premium-search" id="heroSearchForm">
           <div class="hero-operation-tabs" role="tablist" aria-label="Tipo de operación">
-            <button type="button" class="hero-operation-tab is-active" data-operation="venta" role="tab" aria-selected="true">Comprar</button>
+            <button type="button" class="hero-operation-tab is-active" data-operation="venta" role="tab" aria-selected="true">Venta</button>
             <button type="button" class="hero-operation-tab" data-operation="alquiler" role="tab" aria-selected="false">Alquiler</button>
           </div>
           <input type="hidden" id="heroOperationInput" value="venta" />
-          <input type="text" id="searchInput" placeholder="Ciudad o zona (Ej: San Juan del Sur)" aria-label="Buscar ubicación" />
           <select id="typeInput" aria-label="Tipo de propiedad">
             <option value="">Tipo de propiedad</option>
             <option value="house">Casa</option>
@@ -65,19 +62,105 @@
             <option value="warehouse">Bodega</option>
             <option value="farm">Finca</option>
             <option value="quinta">Quinta</option>
-            <option value="beach_house">Casa cerca del mar</option>
+            <option value="beach_house">Casa de playa</option>
           </select>
-          <button type="submit">Buscar ahora</button>
+          <input type="text" id="searchInput" placeholder="Ubicación estratégica" aria-label="Buscar ubicación" />
+          <select aria-label="Rango de precio">
+            <option value="">Rango de precio</option>
+            <option value="0-100000">Hasta $100K</option>
+            <option value="100000-300000">$100K - $300K</option>
+            <option value="300000-700000">$300K - $700K</option>
+            <option value="700000+">$700K+</option>
+          </select>
+          <select aria-label="Habitaciones">
+            <option value="">Habitaciones</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+          </select>
+          <button type="submit">Buscar</button>
+          <button type="button" class="advanced-toggle" id="advancedToggle">Búsqueda avanzada</button>
+          <div class="advanced-search-panel" id="advancedSearchPanel">
+            <label>
+              Área mínima (m²)
+              <input type="number" min="0" placeholder="Ej: 120" />
+            </label>
+            <label>
+              Parqueos
+              <select>
+                <option value="">Cualquiera</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+              </select>
+            </label>
+            <label>
+              Tipo de vista
+              <select>
+                <option value="">Todas</option>
+                <option>Mar</option>
+                <option>Montaña</option>
+                <option>Ciudad</option>
+              </select>
+            </label>
+          </div>
         </form>
+
+        <div class="quick-chips" aria-label="Categorías rápidas">
+          <a href="propiedades.html?tipo=house">Casas</a>
+          <a href="propiedades.html?tipo=apartment">Apartamentos</a>
+          <a href="propiedades.html?tipo=land">Terrenos</a>
+          <a href="propiedades.html?tipo=warehouse">Bodegas</a>
+          <a href="propiedades.html?operacion=alquiler">Alquileres</a>
+          <a href="propiedades.html?tipo=inversion">Inversión</a>
+        </div>
       </div>
     </section>
 
-    <section class="section section-properties container">
+    <section class="section container premium-categories">
       <div class="section-header">
+        <h2>Categorías destacadas</h2>
+      </div>
+      <div class="categories-grid">
+        <a class="category-card" href="propiedades.html?tipo=house"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80" alt="Casas" /><span><strong>Casas</strong><small>126 propiedades</small><em>Explorar</em></span></a>
+        <a class="category-card" href="propiedades.html?tipo=apartment"><img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80" alt="Apartamentos" /><span><strong>Apartamentos</strong><small>84 propiedades</small><em>Explorar</em></span></a>
+        <a class="category-card" href="propiedades.html?tipo=land"><img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80" alt="Terrenos" /><span><strong>Terrenos</strong><small>64 oportunidades</small><em>Explorar</em></span></a>
+        <a class="category-card" href="propiedades.html?tipo=warehouse"><img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80" alt="Bodegas" /><span><strong>Bodegas</strong><small>29 propiedades</small><em>Explorar</em></span></a>
+        <a class="category-card" href="propiedades.html?operacion=alquiler"><img src="https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?auto=format&fit=crop&w=1200&q=80" alt="Alquileres" /><span><strong>Alquileres</strong><small>73 disponibles</small><em>Explorar</em></span></a>
+        <a class="category-card" href="propiedades.html?tipo=inversion"><img src="https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80" alt="Inversión" /><span><strong>Inversión</strong><small>35 proyectos</small><em>Explorar</em></span></a>
+      </div>
+    </section>
+
+    <section class="section section-properties container premium-properties">
+      <div class="section-header section-header-tabs">
         <h2>Propiedades destacadas</h2>
-        <a href="propiedades.html" class="text-link">Ver todas</a>
+        <div class="listing-tabs">
+          <a href="propiedades.html?operacion=venta">Venta</a>
+          <a href="propiedades.html?operacion=alquiler">Alquiler</a>
+          <a href="propiedades.html?featured=1">Premium</a>
+        </div>
       </div>
       <div id="featuredGrid" class="properties-grid"></div>
+    </section>
+
+    <section class="section container editorial-feature">
+      <div class="editorial-grid">
+        <div class="editorial-media">
+          <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=1400&q=80" alt="Proyecto residencial premium" />
+        </div>
+        <div class="editorial-copy">
+          <p class="eyebrow">Proyecto editorial</p>
+          <h2>Residencias frente al mar para inversión patrimonial</h2>
+          <p>Proyecto de alta plusvalía con diseño contemporáneo, amenidades premium y gestión integral para compradores locales e internacionales.</p>
+          <ul>
+            <li>Ubicación estratégica y alta demanda</li>
+            <li>Retorno potencial con renta vacacional</li>
+            <li>Acompañamiento legal y financiero</li>
+          </ul>
+          <a href="propiedades.html" class="btn-primary-property">Ver proyecto destacado</a>
+        </div>
+      </div>
     </section>
 
     <section class="section section-properties container terrenos-section">
@@ -96,35 +179,81 @@
       <div id="alquileresGrid" class="properties-grid"></div>
     </section>
 
-    <div class="announcement-bar" aria-label="Anuncios destacados">
-      <div class="announcement-track">
-        <span>🔥 Nuevas propiedades en Managua</span>
-        <span>🏡 Casas de lujo disponibles</span>
-        <span>🌴 Propiedades frente al mar</span>
-        <span>✨ Oportunidades de inversión exclusivas</span>
-        <span>🔥 Nuevas propiedades en Managua</span>
-        <span>🏡 Casas de lujo disponibles</span>
-        <span>🌴 Propiedades frente al mar</span>
-        <span>✨ Oportunidades de inversión exclusivas</span>
+    <section class="section container agents-highlight">
+      <div class="section-header">
+        <h2>Asesores inmobiliarios</h2>
+        <a href="agentes.html" class="text-link">Ver equipo completo</a>
       </div>
-    </div>
+      <div class="agents-grid">
+        <article>
+          <img src="assets/placeholder.svg" alt="Agente especialista residencial" />
+          <h3>Especialista residencial</h3>
+          <p>Atención personalizada, estrategia comercial y negociación enfocada en resultados.</p>
+          <a href="agentes.html">Ver perfil público</a>
+        </article>
+        <article>
+          <img src="assets/placeholder.svg" alt="Agente especialista inversión" />
+          <h3>Especialista inversión</h3>
+          <p>Asesoría en plusvalía, rentabilidad y estructuración de portafolios inmobiliarios.</p>
+          <a href="agentes.html">Ver perfil público</a>
+        </article>
+        <article>
+          <img src="assets/placeholder.svg" alt="Agente comercial" />
+          <h3>Especialista comercial</h3>
+          <p>Gestión de activos corporativos y acompañamiento en adquisición de bodegas y oficinas.</p>
+          <a href="agentes.html">Ver perfil público</a>
+        </article>
+      </div>
+    </section>
 
-    <section class="section section-dark advisory-section section-asesoria">
-      <div class="container split-grid">
+    <section class="section container map-highlight">
+      <div class="section-header">
+        <h2>Explora en mapa</h2>
+      </div>
+      <div class="map-highlight-card">
         <div>
-          <h2>Asesoría inmobiliaria integral</h2>
-          <p>Te acompañamos en cada etapa: desde la búsqueda ideal hasta el cierre notarial, con transparencia y enfoque en resultados.</p>
-          <ul class="checklist">
-            <li>Selección curada de inmuebles premium</li>
-            <li>Soporte legal y documental</li>
-            <li>Análisis de inversión y retorno</li>
+          <p>Filtra por tipo, precio y ubicación en una experiencia geográfica avanzada.</p>
+          <div class="map-filters">
+            <span>Venta</span><span>Alquiler</span><span>Residencial</span><span>Comercial</span>
+          </div>
+        </div>
+        <a href="mapa.html" class="btn-primary-property">Abrir mapa interactivo</a>
+      </div>
+    </section>
+
+    <section class="section container sell-premium-block">
+      <div class="sell-grid">
+        <div>
+          <h2>¿Quieres vender tu propiedad?</h2>
+          <p>Publica con una presentación premium, asesoría profesional y alcance a compradores calificados.</p>
+          <ul>
+            <li>Fotografía y marketing estratégico</li>
+            <li>Difusión multicanal y base de clientes activa</li>
+            <li>Gestión documental y soporte legal</li>
           </ul>
+          <a href="https://wa.me/50557251888" target="_blank" rel="noopener noreferrer" class="button-outline">Hablar por WhatsApp</a>
         </div>
-        <div class="highlight-card">
-          <h3>Más de 12 años conectando clientes con propiedades extraordinarias</h3>
-          <p>Atención personalizada para compradores nacionales e internacionales.</p>
-          <a href="contacto.html" class="button-outline btn-asesoria">Solicitar asesoría</a>
-        </div>
+        <form class="sell-mini-form" action="quieres-vender.html">
+          <label>Nombre completo<input type="text" placeholder="Tu nombre" required /></label>
+          <label>Tipo de propiedad<select><option>Casa</option><option>Apartamento</option><option>Terreno</option><option>Bodega</option></select></label>
+          <label>Agente asignado<select><option>Asignación automática</option><option>Asesor residencial</option><option>Asesor inversión</option></select></label>
+          <button type="submit">Iniciar proceso de venta</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section container reviews-premium">
+      <div class="section-header">
+        <h2>Reseñas y experiencia de clientes</h2>
+      </div>
+      <div class="review-summary">
+        <strong>4.9/5</strong>
+        <span>Basado en 180+ reseñas verificadas</span>
+      </div>
+      <div class="reviews-grid">
+        <article><p>“Servicio impecable, claridad en todo el proceso y resultados rápidos.”</p><small>— Cliente comprador</small></article>
+        <article><p>“Lograron vender nuestra propiedad con una estrategia premium.”</p><small>— Cliente vendedor</small></article>
+        <article><p>“Equipo profesional y excelente acompañamiento legal.”</p><small>— Inversionista</small></article>
       </div>
     </section>
   </main>
@@ -135,7 +264,7 @@
     </a>
   </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="js/firebase-client.js"></script>
