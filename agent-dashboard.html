@@ -90,7 +90,16 @@
               <option value="manzanas">manzanas</option>
             </select>
             <p id="propertyPricePerAreaPreview" class="dashboard-helper-text">Precio por área no disponible</p>
-            <input type="url" id="propertyVideo" placeholder="Video URL" />
+            <fieldset class="property-video-fieldset">
+              <legend>Video de la propiedad</legend>
+              <select id="propertyVideoType">
+                <option value="">Seleccionar plataforma (opcional)</option>
+                <option value="youtube">YouTube</option>
+                <option value="tiktok">TikTok</option>
+              </select>
+              <input type="url" id="propertyVideoUrl" placeholder="https://youtube.com/... o https://www.tiktok.com/..." />
+              <p class="dashboard-helper-text">Acepta enlaces públicos válidos de YouTube o TikTok. No se suben archivos de video.</p>
+            </fieldset>
             <div class="dashboard-image-uploader">
               <h3 class="dashboard-label">Imágenes</h3>
               <div class="image-mode-selector" role="radiogroup" aria-label="Modo de carga de imágenes">
@@ -169,6 +178,7 @@
   <script src="js/firebase-client.js"></script>
   <script src="js/main.js"></script>
   <script src="js/image-utils.js"></script>
+  <script src="js/video-utils.js"></script>
   <script src="js/property-utils.js"></script>
   <script type="module" src="js/agent-dashboard.js"></script>
 </body>
