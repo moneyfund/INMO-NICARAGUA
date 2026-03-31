@@ -4210,12 +4210,21 @@ p, li, label, input, textarea, select, button, a {
   padding: clamp(1.2rem, 2.2vw, 1.8rem);
   box-shadow: var(--shadow-lg);
 }
-.premium-hero .hero-content > .eyebrow {
+.premium-hero .hero-static-content {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.premium-hero .hero-search-content {
+  margin-top: 0;
+}
+
+.premium-hero .hero-static-content .eyebrow {
   color: #c1121f !important;
   font-weight: 700;
   letter-spacing: 0.14em;
 }
-.premium-hero .hero-content > .hero-license {
+.premium-hero .hero-static-content .hero-license {
   margin: 0.12rem 0 0.65rem;
   font-family: "Inter", sans-serif;
   font-size: clamp(0.72rem, 1.35vw, 0.86rem);
@@ -4224,11 +4233,11 @@ p, li, label, input, textarea, select, button, a {
   text-transform: uppercase;
   color: #facc15 !important;
 }
-.premium-hero .hero-content > h1 {
+.premium-hero .hero-static-content h1 {
   color: #ffffff !important;
   text-wrap: balance;
 }
-.premium-hero .hero-content > p:not(.eyebrow):not(.hero-license) {
+.premium-hero .hero-static-content .hero-description {
   color: #ffffff !important;
 }
 
