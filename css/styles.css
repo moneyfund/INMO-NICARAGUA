@@ -5308,7 +5308,9 @@ body.dark-mode .btn-primary-property:focus-visible {
 }
 
 .detail-gallery {
-  min-height: 320px;
+  min-height: 300px;
+  border-radius: 16px;
+  box-shadow: 0 16px 38px rgba(27, 27, 27, 0.14);
 }
 
 .property-gallery::after,
@@ -5318,9 +5320,9 @@ body.dark-mode .btn-primary-property:focus-visible {
   inset: 0;
   background-image: url('../assets/marca de agua.png');
   background-repeat: no-repeat;
-  background-size: clamp(92px, 24%, 180px);
-  background-position: right 14px bottom 14px;
-  opacity: 0.22;
+  background-size: clamp(120px, 26%, 220px);
+  background-position: center center;
+  opacity: 0.2;
   pointer-events: none;
   z-index: 2;
 }
@@ -5335,7 +5337,7 @@ body.dark-mode .btn-primary-property:focus-visible {
 }
 
 .detail-gallery-main-image {
-  min-height: 320px;
+  min-height: 300px;
   max-height: 520px;
 }
 
@@ -5379,6 +5381,83 @@ body.dark-mode .btn-primary-property:focus-visible {
   color: #fff;
   background: rgba(18, 18, 18, 0.52);
   border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.detail-gallery .gallery-indicators {
+  display: none !important;
+}
+
+.detail-content {
+  display: grid;
+  gap: 0.82rem;
+  align-content: start;
+}
+
+.detail-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.012em;
+  color: var(--color-brand-red);
+}
+
+.detail-location {
+  margin: 0;
+  font-size: 1.03rem;
+  color: var(--text-secondary);
+}
+
+.detail-subheadline {
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.detail-key-data {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.detail-description {
+  margin: 0.2rem 0 0.4rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+
+.property-feature-list li {
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.detail-agent-label {
+  margin: 0.2rem 0 0;
+  color: var(--text-primary);
+  line-height: 1.55;
+}
+
+body:not(.dark):not(.dark-mode) .detail-grid h1,
+body:not(.dark):not(.dark-mode) .detail-title,
+html[data-theme="light"] .detail-title {
+  color: var(--color-brand-red);
+}
+
+body:not(.dark):not(.dark-mode) .detail-grid p,
+body:not(.dark):not(.dark-mode) .detail-grid li,
+body:not(.dark):not(.dark-mode) .detail-grid strong,
+body:not(.dark):not(.dark-mode) .property-feature-list li,
+body:not(.dark):not(.dark-mode) .detail-location,
+body:not(.dark):not(.dark-mode) .detail-description,
+html[data-theme="light"] .detail-grid p,
+html[data-theme="light"] .detail-grid li,
+html[data-theme="light"] .detail-grid strong {
+  color: #1f1f1f;
+}
+
+body:not(.dark):not(.dark-mode) .detail-grid .price,
+html[data-theme="light"] .detail-grid .price {
+  color: var(--color-brand-red);
 }
 
 html[data-theme="dark"] .gallery-nav,

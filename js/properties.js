@@ -608,7 +608,6 @@ async function renderPropertyDetail() {
     ? `
       <button class="gallery-nav gallery-prev" type="button" aria-label="Imagen anterior">&#10094;</button>
       <button class="gallery-nav gallery-next" type="button" aria-label="Imagen siguiente">&#10095;</button>
-      <div class="gallery-indicators" aria-label="Indicadores de imágenes"></div>
       <p class="gallery-counter" aria-live="polite"></p>
     `
     : '';
@@ -619,17 +618,17 @@ async function renderPropertyDetail() {
         <img class="detail-gallery-main-image" src="${getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
         ${galleryMarkup}
       </section>
-      <div>
-        <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
-        <h1>${property.titulo}</h1>
-        <p>${property.ubicacion}</p>
-        <p><strong>${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
+      <div class="detail-content">
+        <p class="badge detail-badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
+        <h1 class="detail-title">${property.titulo}</h1>
+        <p class="detail-location">${property.ubicacion}</p>
+        <p class="detail-subheadline"><strong>${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
         <p class="price">${formatDualPrice(getPriceUsd(property))}</p>
-        <p><strong>Área:</strong> ${getAreaDisplay(property)}</p>
-        <p><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
+        <p class="detail-key-data"><strong>Área:</strong> ${getAreaDisplay(property)}</p>
+        <p class="detail-key-data"><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
         <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
-        <p>${property.descripcion}</p>
+        <p class="detail-description">${property.descripcion}</p>
         <ul class="checklist property-feature-list">
           <li>${featureIcon('bedrooms')} ${(property.habitaciones ?? property.bedrooms) || 0} habitaciones</li>
           <li>${featureIcon('bathrooms')} ${(property.banos ?? property.bathrooms) || 0} baños</li>
@@ -637,7 +636,7 @@ async function renderPropertyDetail() {
           <li>${featureIcon('area')} ${getAreaDisplay(property)}</li>
           <li>${featureIcon('location')} ${property.ubicacion || property.city || 'Ubicación no disponible'}</li>
         </ul>
-        ${publishedByName ? `<p><strong>Publicado por</strong><br>${publishedByName}</p>` : ''}
+        ${publishedByName ? `<p class="detail-agent-label"><strong>Publicado por</strong><br>${publishedByName}</p>` : ''}
         ${hasAgentLink ? `<a class="button-outline" href="${agentProfileUrl}">Para más información aquí</a>` : ''}
       </div>
     </div>
