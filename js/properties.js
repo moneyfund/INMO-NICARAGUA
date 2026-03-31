@@ -249,15 +249,25 @@ async function loadAgents() {
 function propertyCardTemplate(property) {
   const featuredClass = property.featured ? ' is-featured' : '';
   const status = (property.status || 'disponible').toLowerCase();
-  const imageSrc = getPrimaryPropertyImage(property);
+  const galleryImages = getPropertyImages(property);
+  const imageSrc = galleryImages[0] || getPrimaryPropertyImage(property);
   const imageAlt = property.title || property.titulo || 'Imagen de la propiedad';
   const detailUrl = getPropertyDetailUrl(property);
   const locationLabel = property.city || property.ubicacion || 'Ubicación no disponible';
   const parkingCount = Number(property.parking ?? property.garaje ?? property.garages ?? 0);
+  const hasGalleryControls = galleryImages.length > 1;
 
   return `
     <article class="property-card${featuredClass}">
-      <img src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
+      <section class="property-gallery" data-gallery-images='${JSON.stringify(galleryImages)}' data-gallery-label="${imageAlt}">
+        <img class="property-gallery-main-image" src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
+        ${hasGalleryControls ? `
+          <button class="gallery-nav gallery-prev" type="button" aria-label="Imagen anterior">&#10094;</button>
+          <button class="gallery-nav gallery-next" type="button" aria-label="Imagen siguiente">&#10095;</button>
+          <div class="gallery-indicators" aria-label="Indicadores de imágenes"></div>
+          <p class="gallery-counter" aria-live="polite"></p>
+        ` : ''}
+      </section>
       <div class="property-card-content">
         <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
         <h3>${property.title || property.titulo}</h3>
@@ -299,6 +309,7 @@ function renderFeatured(properties) {
   const featuredGrid = document.getElementById('featuredGrid');
   if (!featuredGrid) return;
   featuredGrid.innerHTML = properties.slice(0, 3).map(propertyCardTemplate).join('');
+  initPropertyGallery(featuredGrid);
   applyCardRevealAnimation(featuredGrid);
 }
 
@@ -308,6 +319,7 @@ function renderCategory(properties, gridId, filterFn) {
 
   const filtered = properties.filter(filterFn).slice(0, 3);
   grid.innerHTML = filtered.map(propertyCardTemplate).join('');
+  initPropertyGallery(grid);
   applyCardRevealAnimation(grid);
 }
 
@@ -321,6 +333,7 @@ function renderAlquileres(properties) {
 
   const rentals = properties.filter((property) => normalizePropertyOperation(property.operacion) === 'alquiler');
   grid.innerHTML = rentals.slice(0, 3).map(propertyCardTemplate).join('');
+  initPropertyGallery(grid);
   applyCardRevealAnimation(grid);
 }
 
@@ -330,6 +343,7 @@ function renderPropertyList(properties) {
   if (!grid) return;
 
   grid.innerHTML = properties.map(propertyCardTemplate).join('');
+  initPropertyGallery(grid);
   if (emptyState) emptyState.classList.toggle('hidden', properties.length !== 0);
   applyCardRevealAnimation(grid);
 }
@@ -595,12 +609,13 @@ async function renderPropertyDetail() {
       <button class="gallery-nav gallery-prev" type="button" aria-label="Imagen anterior">&#10094;</button>
       <button class="gallery-nav gallery-next" type="button" aria-label="Imagen siguiente">&#10095;</button>
       <div class="gallery-indicators" aria-label="Indicadores de imágenes"></div>
+      <p class="gallery-counter" aria-live="polite"></p>
     `
     : '';
 
   detailContainer.innerHTML = `
     <div class="detail-grid">
-      <section class="detail-gallery" data-gallery-images='${JSON.stringify(galleryImages)}'>
+      <section class="detail-gallery" data-gallery-images='${JSON.stringify(galleryImages)}' data-gallery-label="${property.titulo || 'Imagen de la propiedad'}">
         <img class="detail-gallery-main-image" src="${getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
         ${galleryMarkup}
       </section>
@@ -645,67 +660,86 @@ async function renderPropertyDetail() {
 }
 
 function initPropertyGallery(scope = document) {
-  const gallery = scope.querySelector('.detail-gallery');
-  if (!gallery) return;
+  const galleries = scope.querySelectorAll('.detail-gallery, .property-gallery');
+  if (!galleries.length) return;
 
-  const mainImage = gallery.querySelector('.detail-gallery-main-image');
-  if (!mainImage) return;
+  galleries.forEach((gallery) => {
+    if (gallery.dataset.galleryReady === 'true') return;
 
-  const images = (() => {
-    try {
-      const parsed = JSON.parse(gallery.dataset.galleryImages || '[]');
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      return [];
+    const mainImage = gallery.querySelector('.detail-gallery-main-image, .property-gallery-main-image');
+    if (!mainImage) return;
+
+    const images = (() => {
+      try {
+        const parsed = JSON.parse(gallery.dataset.galleryImages || '[]');
+        return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+      } catch (error) {
+        return [];
+      }
+    })();
+
+    if (!images.length) return;
+
+    const indicators = gallery.querySelector('.gallery-indicators');
+    const galleryCounter = gallery.querySelector('.gallery-counter');
+    const baseLabel = String(gallery.dataset.galleryLabel || mainImage.alt || 'Imagen de la propiedad').trim();
+    let currentIndex = 0;
+    let pointerStartX = 0;
+
+    function updateImage(index) {
+      currentIndex = (index + images.length) % images.length;
+      mainImage.src = images[currentIndex] || PROPERTY_IMAGE_PLACEHOLDER;
+      mainImage.alt = `${baseLabel} (${currentIndex + 1}/${images.length})`;
+
+      if (galleryCounter) {
+        galleryCounter.textContent = `${currentIndex + 1}/${images.length}`;
+      }
+
+      if (!indicators) return;
+      indicators.querySelectorAll('button').forEach((dot, dotIndex) => {
+        dot.classList.toggle('is-active', dotIndex === currentIndex);
+        dot.setAttribute('aria-current', dotIndex === currentIndex ? 'true' : 'false');
+      });
     }
-  })();
 
-  if (!images.length) return;
+    if (indicators) {
+      indicators.innerHTML = images
+        .map((_, index) => `<button type="button" aria-label="Ver imagen ${index + 1}"></button>`)
+        .join('');
 
-  const indicators = gallery.querySelector('.gallery-indicators');
-  let currentIndex = 0;
-  let pointerStartX = 0;
+      indicators.querySelectorAll('button').forEach((dot, dotIndex) => {
+        dot.addEventListener('click', () => updateImage(dotIndex));
+      });
+    }
 
-  function updateImage(index) {
-    currentIndex = (index + images.length) % images.length;
-    mainImage.src = images[currentIndex] || PROPERTY_IMAGE_PLACEHOLDER;
-    mainImage.alt = `Imagen ${currentIndex + 1} de ${images.length}`;
-
-    if (!indicators) return;
-    indicators.querySelectorAll('button').forEach((dot, dotIndex) => {
-      dot.classList.toggle('is-active', dotIndex === currentIndex);
-      dot.setAttribute('aria-current', dotIndex === currentIndex ? 'true' : 'false');
+    gallery.querySelector('.gallery-prev')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      updateImage(currentIndex - 1);
     });
-  }
-
-  if (indicators) {
-    indicators.innerHTML = images
-      .map((_, index) => `<button type="button" aria-label="Ver imagen ${index + 1}"></button>`)
-      .join('');
-
-    indicators.querySelectorAll('button').forEach((dot, dotIndex) => {
-      dot.addEventListener('click', () => updateImage(dotIndex));
-    });
-  }
-
-  gallery.querySelector('.gallery-prev')?.addEventListener('click', () => updateImage(currentIndex - 1));
-  gallery.querySelector('.gallery-next')?.addEventListener('click', () => updateImage(currentIndex + 1));
-
-  gallery.addEventListener('pointerdown', (event) => {
-    pointerStartX = event.clientX;
-  });
-
-  gallery.addEventListener('pointerup', (event) => {
-    const diffX = event.clientX - pointerStartX;
-    if (Math.abs(diffX) < SWIPE_THRESHOLD) return;
-    if (diffX < 0) {
+    gallery.querySelector('.gallery-next')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       updateImage(currentIndex + 1);
-      return;
-    }
-    updateImage(currentIndex - 1);
-  });
+    });
 
-  updateImage(0);
+    gallery.addEventListener('pointerdown', (event) => {
+      pointerStartX = event.clientX;
+    });
+
+    gallery.addEventListener('pointerup', (event) => {
+      const diffX = event.clientX - pointerStartX;
+      if (Math.abs(diffX) < SWIPE_THRESHOLD) return;
+      if (diffX < 0) {
+        updateImage(currentIndex + 1);
+        return;
+      }
+      updateImage(currentIndex - 1);
+    });
+
+    gallery.dataset.galleryReady = 'true';
+    updateImage(0);
+  });
 }
 
 function renderGlobalMap(properties) {
