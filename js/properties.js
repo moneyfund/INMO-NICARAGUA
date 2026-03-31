@@ -334,8 +334,7 @@ function buildGalleryWatermarkMarkup() {
 function propertyCardTemplate(property) {
   const featuredClass = property.featured ? ' is-featured' : '';
   const status = (property.status || 'disponible').toLowerCase();
-  const galleryImages = getPropertyImages(property);
-  const imageSrc = galleryImages[0] || getPrimaryPropertyImage(property);
+  const imageSrc = getPrimaryPropertyImage(property);
   const imageAlt = property.title || property.titulo || 'Imagen de la propiedad';
   const detailUrl = getPropertyDetailUrl(property);
   const locationLabel = property.city || property.ubicacion || 'Ubicación no disponible';
@@ -343,12 +342,8 @@ function propertyCardTemplate(property) {
 
   return `
     <article class="property-card${featuredClass}">
-      <section class="property-gallery" data-gallery-images='${JSON.stringify(galleryImages)}' data-gallery-label="${imageAlt}">
-        <div class="gallery-viewport">
-          <img class="property-gallery-main-image" src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
-          ${buildGalleryWatermarkMarkup()}
-          ${buildGalleryControlsMarkup(galleryImages)}
-        </div>
+      <section class="property-cover">
+        <img class="property-cover-image" src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
       </section>
       <div class="property-card-content">
         <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
@@ -391,7 +386,6 @@ function renderFeatured(properties) {
   const featuredGrid = document.getElementById('featuredGrid');
   if (!featuredGrid) return;
   featuredGrid.innerHTML = properties.slice(0, 3).map(propertyCardTemplate).join('');
-  initPropertyGallery(featuredGrid);
   applyCardRevealAnimation(featuredGrid);
 }
 
@@ -401,7 +395,6 @@ function renderCategory(properties, gridId, filterFn) {
 
   const filtered = properties.filter(filterFn).slice(0, 3);
   grid.innerHTML = filtered.map(propertyCardTemplate).join('');
-  initPropertyGallery(grid);
   applyCardRevealAnimation(grid);
 }
 
@@ -415,7 +408,6 @@ function renderAlquileres(properties) {
 
   const rentals = properties.filter((property) => normalizePropertyOperation(property.operacion) === 'alquiler');
   grid.innerHTML = rentals.slice(0, 3).map(propertyCardTemplate).join('');
-  initPropertyGallery(grid);
   applyCardRevealAnimation(grid);
 }
 
@@ -425,7 +417,6 @@ function renderPropertyList(properties) {
   if (!grid) return;
 
   grid.innerHTML = properties.map(propertyCardTemplate).join('');
-  initPropertyGallery(grid);
   if (emptyState) emptyState.classList.toggle('hidden', properties.length !== 0);
   applyCardRevealAnimation(grid);
 }
@@ -768,13 +759,13 @@ async function renderPropertyDetail() {
 }
 
 function initPropertyGallery(scope = document) {
-  const galleries = scope.querySelectorAll('.detail-gallery, .property-gallery');
+  const galleries = scope.querySelectorAll('.detail-gallery');
   if (!galleries.length) return;
 
   galleries.forEach((gallery) => {
     if (gallery.dataset.galleryReady === 'true') return;
 
-    const mainImage = gallery.querySelector('.detail-gallery-main-image, .property-gallery-main-image');
+    const mainImage = gallery.querySelector('.detail-gallery-main-image');
     if (!mainImage) return;
 
     const images = (() => {
