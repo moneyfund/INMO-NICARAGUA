@@ -38,8 +38,9 @@ const state = {
   user: null,
   reviewRating: 0,
   reviewHover: 0,
-  initialized: false,
-  unsubscribers: []
+  authBound: false,
+  unsubscribers: [],
+  likesCache: []
 };
 
 function getPropertyIdFromUrl() {
@@ -85,7 +86,33 @@ function setFormMessage(formSelector, text, type = '') {
   if (type) element.classList.add(type);
 }
 
-function renderShell() {
+function setLikeMessage(text, type = '') {
+  const element = document.querySelector('[data-pi-like-message]');
+  if (!element) return;
+  element.textContent = text;
+  element.classList.remove('is-success', 'is-error');
+  if (type) element.classList.add(type);
+}
+
+function renderLikeShell() {
+  const mount = document.getElementById('propertyLikeMount');
+  if (!mount) return false;
+
+  mount.innerHTML = `
+    <div class="pi-like-top" data-pi-likes>
+      <button type="button" class="pi-like-btn" data-pi-like-btn aria-pressed="false">
+        <span class="pi-like-icon" aria-hidden="true">❤</span>
+        <span data-pi-like-label>Me gusta</span>
+      </button>
+      <p class="pi-like-count"><strong data-pi-like-count>0</strong> me gusta</p>
+      <p class="pi-form-message" data-pi-like-message></p>
+    </div>
+  `;
+
+  return true;
+}
+
+function renderDiscussionShell() {
   const section = document.getElementById('propertyReviews');
   if (!section) return false;
 
@@ -94,25 +121,12 @@ function renderShell() {
       <header class="pi-header">
         <div>
           <p class="pi-eyebrow">Interacciones</p>
-          <h2>Comentarios, reseñas y me gusta</h2>
+          <h2>Comentarios y reseñas</h2>
         </div>
         <div class="pi-auth" data-pi-auth></div>
       </header>
 
-      <div class="pi-grid">
-        <article class="pi-card" data-pi-likes>
-          <div class="pi-card-head">
-            <h3>Me gusta</h3>
-            <p>Guarda tu reacción para esta propiedad.</p>
-          </div>
-          <button type="button" class="pi-like-btn" data-pi-like-btn>
-            <span class="pi-like-icon" aria-hidden="true">❤</span>
-            <span data-pi-like-label>Me gusta</span>
-          </button>
-          <p class="pi-like-count"><strong data-pi-like-count>0</strong> personas han dado me gusta.</p>
-          <p class="pi-form-message" data-pi-like-message></p>
-        </article>
-
+      <div class="pi-grid pi-grid-two">
         <article class="pi-card" data-pi-comments>
           <div class="pi-card-head">
             <h3>Comentarios</h3>
@@ -302,6 +316,21 @@ function paintRatingPicker(value = 0) {
   if (valueEl) valueEl.textContent = String(activeValue);
 }
 
+function renderLikeState() {
+  const button = document.querySelector('[data-pi-like-btn]');
+  const count = document.querySelector('[data-pi-like-count]');
+  const label = document.querySelector('[data-pi-like-label]');
+  if (!button || !count || !label) return;
+
+  const total = state.likesCache.length;
+  const isLiked = Boolean(state.user && state.likesCache.some((item) => item.userId === state.user.uid));
+
+  count.textContent = String(total);
+  button.classList.toggle('is-liked', isLiked);
+  button.setAttribute('aria-pressed', String(isLiked));
+  label.textContent = isLiked ? 'Te gusta esta propiedad' : 'Me gusta';
+}
+
 function bindReviewForm() {
   const form = document.querySelector('[data-pi-review-form]');
   if (!form) return;
@@ -354,6 +383,7 @@ function bindReviewForm() {
         rating: state.reviewRating,
         comment: reviewText,
         review: reviewText,
+        content: reviewText,
         createdAt: serverTimestamp()
       });
 
@@ -409,47 +439,23 @@ function bindCommentForm() {
 
 function bindLikes() {
   const button = document.querySelector('[data-pi-like-btn]');
-  const count = document.querySelector('[data-pi-like-count]');
-  const label = document.querySelector('[data-pi-like-label]');
-  const message = document.querySelector('[data-pi-like-message]');
-  if (!button || !count || !label || !message) return;
-
-  let likesCache = [];
-
-  const likesQuery = query(collection(db, 'likes'), where('propertyId', '==', state.propertyId));
-  const unsubLikes = onSnapshot(likesQuery, (snapshot) => {
-    likesCache = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-    const total = likesCache.length;
-    const isLiked = Boolean(state.user && likesCache.some((item) => item.userId === state.user.uid));
-
-    count.textContent = String(total);
-    button.classList.toggle('is-liked', isLiked);
-    button.setAttribute('aria-pressed', String(isLiked));
-    label.textContent = isLiked ? 'Te gusta esta propiedad' : 'Me gusta';
-  }, (error) => {
-    console.error('No se pudieron cargar los likes:', error);
-    message.textContent = 'No se pudieron cargar los likes.';
-  });
-
-  state.unsubscribers.push(unsubLikes);
+  if (!button) return;
 
   button.addEventListener('click', async () => {
     if (!state.user) {
-      message.textContent = 'Debes iniciar sesión para dar me gusta.';
-      message.classList.remove('is-success');
-      message.classList.add('is-error');
+      setLikeMessage('Debes iniciar sesión para dar me gusta.', 'is-error');
       return;
     }
 
     const likeId = `${state.propertyId}_${state.user.uid}`;
     const likeDoc = doc(db, 'likes', likeId);
-    const alreadyLiked = likesCache.some((item) => item.userId === state.user.uid);
+    const alreadyLiked = state.likesCache.some((item) => item.userId === state.user.uid);
 
     button.disabled = true;
     try {
       if (alreadyLiked) {
         await deleteDoc(likeDoc);
-        message.textContent = 'Quitaste tu me gusta.';
+        setLikeMessage('Quitaste tu me gusta.', 'is-success');
       } else {
         await setDoc(likeDoc, {
           propertyId: state.propertyId,
@@ -458,15 +464,11 @@ function bindLikes() {
           userPhoto: state.user.photoURL || '',
           createdAt: serverTimestamp()
         });
-        message.textContent = '¡Gracias por tu me gusta!';
+        setLikeMessage('¡Gracias por tu me gusta!', 'is-success');
       }
-      message.classList.remove('is-error');
-      message.classList.add('is-success');
     } catch (error) {
       console.error('No se pudo registrar el like:', error);
-      message.textContent = 'No se pudo actualizar tu me gusta.';
-      message.classList.remove('is-success');
-      message.classList.add('is-error');
+      setLikeMessage('No se pudo actualizar tu me gusta.', 'is-error');
     } finally {
       button.disabled = false;
     }
@@ -497,6 +499,19 @@ function subscribeReviews() {
   state.unsubscribers.push(unsub);
 }
 
+function subscribeLikes() {
+  const likesQuery = query(collection(db, 'likes'), where('propertyId', '==', state.propertyId));
+  const unsub = onSnapshot(likesQuery, (snapshot) => {
+    state.likesCache = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+    renderLikeState();
+  }, (error) => {
+    console.error('No se pudieron cargar los likes:', error);
+    setLikeMessage('No se pudieron cargar los likes.', 'is-error');
+  });
+
+  state.unsubscribers.push(unsub);
+}
+
 function clearSubscriptions() {
   state.unsubscribers.forEach((unsubscribe) => {
     try {
@@ -508,39 +523,48 @@ function clearSubscriptions() {
   state.unsubscribers = [];
 }
 
-async function initInteractionSystem() {
-  const nextPropertyId = getPropertyIdFromUrl();
+function bindAuth() {
+  if (state.authBound) return;
+
+  onAuthStateChanged(auth, (user) => {
+    state.user = user;
+    renderAuthBox();
+    renderLikeState();
+  });
+
+  state.authBound = true;
+}
+
+async function initInteractionSystem(propertyIdFromEvent = '') {
+  const nextPropertyId = String(propertyIdFromEvent || getPropertyIdFromUrl() || '').trim();
   if (!nextPropertyId) return;
 
   state.propertyId = nextPropertyId;
-
-  if (!renderShell()) return;
-
-  clearSubscriptions();
   state.reviewRating = 0;
   state.reviewHover = 0;
+  state.likesCache = [];
 
+  if (!renderLikeShell() || !renderDiscussionShell()) return;
+
+  clearSubscriptions();
+  bindAuth();
   bindCommentForm();
   bindReviewForm();
   bindLikes();
+
+  paintRatingPicker(0);
+  renderAuthBox();
+  renderLikeState();
+
+  subscribeLikes();
   subscribeComments();
   subscribeReviews();
-  paintRatingPicker(0);
-
-  if (!state.initialized) {
-    onAuthStateChanged(auth, (user) => {
-      state.user = user;
-      renderAuthBox();
-    });
-    state.initialized = true;
-  } else {
-    renderAuthBox();
-  }
 }
 
-function queueInit() {
+function queueInit(event) {
+  const propertyId = event?.detail?.propertyId || '';
   window.requestAnimationFrame(() => {
-    initInteractionSystem().catch((error) => {
+    initInteractionSystem(propertyId).catch((error) => {
       console.error('No se pudo inicializar el sistema de interacciones:', error);
     });
   });
@@ -549,11 +573,3 @@ function queueInit() {
 window.addEventListener('propertyDetailReady', queueInit);
 window.addEventListener('DOMContentLoaded', queueInit);
 window.addEventListener('beforeunload', clearSubscriptions);
-
-const observer = new MutationObserver(() => {
-  if (document.getElementById('propertyReviews')) queueInit();
-});
-
-if (document.body) {
-  observer.observe(document.body, { childList: true, subtree: true });
-}

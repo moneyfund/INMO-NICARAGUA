@@ -625,9 +625,12 @@ async function renderPropertyDetail() {
         <p>${property.ubicacion}</p>
         <p><strong>${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
         <p class="price">${formatDualPrice(getPriceUsd(property))}</p>
+        <div class="property-main-actions">
+          <div id="propertyLikeMount" class="property-like-mount" aria-live="polite"></div>
+          <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
+        </div>
         <p><strong>Área:</strong> ${getAreaDisplay(property)}</p>
         <p><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
-        <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
         <p>${property.descripcion}</p>
         <ul class="checklist property-feature-list">
