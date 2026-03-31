@@ -401,6 +401,25 @@ async function initReviewSystem() {
   }
 }
 
-window.addEventListener('propertyDetailReady', initReviewSystem);
-window.addEventListener('DOMContentLoaded', initReviewSystem);
+
+function queueReviewSystemInit() {
+  window.requestAnimationFrame(() => {
+    initReviewSystem().catch((error) => {
+      console.error('No se pudo inicializar el sistema de reseñas:', error);
+    });
+  });
+}
+
+window.addEventListener('propertyDetailReady', queueReviewSystemInit);
+window.addEventListener('DOMContentLoaded', queueReviewSystemInit);
+window.addEventListener('load', queueReviewSystemInit);
 window.addEventListener('beforeunload', clearReviewSubscriptions);
+
+const reviewSectionObserver = new MutationObserver(() => {
+  if (!document.getElementById('propertyReviews')) return;
+  queueReviewSystemInit();
+});
+
+if (document.body) {
+  reviewSectionObserver.observe(document.body, { childList: true, subtree: true });
+}

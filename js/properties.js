@@ -466,39 +466,6 @@ function buildAgentProfileUrl(agentId) {
   return `agente.html?id=${encodeURIComponent(agentId)}`;
 }
 
-function createAgentCardTemplate(agent, property) {
-  const hasRenderableAgent =
-    Boolean(agent?.id) &&
-    Boolean(
-      String(agent?.name || '').trim() ||
-      String(agent?.photo || agent?.image || agent?.avatar || '').trim() ||
-      String(agent?.phone || agent?.whatsapp || '').trim()
-    );
-
-  if (!hasRenderableAgent) return '';
-
-  const agentPhoto = normalizePropertyImageUrl(agent.photo || agent.image || agent.avatar || '') || AGENT_IMAGE_PLACEHOLDER;
-  const profileUrl = buildAgentProfileUrl(agent.id);
-  const moreByAgentUrl = `propiedades.html?agent=${encodeURIComponent(agent.id)}`;
-
-  return `
-    <section class="agent-card-section" aria-label="Agente de la propiedad">
-      <h2>Agente de esta propiedad</h2>
-      <article class="agent-card">
-        <img src="${agentPhoto}" alt="Foto de ${agent.name || 'agente'}" loading="lazy" onerror="this.onerror=null;this.src='${AGENT_IMAGE_PLACEHOLDER}'">
-        <div class="agent-card-content">
-          <h3>${agent.name || 'Agente inmobiliario'}</h3>
-          <p>Agente inmobiliario</p>
-          <div class="agent-card-actions">
-            <a class="button-outline" href="${profileUrl}">Ver perfil del agente</a>
-            <a class="button-outline" href="${moreByAgentUrl}">Ver más propiedades</a>
-          </div>
-        </div>
-      </article>
-    </section>
-  `;
-}
-
 async function findFavorite(propertyId, userId) {
   if (!propertyId || !userId) return null;
 
@@ -663,7 +630,6 @@ async function renderPropertyDetail() {
       <h2>Ubicación de la propiedad</h2>
       <div id="propertyMap" class="property-map"></div>
     </section>
-    ${createAgentCardTemplate(agent, property)}
     <section class="property-reviews-section" id="propertyReviews"></section>
   `;
 
