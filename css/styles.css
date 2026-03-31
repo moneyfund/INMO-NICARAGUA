@@ -5319,8 +5319,8 @@ body.dark-mode .btn-primary-property:focus-visible {
   background-image: url('../assets/marca de agua.png');
   background-repeat: no-repeat;
   background-size: clamp(92px, 24%, 180px);
-  background-position: right 14px bottom 14px;
-  opacity: 0.22;
+  background-position: center;
+  opacity: 0.18;
   pointer-events: none;
   z-index: 2;
 }
@@ -5360,7 +5360,6 @@ body.dark-mode .btn-primary-property:focus-visible {
   border-color: rgba(255, 255, 255, 0.9);
 }
 
-.gallery-indicators,
 .gallery-counter {
   z-index: 3;
 }
@@ -5379,6 +5378,18 @@ body.dark-mode .btn-primary-property:focus-visible {
   color: #fff;
   background: rgba(18, 18, 18, 0.52);
   border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+html[data-theme="light"] .detail-grid > div,
+body:not(.dark):not(.dark-mode) .detail-grid > div {
+  color: #1f2937;
+}
+
+html[data-theme="light"] .detail-grid > div p,
+html[data-theme="light"] .detail-grid > div li,
+body:not(.dark):not(.dark-mode) .detail-grid > div p,
+body:not(.dark):not(.dark-mode) .detail-grid > div li {
+  color: #334155;
 }
 
 html[data-theme="dark"] .gallery-nav,
