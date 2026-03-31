@@ -4185,6 +4185,15 @@ p, li, label, input, textarea, select, button, a {
   box-shadow: var(--shadow-lg);
 }
 .hero .eyebrow { color: var(--color-brand-gold) !important; font-weight: 700; letter-spacing: 0.14em; }
+.hero-license {
+  margin: 0.12rem 0 0.65rem;
+  font-family: "Inter", sans-serif;
+  font-size: clamp(0.72rem, 1.35vw, 0.86rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(244, 234, 227, 0.84);
+}
 .hero h1 { color: var(--text-on-dark) !important; text-wrap: balance; }
 .hero p { color: #f4eae3 !important; }
 
@@ -4935,6 +4944,12 @@ body.dark-mode .site-footer,
   .hero .eyebrow {
     font-size: 0.72rem;
     letter-spacing: 0.12em;
+  }
+
+  .hero-license {
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
   }
 
   .hero p {
