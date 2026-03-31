@@ -2648,6 +2648,9 @@ body.dark-mode {
 
 /* Brand identity refinement: premium typography + consistent light red in both themes */
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
   font-family: 'Inter', 'Segoe UI', sans-serif;
   font-weight: 800;
   font-size: clamp(1rem, 1.6vw, 1.28rem);
@@ -2655,6 +2658,17 @@ body.dark-mode {
   text-transform: uppercase;
   color: #ff6b6b;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
+}
+
+.brand-logo {
+  width: auto;
+  height: clamp(30px, 3.2vw, 42px);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.brand span {
+  line-height: 1.1;
 }
 
 .brand:hover {
@@ -2715,6 +2729,16 @@ body.dark-mode .site-header.is-scrolled {
 .menu-toggle,
 .theme-toggle {
   color: var(--text-main);
+}
+
+@media (max-width: 720px) {
+  .brand {
+    gap: 0.45rem;
+  }
+
+  .brand-logo {
+    height: 32px;
+  }
 }
 
 .site-nav a {
