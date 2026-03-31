@@ -630,7 +630,24 @@ section h2,
 .filter-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr auto; gap: .75rem; margin-bottom: 1.5rem; }
 .empty-state { text-align: center; margin-top: 1rem; color: var(--text-inverse); }
 
+.detail-layout {
+  display: grid;
+  gap: 1.35rem;
+}
 .detail-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; align-items: start; }
+.detail-summary-card,
+.detail-extended-card {
+  padding: 1.15rem;
+}
+.detail-summary-card {
+  display: grid;
+  align-content: start;
+  gap: 0.65rem;
+}
+.detail-extended-card {
+  display: grid;
+  gap: 0.8rem;
+}
 .detail-gallery {
   position: relative;
   border-radius: 12px;
@@ -5515,15 +5532,21 @@ body.dark-mode .btn-primary-property:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.45);
 }
 
-html[data-theme="light"] .detail-grid > div,
-body:not(.dark):not(.dark-mode) .detail-grid > div {
+html[data-theme="light"] .detail-summary-card,
+html[data-theme="light"] .detail-extended-card,
+body:not(.dark):not(.dark-mode) .detail-summary-card,
+body:not(.dark):not(.dark-mode) .detail-extended-card {
   color: #1f2937;
 }
 
-html[data-theme="light"] .detail-grid > div p,
-html[data-theme="light"] .detail-grid > div li,
-body:not(.dark):not(.dark-mode) .detail-grid > div p,
-body:not(.dark):not(.dark-mode) .detail-grid > div li {
+html[data-theme="light"] .detail-summary-card p,
+html[data-theme="light"] .detail-summary-card li,
+html[data-theme="light"] .detail-extended-card p,
+html[data-theme="light"] .detail-extended-card li,
+body:not(.dark):not(.dark-mode) .detail-summary-card p,
+body:not(.dark):not(.dark-mode) .detail-summary-card li,
+body:not(.dark):not(.dark-mode) .detail-extended-card p,
+body:not(.dark):not(.dark-mode) .detail-extended-card li {
   color: #334155;
 }
 
@@ -6065,7 +6088,8 @@ body:not(.dark):not(.dark-mode) .site-nav a { color: var(--premium-text); }
   gap: 1.4rem;
 }
 
-.detail-grid > div,
+.detail-summary-card,
+.detail-extended-card,
 .detail-gallery,
 .agent-public-profile,
 .agent-public-stats,
@@ -6080,7 +6104,6 @@ body:not(.dark):not(.dark-mode) .site-nav a { color: var(--premium-text); }
   box-shadow: var(--premium-shadow-soft);
 }
 
-.detail-grid > div { padding: 1.1rem; }
 .property-feature-list li { margin-bottom: 0.5rem; }
 
 .agents-grid { gap: 1.35rem; }
@@ -6107,7 +6130,8 @@ body.dark-mode .hero-content,
 }
 
 body.dark .property-card,
-body.dark .detail-grid > div,
+body.dark .detail-summary-card,
+body.dark .detail-extended-card,
 body.dark .detail-gallery,
 body.dark .agent-public-profile,
 body.dark .agent-public-stats,
@@ -6116,7 +6140,8 @@ body.dark .seller-form,
 body.dark .seller-contact-card,
 body.dark .properties-map-full,
 body.dark-mode .property-card,
-body.dark-mode .detail-grid > div,
+body.dark-mode .detail-summary-card,
+body.dark-mode .detail-extended-card,
 body.dark-mode .detail-gallery,
 body.dark-mode .agent-public-profile,
 body.dark-mode .agent-public-stats,
@@ -6139,7 +6164,8 @@ body.dark-mode .properties-map-full {
   .page-banner .container,
   .section-properties.container,
   .map-page-header .container { padding: 1rem; border-radius: 16px; }
-  .detail-grid > div,
+  .detail-summary-card,
+  .detail-extended-card,
   .detail-gallery,
   .agent-public-profile,
   .agent-public-stats,
