@@ -4210,18 +4210,27 @@ p, li, label, input, textarea, select, button, a {
   padding: clamp(1.2rem, 2.2vw, 1.8rem);
   box-shadow: var(--shadow-lg);
 }
-.hero .eyebrow { color: var(--color-brand-gold) !important; font-weight: 700; letter-spacing: 0.14em; }
-.hero-license {
+.premium-hero .hero-content > .eyebrow {
+  color: #c1121f !important;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.premium-hero .hero-content > .hero-license {
   margin: 0.12rem 0 0.65rem;
   font-family: "Inter", sans-serif;
   font-size: clamp(0.72rem, 1.35vw, 0.86rem);
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(244, 234, 227, 0.84);
+  color: #facc15 !important;
 }
-.hero h1 { color: var(--text-on-dark) !important; text-wrap: balance; }
-.hero p { color: #f4eae3 !important; }
+.premium-hero .hero-content > h1 {
+  color: #ffffff !important;
+  text-wrap: balance;
+}
+.premium-hero .hero-content > p:not(.eyebrow):not(.hero-license) {
+  color: #ffffff !important;
+}
 
 /* Unified control system */
 button,
