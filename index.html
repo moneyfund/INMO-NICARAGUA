@@ -48,44 +48,48 @@
       </div>
       <div class="hero-overlay"></div>
       <div class="container hero-content">
-        <p class="eyebrow">Diamantes Realty Group</p>
-        <p class="hero-license">INVUR-UCBR-PN-N°. 0153-2026</p>
-        <h1>Encuentra La Propiedad Ideal Para Ti</h1>
-        <p>Descubre residencias, terrenos, propiedades comerciales y oportunidades de inversión con asesoría especializada de alto nivel.</p>
+        <div class="hero-static-content">
+          <p class="eyebrow">Diamantes Realty Group</p>
+          <p class="hero-license">INVUR-UCBR-PN-N°. 0153-2026</p>
+          <h1>Encuentra La Propiedad Ideal Para Ti</h1>
+          <p class="hero-description">Descubre residencias, terrenos, propiedades comerciales y oportunidades de inversión con asesoría especializada de alto nivel.</p>
+        </div>
 
-        <form class="search-form premium-search" id="heroSearchForm">
-          <div class="hero-operation-tabs" role="tablist" aria-label="Tipo de operación">
-            <button type="button" class="hero-operation-tab is-active" data-operation="venta" role="tab" aria-selected="true">Venta</button>
-            <button type="button" class="hero-operation-tab" data-operation="alquiler" role="tab" aria-selected="false">Alquiler</button>
-          </div>
-          <input type="hidden" id="heroOperationInput" value="venta" />
-          <select id="typeInput" aria-label="Tipo de propiedad">
-            <option value="">Tipo de propiedad</option>
-            <option value="house">Casa</option>
-            <option value="apartment">Apartamento</option>
-            <option value="land">Terreno</option>
-            <option value="warehouse">Bodega</option>
-            <option value="farm">Finca</option>
-            <option value="quinta">Quinta</option>
-            <option value="beach_house">Casa de playa</option>
-          </select>
-          <input type="text" id="searchInput" placeholder="Ubicación estratégica" aria-label="Buscar ubicación" />
-          <select aria-label="Rango de precio">
-            <option value="">Rango de precio</option>
-            <option value="0-100000">Hasta $100K</option>
-            <option value="100000-300000">$100K - $300K</option>
-            <option value="300000-700000">$300K - $700K</option>
-            <option value="700000+">$700K+</option>
-          </select>
-          <select aria-label="Exclusivas">
-            <option value="">Exclusivas</option>
-            <option value="featured">Destacadas</option>
-            <option value="luxury">Lujo</option>
-            <option value="new">Nuevas</option>
-            <option value="ocean-view">Vista al mar</option>
-          </select>
-          <button type="submit" class="hero-search-submit">BUSCAR</button>
-        </form>
+        <div class="hero-search-content">
+          <form class="search-form premium-search" id="heroSearchForm">
+            <div class="hero-operation-tabs" role="tablist" aria-label="Tipo de operación">
+              <button type="button" class="hero-operation-tab is-active" data-operation="venta" role="tab" aria-selected="true">Venta</button>
+              <button type="button" class="hero-operation-tab" data-operation="alquiler" role="tab" aria-selected="false">Alquiler</button>
+            </div>
+            <input type="hidden" id="heroOperationInput" value="venta" />
+            <select id="typeInput" aria-label="Tipo de propiedad">
+              <option value="">Tipo de propiedad</option>
+              <option value="house">Casa</option>
+              <option value="apartment">Apartamento</option>
+              <option value="land">Terreno</option>
+              <option value="warehouse">Bodega</option>
+              <option value="farm">Finca</option>
+              <option value="quinta">Quinta</option>
+              <option value="beach_house">Casa de playa</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Ubicación estratégica" aria-label="Buscar ubicación" />
+            <select aria-label="Rango de precio">
+              <option value="">Rango de precio</option>
+              <option value="0-100000">Hasta $100K</option>
+              <option value="100000-300000">$100K - $300K</option>
+              <option value="300000-700000">$300K - $700K</option>
+              <option value="700000+">$700K+</option>
+            </select>
+            <select aria-label="Exclusivas">
+              <option value="">Exclusivas</option>
+              <option value="featured">Destacadas</option>
+              <option value="luxury">Lujo</option>
+              <option value="new">Nuevas</option>
+              <option value="ocean-view">Vista al mar</option>
+            </select>
+            <button type="submit" class="hero-search-submit">BUSCAR</button>
+          </form>
+        </div>
       </div>
     </section>
 
