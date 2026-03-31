@@ -449,7 +449,7 @@ section h2,
 .property-card.is-featured:hover::after {
   border-color: color-mix(in srgb, var(--accent-gold) 55%, var(--diamond-red));
 }
-.property-card img {
+.property-card > img {
   width: 100%;
   height: 190px;
   object-fit: cover;
@@ -457,7 +457,7 @@ section h2,
   border-radius: 16px 16px 0 0;
   transition: transform 0.4s ease;
 }
-.property-card:hover img {
+.property-card:hover > img {
   transform: scale(1.08);
 }
 
@@ -5391,17 +5391,12 @@ body.dark-mode .btn-primary-property:focus-visible {
 }
 
 /* Galería premium de propiedades (cards + detalle) */
-.property-gallery,
 .detail-gallery {
   position: relative;
   overflow: visible;
   background: transparent;
   line-height: normal;
   touch-action: pan-y;
-}
-
-.property-gallery {
-  border-radius: 14px 14px 0 0;
 }
 
 .detail-gallery {
@@ -5417,6 +5412,27 @@ body.dark-mode .btn-primary-property:focus-visible {
   background: #131313;
   line-height: 0;
   aspect-ratio: 16 / 10;
+}
+
+.property-cover {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px 14px 0 0;
+  background: #131313;
+  aspect-ratio: 16 / 10;
+}
+
+.property-cover-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s ease;
+}
+
+.property-card:hover .property-cover-image {
+  transform: scale(1.04);
 }
 
 .detail-gallery .gallery-viewport {
@@ -5518,7 +5534,7 @@ body.dark-mode .gallery-nav {
 }
 
 @media (max-width: 768px) {
-  .property-gallery .gallery-viewport {
+  .property-cover {
     aspect-ratio: 16 / 11;
   }
 
