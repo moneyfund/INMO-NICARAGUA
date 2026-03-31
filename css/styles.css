@@ -6571,8 +6571,7 @@ body.dark-mode.home-page,
 }
 
 .home-page .editorial-grid,
-.home-page .sell-grid,
-.home-page .map-highlight-card {
+.home-page .sell-grid {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: 1.25rem;
@@ -6601,9 +6600,6 @@ body.dark-mode.home-page,
 .home-page .sell-mini-form select,
 .home-page .sell-mini-form button { min-height: 44px; border-radius: 10px; border:1px solid var(--premium-border); }
 .home-page .sell-mini-form button { background: var(--premium-red); color: #fff; border-color: var(--premium-red); font-weight: 700; }
-
-.home-page .map-filters { display: flex; flex-wrap: wrap; gap: .5rem; }
-.home-page .map-filters span { border:1px solid var(--premium-border); border-radius: 999px; padding: .4rem .8rem; }
 
 .site-footer {
   background: #0f172a;
@@ -6675,8 +6671,7 @@ body.dark-mode.home-page,
     --card-height: clamp(250px, 48vw, 320px);
   }
   .home-page .editorial-grid,
-  .home-page .sell-grid,
-  .home-page .map-highlight-card { grid-template-columns: 1fr; }
+  .home-page .sell-grid { grid-template-columns: 1fr; }
   .home-page .featured-properties-slider { --featured-columns: 2; }
   .home-page .section.section-properties.container.premium-properties {
     padding: .82rem .88rem .96rem;
