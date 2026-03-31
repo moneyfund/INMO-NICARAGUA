@@ -78,11 +78,40 @@ const footerSocialLinks = [
 function renderSiteFooter() {
   const footerMarkup = `
     <div class="container footer-content">
-      <nav class="footer-legal-nav" aria-label="Enlaces legales">
-        ${footerLinks.map((link) => `<a class="footer-legal-link" href="${link.href}">${link.label}</a>`).join('')}
-      </nav>
-      <div class="footer-social" aria-label="Redes sociales de Diamantes Realty Group">
-        ${footerSocialLinks.map((link) => `<a class="footer-social-link" href="${link.href}" ${link.href.startsWith('mailto:') ? '' : 'target="_blank" rel="noopener noreferrer"'} aria-label="${link.label}" title="${link.label}">${link.icon}</a>`).join('')}
+      <div class="footer-brand-row">
+        <div>
+          <h3>${APP_NAME}</h3>
+          <p>Inmobiliaria corporativa en Nicaragua con enfoque en propiedades premium y asesoría integral.</p>
+        </div>
+        <a class="footer-cta" href="contacto.html">Agendar asesoría</a>
+      </div>
+
+      <div class="footer-columns">
+        <div>
+          <h4>Explora</h4>
+          <a href="index.html">Inicio</a>
+          <a href="propiedades.html">Propiedades</a>
+          <a href="mapa.html">Mapa</a>
+          <a href="agentes.html">Agentes</a>
+        </div>
+        <div>
+          <h4>Servicios</h4>
+          <a href="quieres-vender.html">Vender propiedad</a>
+          <a href="contacto.html">Asesoría personalizada</a>
+          <a href="nosotros.html">Nosotros</a>
+        </div>
+        <div>
+          <h4>Legal</h4>
+          ${footerLinks.map((link) => `<a class="footer-legal-link" href="${link.href}">${link.label}</a>`).join('')}
+        </div>
+        <div>
+          <h4>Contacto</h4>
+          <a href="tel:+50557251888">+505 5725-1888</a>
+          <a href="mailto:correo@inmonicaragua.com">correo@inmonicaragua.com</a>
+          <div class="footer-social" aria-label="Redes sociales de Diamantes Realty Group">
+            ${footerSocialLinks.map((link) => `<a class="footer-social-link" href="${link.href}" ${link.href.startsWith('mailto:') ? '' : 'target="_blank" rel="noopener noreferrer"'} aria-label="${link.label}" title="${link.label}">${link.icon}</a>`).join('')}
+          </div>
+        </div>
       </div>
       <p class="footer-text">© <span id="currentYear"></span> ${APP_NAME}</p>
     </div>
@@ -130,6 +159,28 @@ function initializeHeroSlider() {
 }
 
 initializeHeroSlider();
+
+
+function updateHeaderOnScroll() {
+  if (!siteHeader) return;
+  const isScrolled = window.scrollY > 24;
+  siteHeader.classList.toggle('scrolled', isScrolled);
+  siteHeader.classList.toggle('is-scrolled', isScrolled);
+}
+
+window.addEventListener('scroll', updateHeaderOnScroll, { passive: true });
+updateHeaderOnScroll();
+
+const advancedToggle = document.getElementById('advancedToggle');
+const advancedSearchPanel = document.getElementById('advancedSearchPanel');
+
+if (advancedToggle && advancedSearchPanel) {
+  advancedToggle.addEventListener('click', () => {
+    const isOpen = advancedSearchPanel.classList.toggle('is-open');
+    advancedToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+}
+
 
 const heroSearchForm = document.getElementById('heroSearchForm');
 if (heroSearchForm) {
