@@ -274,17 +274,6 @@ function updateHeaderOnScroll() {
 window.addEventListener('scroll', updateHeaderOnScroll, { passive: true });
 updateHeaderOnScroll();
 
-const advancedToggle = document.getElementById('advancedToggle');
-const advancedSearchPanel = document.getElementById('advancedSearchPanel');
-
-if (advancedToggle && advancedSearchPanel) {
-  advancedToggle.addEventListener('click', () => {
-    const isOpen = advancedSearchPanel.classList.toggle('is-open');
-    advancedToggle.setAttribute('aria-expanded', String(isOpen));
-  });
-}
-
-
 const heroSearchForm = document.getElementById('heroSearchForm');
 if (heroSearchForm) {
   const operationInput = document.getElementById('heroOperationInput');
