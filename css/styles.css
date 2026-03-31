@@ -6533,29 +6533,53 @@ body.dark-mode.home-page,
   margin-top: 4rem;
   padding: 3rem 0;
 }
-.site-footer .footer-content { display: grid; gap: 1rem; }
-.site-footer .footer-brand-row { display:flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.site-footer .footer-content {
+  display: grid;
+  gap: 1.25rem;
+  justify-items: center;
+  text-align: center;
+}
+.site-footer .footer-brand-row {
+  display: grid;
+  gap: .9rem;
+  justify-items: center;
+  width: min(760px, 100%);
+}
+.site-footer .footer-brand-row > div {
+  display: grid;
+  gap: .45rem;
+  justify-items: center;
+}
 .site-footer .footer-cta { padding: .65rem 1rem; background: var(--premium-red); color:#fff; border-radius: 10px; }
-.site-footer .footer-columns { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:1rem; }
+.site-footer .footer-columns {
+  display:grid;
+  grid-template-columns: repeat(2,minmax(240px,320px));
+  gap: 1.5rem;
+  justify-content: center;
+  width: 100%;
+}
+.site-footer .footer-columns > div {
+  display: grid;
+  gap: .2rem;
+  justify-items: center;
+  text-align: center;
+}
 .site-footer .footer-columns h4 { margin: 0 0 .5rem; color: #fff; font-family: Inter, sans-serif; }
 .site-footer .footer-columns a { color:#fff; display:block; margin:.25rem 0; }
-.site-footer .footer-brand-row h3,
-.site-footer .footer-brand-row p,
-.site-footer .footer-text,
-.site-footer .footer-legal-link,
-.site-footer .footer-columns h4 {
+.site-footer :is(h1, h2, h3, h4, h5, h6, p, span, small, strong, em, li, a, label) {
   color: #fff;
 }
 .site-footer .footer-columns a:hover,
 .site-footer .footer-columns a:focus-visible,
 .site-footer .footer-legal-link:hover,
 .site-footer .footer-legal-link:focus-visible {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.82);
 }
 .site-footer .footer-social {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: center;
   align-items: center;
   gap: .65rem;
 }
@@ -6596,9 +6620,9 @@ body.dark-mode.home-page,
   }
   .home-page .coverflow-card { border-radius: 22px; }
   .home-page .coverflow-overlay { padding: .9rem 1rem; }
-  .site-footer .footer-brand-row { flex-direction: column; }
+  .site-footer .footer-brand-row { width: 100%; }
   .site-footer .footer-social {
-    justify-content: flex-start;
+    justify-content: center;
     gap: .6rem;
   }
 }
