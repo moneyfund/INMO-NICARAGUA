@@ -648,7 +648,32 @@ async function renderPropertyDetail() {
       <h2>Ubicación de la propiedad</h2>
       <div id="propertyMap" class="property-map"></div>
     </section>
-    <section class="property-reviews-section" id="propertyReviews"></section>
+    <section class="property-reviews-section" id="propertyReviews">
+      <section class="pi-wrap">
+        <header class="pi-header">
+          <div>
+            <p class="pi-eyebrow">Interacciones</p>
+            <h2>Comentarios y reseñas</h2>
+          </div>
+        </header>
+        <div class="pi-grid pi-grid-two">
+          <article class="pi-card">
+            <div class="pi-card-head">
+              <h3>Comentarios</h3>
+              <p>Escribe un comentario para esta propiedad.</p>
+            </div>
+            <p class="pi-empty">Cargando comentarios...</p>
+          </article>
+          <article class="pi-card">
+            <div class="pi-card-head">
+              <h3>Reseñas</h3>
+              <p>Califica y comparte tu opinión sobre esta propiedad.</p>
+            </div>
+            <p class="pi-empty">Cargando reseñas...</p>
+          </article>
+        </div>
+      </section>
+    </section>
   `;
 
   initPropertyGallery(detailContainer);

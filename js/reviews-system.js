@@ -40,7 +40,9 @@ const state = {
   reviewHover: 0,
   authBound: false,
   unsubscribers: [],
-  likesCache: []
+  likesCache: [],
+  isPublishingComment: false,
+  isPublishingReview: false
 };
 
 function getPropertyIdFromUrl() {
@@ -92,6 +94,33 @@ function setLikeMessage(text, type = '') {
   element.textContent = text;
   element.classList.remove('is-success', 'is-error');
   if (type) element.classList.add(type);
+}
+
+function updateFormsAvailability() {
+  const commentForm = document.querySelector('[data-pi-comment-form]');
+  const reviewForm = document.querySelector('[data-pi-review-form]');
+  if (!commentForm || !reviewForm) return;
+
+  const enabled = Boolean(state.user);
+  const controls = [
+    ...commentForm.querySelectorAll('textarea, button'),
+    ...reviewForm.querySelectorAll('textarea, button')
+  ];
+
+  controls.forEach((control) => {
+    if (control.dataset.piLogin) return;
+    const isRateButton = control.matches('[data-pi-rate]');
+    const busy = isRateButton ? state.isPublishingReview : (control.closest('[data-pi-review-form]') ? state.isPublishingReview : state.isPublishingComment);
+    control.disabled = !enabled || busy;
+  });
+
+  if (!enabled) {
+    setFormMessage('[data-pi-comment-form]', 'Inicia sesión para publicar un comentario.', 'is-error');
+    setFormMessage('[data-pi-review-form]', 'Inicia sesión para publicar una reseña.', 'is-error');
+  } else {
+    setFormMessage('[data-pi-comment-form]', '');
+    setFormMessage('[data-pi-review-form]', '');
+  }
 }
 
 function renderLikeShell() {
@@ -344,7 +373,20 @@ function bindReviewForm() {
       paintRatingPicker(state.reviewHover);
     });
 
+    button.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      state.reviewRating = value;
+      paintRatingPicker(state.reviewRating);
+    });
+
     button.addEventListener('click', () => {
+      state.reviewRating = value;
+      paintRatingPicker(state.reviewRating);
+    });
+
+    button.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
       state.reviewRating = value;
       paintRatingPicker(state.reviewRating);
     });
@@ -375,6 +417,8 @@ function bindReviewForm() {
     }
 
     try {
+      state.isPublishingReview = true;
+      updateFormsAvailability();
       await addDoc(collection(db, 'reviews'), {
         propertyId: state.propertyId,
         userId: state.user.uid,
@@ -395,6 +439,9 @@ function bindReviewForm() {
     } catch (error) {
       console.error('No se pudo publicar la reseña:', error);
       setFormMessage('[data-pi-review-form]', 'No se pudo publicar la reseña. Inténtalo nuevamente.', 'is-error');
+    } finally {
+      state.isPublishingReview = false;
+      updateFormsAvailability();
     }
   });
 }
@@ -418,6 +465,8 @@ function bindCommentForm() {
     }
 
     try {
+      state.isPublishingComment = true;
+      updateFormsAvailability();
       await addDoc(collection(db, 'comments'), {
         propertyId: state.propertyId,
         userId: state.user.uid,
@@ -433,6 +482,9 @@ function bindCommentForm() {
     } catch (error) {
       console.error('No se pudo publicar el comentario:', error);
       setFormMessage('[data-pi-comment-form]', 'No se pudo publicar el comentario. Inténtalo nuevamente.', 'is-error');
+    } finally {
+      state.isPublishingComment = false;
+      updateFormsAvailability();
     }
   });
 }
@@ -530,19 +582,29 @@ function bindAuth() {
     state.user = user;
     renderAuthBox();
     renderLikeState();
+    updateFormsAvailability();
   });
 
   state.authBound = true;
 }
 
 async function initInteractionSystem(propertyIdFromEvent = '') {
-  const nextPropertyId = String(propertyIdFromEvent || getPropertyIdFromUrl() || '').trim();
+  const propertyIdFromUrl = getPropertyIdFromUrl();
+  const nextPropertyId = String(propertyIdFromEvent || propertyIdFromUrl || '').trim();
   if (!nextPropertyId) return;
+  if (propertyIdFromEvent && propertyIdFromUrl && propertyIdFromEvent !== propertyIdFromUrl) {
+    console.warn('Se detectó diferencia entre el propertyId del evento y la URL. Se usará el ID del evento.', {
+      fromEvent: propertyIdFromEvent,
+      fromUrl: propertyIdFromUrl
+    });
+  }
 
   state.propertyId = nextPropertyId;
   state.reviewRating = 0;
   state.reviewHover = 0;
   state.likesCache = [];
+  state.isPublishingComment = false;
+  state.isPublishingReview = false;
 
   if (!renderLikeShell() || !renderDiscussionShell()) return;
 
@@ -555,6 +617,7 @@ async function initInteractionSystem(propertyIdFromEvent = '') {
   paintRatingPicker(0);
   renderAuthBox();
   renderLikeState();
+  updateFormsAvailability();
 
   subscribeLikes();
   subscribeComments();
