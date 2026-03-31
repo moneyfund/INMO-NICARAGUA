@@ -6,7 +6,10 @@ import {
   query,
   where,
   onSnapshot,
-  serverTimestamp
+  serverTimestamp,
+  doc,
+  setDoc,
+  deleteDoc
 } from 'firebase/firestore';
 import {
   getAuth,
@@ -33,9 +36,10 @@ const googleProvider = new GoogleAuthProvider();
 const state = {
   propertyId: '',
   user: null,
-  rating: 0,
-  isInitialized: false,
-  activeReviewUnsubscribes: []
+  reviewRating: 0,
+  reviewHover: 0,
+  initialized: false,
+  unsubscribers: []
 };
 
 function getPropertyIdFromUrl() {
@@ -43,7 +47,7 @@ function getPropertyIdFromUrl() {
   return String(params.get('id') || '').trim();
 }
 
-function sanitize(value = '') {
+function escapeHtml(value = '') {
   return String(value)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -52,63 +56,33 @@ function sanitize(value = '') {
     .replaceAll("'", '&#39;');
 }
 
-function stars(rating) {
+function formatDate(value) {
+  const rawDate = value?.toDate ? value.toDate() : new Date(value || Date.now());
+  if (Number.isNaN(rawDate.getTime())) return 'Fecha pendiente';
+  return new Intl.DateTimeFormat('es-NI', { dateStyle: 'medium', timeStyle: 'short' }).format(rawDate);
+}
+
+function getInitials(name = 'Usuario') {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean).slice(0, 2);
+  if (!parts.length) return 'U';
+  return parts.map((part) => part[0]?.toUpperCase() || '').join('');
+}
+
+function starSvg(filled = false) {
+  return `<svg class="pi-star-icon ${filled ? 'is-filled' : ''}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>`;
+}
+
+function renderStars(rating = 0) {
   const safeRating = Math.max(0, Math.min(5, Number(rating) || 0));
-  return Array.from({ length: 5 }, (_, index) => (index < safeRating ? '★' : '☆')).join(' ');
+  return Array.from({ length: 5 }, (_, index) => starSvg(index < safeRating)).join('');
 }
 
-function renderStarIcons(rating = 0, className = 'rating-stars') {
-  const safeRating = Math.max(0, Math.min(5, Number(rating) || 0));
-  return `
-    <span class="${className}" aria-label="${safeRating} de 5 estrellas">
-      ${Array.from({ length: 5 }, (_, index) => `
-        <svg class="rating-star-icon ${index < safeRating ? 'is-filled' : ''}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path>
-        </svg>
-      `).join('')}
-    </span>
-  `;
-}
-
-function formatDate(createdAt) {
-  if (createdAt?.toDate) {
-    return new Intl.DateTimeFormat('es-NI', { dateStyle: 'medium', timeStyle: 'short' }).format(createdAt.toDate());
-  }
-
-  if (createdAt instanceof Date) {
-    return new Intl.DateTimeFormat('es-NI', { dateStyle: 'medium', timeStyle: 'short' }).format(createdAt);
-  }
-
-  if (typeof createdAt === 'string' || typeof createdAt === 'number') {
-    const parsed = new Date(createdAt);
-    if (!Number.isNaN(parsed.getTime())) {
-      return new Intl.DateTimeFormat('es-NI', { dateStyle: 'medium', timeStyle: 'short' }).format(parsed);
-    }
-  }
-
-  return 'Fecha pendiente';
-}
-
-function normalizeReview(docData = {}, id = '', source = '') {
-  const rating = Math.max(0, Math.min(5, Number(docData.rating || 0)));
-  return {
-    id,
-    source,
-    propertyId: String(docData.propertyId || docData.propertyID || '').trim(),
-    userName: docData.userName || docData.authorName || docData.name || 'Usuario',
-    userPhoto: docData.userPhoto || docData.photoURL || docData.avatar || '',
-    comment: docData.comment || docData.content || docData.review || '',
-    rating,
-    createdAt: docData.createdAt || docData.date || null
-  };
-}
-
-function setMessage(message, type = '') {
-  const messageNode = document.querySelector('[data-new-review-message]');
-  if (!messageNode) return;
-  messageNode.textContent = message;
-  messageNode.classList.remove('is-error', 'is-success');
-  if (type) messageNode.classList.add(type);
+function setFormMessage(formSelector, text, type = '') {
+  const element = document.querySelector(`${formSelector} [data-pi-form-message]`);
+  if (!element) return;
+  element.textContent = text;
+  element.classList.remove('is-success', 'is-error');
+  if (type) element.classList.add(type);
 }
 
 function renderShell() {
@@ -116,268 +90,425 @@ function renderShell() {
   if (!section) return false;
 
   section.innerHTML = `
-    <div class="property-reviews-header">
-      <h2>Opiniones de la propiedad</h2>
-      <div class="reviews-auth-controls" data-new-auth-box></div>
-    </div>
-    <div class="reviews-summary" data-new-reviews-summary>
-      <p class="reviews-stars" data-new-average-stars>${renderStarIcons(0, 'rating-stars rating-stars-summary')}</p>
-      <p class="reviews-average" data-new-average-value>0.0 / 5</p>
-      <p class="reviews-count" data-new-review-count>(0 reseñas)</p>
-    </div>
-    <form class="review-form" data-new-review-form>
-      <div class="review-form-stars" aria-label="Calificación de estrellas">
-        <button type="button" data-new-star="1" aria-label="1 estrella">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
-        </button>
-        <button type="button" data-new-star="2" aria-label="2 estrellas">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
-        </button>
-        <button type="button" data-new-star="3" aria-label="3 estrellas">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
-        </button>
-        <button type="button" data-new-star="4" aria-label="4 estrellas">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
-        </button>
-        <button type="button" data-new-star="5" aria-label="5 estrellas">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
-        </button>
+    <section class="pi-wrap" data-pi-wrap>
+      <header class="pi-header">
+        <div>
+          <p class="pi-eyebrow">Interacciones</p>
+          <h2>Comentarios, reseñas y me gusta</h2>
+        </div>
+        <div class="pi-auth" data-pi-auth></div>
+      </header>
+
+      <div class="pi-grid">
+        <article class="pi-card" data-pi-likes>
+          <div class="pi-card-head">
+            <h3>Me gusta</h3>
+            <p>Guarda tu reacción para esta propiedad.</p>
+          </div>
+          <button type="button" class="pi-like-btn" data-pi-like-btn>
+            <span class="pi-like-icon" aria-hidden="true">❤</span>
+            <span data-pi-like-label>Me gusta</span>
+          </button>
+          <p class="pi-like-count"><strong data-pi-like-count>0</strong> personas han dado me gusta.</p>
+          <p class="pi-form-message" data-pi-like-message></p>
+        </article>
+
+        <article class="pi-card" data-pi-comments>
+          <div class="pi-card-head">
+            <h3>Comentarios</h3>
+            <p>Comparte tu experiencia o una consulta rápida.</p>
+          </div>
+          <form data-pi-comment-form>
+            <textarea name="comment" rows="4" maxlength="1200" placeholder="Escribe tu comentario..."></textarea>
+            <button type="submit" class="pi-primary-btn">Publicar comentario</button>
+            <p class="pi-form-message" data-pi-form-message></p>
+          </form>
+          <div class="pi-list" data-pi-comment-list>
+            <p class="pi-empty">Aún no hay comentarios para esta propiedad.</p>
+          </div>
+        </article>
+
+        <article class="pi-card" data-pi-reviews>
+          <div class="pi-card-head">
+            <h3>Reseñas</h3>
+            <p>Califica y deja una opinión detallada.</p>
+          </div>
+
+          <div class="pi-summary">
+            <div class="pi-stars" data-pi-average-stars>${renderStars(0)}</div>
+            <p><strong data-pi-average-value>0.0</strong>/5</p>
+            <p data-pi-review-count>0 reseñas</p>
+          </div>
+
+          <form data-pi-review-form>
+            <div class="pi-rating-picker" role="radiogroup" aria-label="Selecciona una calificación">
+              ${Array.from({ length: 5 }, (_, index) => `<button type="button" class="pi-rate-btn" data-pi-rate="${index + 1}" role="radio" aria-checked="false" aria-label="${index + 1} estrella${index ? 's' : ''}">${starSvg(false)}</button>`).join('')}
+            </div>
+            <p class="pi-rating-value">Calificación seleccionada: <strong data-pi-rating-value>0</strong>/5</p>
+            <textarea name="review" rows="4" maxlength="1200" placeholder="Cuéntanos por qué das esta calificación..."></textarea>
+            <button type="submit" class="pi-primary-btn">Publicar reseña</button>
+            <p class="pi-form-message" data-pi-form-message></p>
+          </form>
+
+          <div class="pi-list" data-pi-review-list>
+            <p class="pi-empty">Aún no hay reseñas para esta propiedad.</p>
+          </div>
+        </article>
       </div>
-      <textarea name="comment" rows="4" maxlength="600" placeholder="Comparte tu opinión sobre esta propiedad..."></textarea>
-      <button type="submit">Enviar reseña</button>
-      <p class="review-form-message" data-new-review-message></p>
-    </form>
-    <div class="reviews-list" data-new-reviews-list>
-      <p class="reviews-empty">Aún no hay reseñas para esta propiedad</p>
-    </div>
+    </section>
   `;
 
   return true;
 }
 
-function refreshStarSelection() {
-  document.querySelectorAll('[data-new-star]').forEach((starButton) => {
-    const starValue = Number(starButton.dataset.newStar || 0);
-    starButton.classList.toggle('active', starValue <= state.rating);
-  });
-}
-
 function renderAuthBox() {
-  const authBox = document.querySelector('[data-new-auth-box]');
-  const form = document.querySelector('[data-new-review-form]');
-  if (!authBox || !form) return;
+  const box = document.querySelector('[data-pi-auth]');
+  if (!box) return;
 
   if (!state.user) {
-    authBox.innerHTML = '<button type="button" class="review-auth-btn" data-new-login-google>Iniciar sesión con Google</button>';
-    form.querySelector('button[type="submit"]').disabled = true;
-    form.querySelector('textarea').disabled = true;
-
-    authBox.querySelector('[data-new-login-google]')?.addEventListener('click', async () => {
+    box.innerHTML = '<button type="button" class="pi-primary-btn pi-login-btn" data-pi-login>Iniciar sesión con Google</button>';
+    box.querySelector('[data-pi-login]')?.addEventListener('click', async () => {
       try {
         await signInWithPopup(auth, googleProvider);
       } catch (error) {
-        console.error('Google login error:', error);
-        setMessage('No se pudo iniciar sesión con Google.', 'is-error');
+        console.error('No se pudo iniciar sesión con Google:', error);
       }
     });
-
     return;
   }
 
-  const userName = sanitize(state.user.displayName || 'Usuario');
-  const userPhoto = sanitize(state.user.photoURL || '');
-  authBox.innerHTML = `
-    <div class="review-user-profile">
-      ${userPhoto ? `<img src="${userPhoto}" alt="${userName}" referrerpolicy="no-referrer">` : ''}
-      <span>${userName}</span>
+  const safeName = escapeHtml(state.user.displayName || 'Usuario');
+  const photo = String(state.user.photoURL || '').trim();
+  box.innerHTML = `
+    <div class="pi-user-pill">
+      ${photo ? `<img src="${escapeHtml(photo)}" alt="${safeName}" referrerpolicy="no-referrer">` : `<span class="pi-user-initial">${getInitials(safeName)}</span>`}
+      <span>${safeName}</span>
     </div>
   `;
-
-  form.querySelector('button[type="submit"]').disabled = false;
-  form.querySelector('textarea').disabled = false;
 }
 
-function renderReviews(reviews) {
-  const list = document.querySelector('[data-new-reviews-list]');
-  const count = document.querySelector('[data-new-review-count]');
-  const average = document.querySelector('[data-new-average-value]');
-  const averageStars = document.querySelector('[data-new-average-stars]');
+function normalizeItems(snapshot, kind) {
+  return snapshot.docs.map((docSnap) => {
+    const data = docSnap.data() || {};
+    return {
+      id: docSnap.id,
+      propertyId: String(data.propertyId || '').trim(),
+      userId: String(data.userId || '').trim(),
+      userName: data.userName || data.authorName || 'Usuario',
+      userPhoto: data.userPhoto || data.photoURL || '',
+      text: data.comment || data.review || data.content || '',
+      rating: Math.max(0, Math.min(5, Number(data.rating || 0))),
+      createdAt: data.createdAt || data.date || null,
+      kind
+    };
+  });
+}
 
-  if (!list || !count || !average || !averageStars) return;
+function sortByDateDesc(items = []) {
+  return [...items].sort((a, b) => {
+    const timeA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : new Date(a.createdAt || 0).getTime();
+    const timeB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+}
 
-  const total = reviews.length;
-  const averageValue = total
-    ? reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / total
-    : 0;
+function renderCommentList(comments = []) {
+  const list = document.querySelector('[data-pi-comment-list]');
+  if (!list) return;
 
-  count.textContent = `(${total} reseñas)`;
-  average.textContent = `${averageValue.toFixed(1)} / 5`;
-  averageStars.innerHTML = renderStarIcons(Math.round(averageValue), 'rating-stars rating-stars-summary');
-
-  if (!total) {
-    list.innerHTML = '<p class="reviews-empty">Aún no hay reseñas para esta propiedad</p>';
+  if (!comments.length) {
+    list.innerHTML = '<p class="pi-empty">Aún no hay comentarios para esta propiedad.</p>';
     return;
   }
 
-  list.innerHTML = reviews.map((review) => {
-    const userName = sanitize(review.userName || 'Usuario');
-    const userPhoto = sanitize(review.userPhoto || '');
-    const comment = sanitize(review.comment || '');
+  list.innerHTML = comments.map((item) => {
+    const userName = escapeHtml(item.userName || 'Usuario');
+    const text = escapeHtml(item.text || '');
+    const photo = String(item.userPhoto || '').trim();
+    const avatar = photo
+      ? `<img src="${escapeHtml(photo)}" alt="${userName}" referrerpolicy="no-referrer">`
+      : `<span class="pi-avatar-fallback">${getInitials(userName)}</span>`;
 
     return `
-      <article class="review-card">
-        <header>
-          ${userPhoto ? `<img src="${userPhoto}" alt="${userName}" referrerpolicy="no-referrer">` : ''}
+      <article class="pi-item">
+        <div class="pi-item-head">
+          <div class="pi-avatar">${avatar}</div>
           <div>
             <strong>${userName}</strong>
-            <p class="review-rating">${renderStarIcons(review.rating || 0)}</p>
-            <small>${formatDate(review.createdAt)}</small>
+            <small>${formatDate(item.createdAt)}</small>
           </div>
-        </header>
-        <p>${comment}</p>
+        </div>
+        <p>${text}</p>
       </article>
     `;
   }).join('');
 }
 
-function sortReviews(items = []) {
-  return [...items].sort((a, b) => {
-    const timeA = a.createdAt?.seconds || (a.createdAt instanceof Date ? a.createdAt.getTime() : 0);
-    const timeB = b.createdAt?.seconds || (b.createdAt instanceof Date ? b.createdAt.getTime() : 0);
-    return timeB - timeA;
-  });
+function renderReviewList(reviews = []) {
+  const list = document.querySelector('[data-pi-review-list]');
+  const avgStars = document.querySelector('[data-pi-average-stars]');
+  const avgValue = document.querySelector('[data-pi-average-value]');
+  const count = document.querySelector('[data-pi-review-count]');
+  if (!list || !avgStars || !avgValue || !count) return;
+
+  const total = reviews.length;
+  const average = total
+    ? reviews.reduce((sum, item) => sum + Number(item.rating || 0), 0) / total
+    : 0;
+
+  avgStars.innerHTML = renderStars(Math.round(average));
+  avgValue.textContent = average.toFixed(1);
+  count.textContent = `${total} reseña${total === 1 ? '' : 's'}`;
+
+  if (!reviews.length) {
+    list.innerHTML = '<p class="pi-empty">Aún no hay reseñas para esta propiedad.</p>';
+    return;
+  }
+
+  list.innerHTML = reviews.map((item) => {
+    const userName = escapeHtml(item.userName || 'Usuario');
+    const text = escapeHtml(item.text || '');
+    const photo = String(item.userPhoto || '').trim();
+    const avatar = photo
+      ? `<img src="${escapeHtml(photo)}" alt="${userName}" referrerpolicy="no-referrer">`
+      : `<span class="pi-avatar-fallback">${getInitials(userName)}</span>`;
+
+    return `
+      <article class="pi-item">
+        <div class="pi-item-head">
+          <div class="pi-avatar">${avatar}</div>
+          <div>
+            <strong>${userName}</strong>
+            <div class="pi-inline-stars">${renderStars(item.rating || 0)}</div>
+            <small>${formatDate(item.createdAt)}</small>
+          </div>
+        </div>
+        <p>${text}</p>
+      </article>
+    `;
+  }).join('');
 }
 
-function clearReviewSubscriptions() {
-  state.activeReviewUnsubscribes.forEach((unsubscribe) => {
-    try {
-      unsubscribe();
-    } catch (error) {
-      console.warn('No se pudo cerrar suscripción de reseñas:', error);
-    }
+function paintRatingPicker(value = 0) {
+  const activeValue = Math.max(0, Math.min(5, Number(value) || 0));
+  document.querySelectorAll('[data-pi-rate]').forEach((btn) => {
+    const current = Number(btn.dataset.piRate || 0);
+    const isActive = current <= activeValue;
+    btn.classList.toggle('is-active', isActive);
+    btn.setAttribute('aria-checked', String(current === activeValue));
+    btn.innerHTML = starSvg(isActive);
   });
-  state.activeReviewUnsubscribes = [];
-}
-
-function subscribeToReviews() {
-  const reviewBuckets = {
-    topLevel: [],
-    topLevelAlt: [],
-    nested: []
-  };
-
-  const updateView = () => {
-    const merged = [...reviewBuckets.topLevel, ...reviewBuckets.topLevelAlt, ...reviewBuckets.nested];
-    const uniqueByKey = new Map();
-
-    merged.forEach((item) => {
-      const key = `${item.userName}-${item.comment}-${item.rating}-${item.createdAt?.seconds || item.createdAt || ''}`;
-      uniqueByKey.set(key, item);
-    });
-
-    renderReviews(sortReviews(Array.from(uniqueByKey.values())));
-  };
-
-  const topLevelQuery = query(collection(db, 'reviews'), where('propertyId', '==', state.propertyId));
-  const topLevelAltQuery = query(collection(db, 'reviews'), where('propertyID', '==', state.propertyId));
-  const nestedCollectionRef = collection(db, 'properties', state.propertyId, 'reviews');
-
-  const unsubTop = onSnapshot(topLevelQuery, (snapshot) => {
-    reviewBuckets.topLevel = snapshot.docs.map((docSnap) => normalizeReview(docSnap.data(), docSnap.id, 'reviews'));
-    updateView();
-  }, (error) => {
-    console.error('Error leyendo reseñas en /reviews (propertyId):', error);
-  });
-
-  const unsubTopAlt = onSnapshot(topLevelAltQuery, (snapshot) => {
-    reviewBuckets.topLevelAlt = snapshot.docs.map((docSnap) => normalizeReview(docSnap.data(), docSnap.id, 'reviews'));
-    updateView();
-  }, () => {
-    reviewBuckets.topLevelAlt = [];
-    updateView();
-  });
-
-  const unsubNested = onSnapshot(nestedCollectionRef, (snapshot) => {
-    reviewBuckets.nested = snapshot.docs
-      .map((docSnap) => normalizeReview({ propertyId: state.propertyId, ...docSnap.data() }, docSnap.id, 'properties/reviews'));
-    updateView();
-  }, () => {
-    reviewBuckets.nested = [];
-    updateView();
-  });
-
-  state.activeReviewUnsubscribes = [unsubTop, unsubTopAlt, unsubNested];
+  const valueEl = document.querySelector('[data-pi-rating-value]');
+  if (valueEl) valueEl.textContent = String(activeValue);
 }
 
 function bindReviewForm() {
-  const form = document.querySelector('[data-new-review-form]');
+  const form = document.querySelector('[data-pi-review-form]');
   if (!form) return;
 
-  form.querySelectorAll('[data-new-star]').forEach((starButton) => {
-    starButton.addEventListener('click', () => {
-      state.rating = Number(starButton.dataset.newStar || 0);
-      refreshStarSelection();
+  const ratingButtons = form.querySelectorAll('[data-pi-rate]');
+  ratingButtons.forEach((button) => {
+    const value = Number(button.dataset.piRate || 0);
+
+    button.addEventListener('mouseenter', () => {
+      state.reviewHover = value;
+      paintRatingPicker(state.reviewHover);
     });
+
+    button.addEventListener('click', () => {
+      state.reviewRating = value;
+      paintRatingPicker(state.reviewRating);
+    });
+  });
+
+  form.querySelector('.pi-rating-picker')?.addEventListener('mouseleave', () => {
+    state.reviewHover = 0;
+    paintRatingPicker(state.reviewRating);
   });
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     if (!state.user) {
-      setMessage('Debes iniciar sesión con Google para enviar tu reseña.', 'is-error');
+      setFormMessage('[data-pi-review-form]', 'Debes iniciar sesión para publicar tu reseña.', 'is-error');
       return;
     }
 
-    if (!state.rating || state.rating < 1 || state.rating > 5) {
-      setMessage('Selecciona una calificación entre 1 y 5 estrellas.', 'is-error');
+    const reviewText = String(form.querySelector('textarea[name="review"]')?.value || '').trim();
+    if (!state.reviewRating) {
+      setFormMessage('[data-pi-review-form]', 'Selecciona una calificación de 1 a 5 estrellas.', 'is-error');
       return;
     }
 
-    const commentField = form.querySelector('textarea[name="comment"]');
-    const comment = String(commentField?.value || '').trim();
-
-    if (!comment) {
-      setMessage('Escribe un comentario para continuar.', 'is-error');
+    if (!reviewText) {
+      setFormMessage('[data-pi-review-form]', 'Escribe una opinión para continuar.', 'is-error');
       return;
     }
-
-    const payload = {
-      propertyId: state.propertyId,
-      userId: state.user.uid,
-      userName: state.user.displayName || 'Usuario',
-      userPhoto: state.user.photoURL || '',
-      rating: state.rating,
-      comment,
-      content: comment,
-      createdAt: serverTimestamp()
-    };
 
     try {
-      await addDoc(collection(db, 'reviews'), payload);
+      await addDoc(collection(db, 'reviews'), {
+        propertyId: state.propertyId,
+        userId: state.user.uid,
+        userName: state.user.displayName || 'Usuario',
+        userPhoto: state.user.photoURL || '',
+        rating: state.reviewRating,
+        comment: reviewText,
+        review: reviewText,
+        createdAt: serverTimestamp()
+      });
+
       form.reset();
-      state.rating = 0;
-      refreshStarSelection();
-      setMessage('Reseña enviada correctamente.', 'is-success');
+      state.reviewRating = 0;
+      state.reviewHover = 0;
+      paintRatingPicker(0);
+      setFormMessage('[data-pi-review-form]', 'Reseña publicada correctamente.', 'is-success');
     } catch (error) {
-      console.warn('No se pudo guardar en /reviews, intentando subcolección.', error);
-      try {
-        await addDoc(collection(db, 'properties', state.propertyId, 'reviews'), {
-          ...payload,
-          propertyId: state.propertyId
-        });
-        form.reset();
-        state.rating = 0;
-        refreshStarSelection();
-        setMessage('Reseña enviada correctamente.', 'is-success');
-      } catch (nestedError) {
-        console.error('Review save error:', nestedError);
-        setMessage('No se pudo guardar la reseña. Inténtalo de nuevo.', 'is-error');
-      }
+      console.error('No se pudo publicar la reseña:', error);
+      setFormMessage('[data-pi-review-form]', 'No se pudo publicar la reseña. Inténtalo nuevamente.', 'is-error');
     }
   });
 }
 
-async function initReviewSystem() {
+function bindCommentForm() {
+  const form = document.querySelector('[data-pi-comment-form]');
+  if (!form) return;
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (!state.user) {
+      setFormMessage('[data-pi-comment-form]', 'Debes iniciar sesión para publicar un comentario.', 'is-error');
+      return;
+    }
+
+    const commentText = String(form.querySelector('textarea[name="comment"]')?.value || '').trim();
+    if (!commentText) {
+      setFormMessage('[data-pi-comment-form]', 'Escribe un comentario para continuar.', 'is-error');
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'comments'), {
+        propertyId: state.propertyId,
+        userId: state.user.uid,
+        userName: state.user.displayName || 'Usuario',
+        userPhoto: state.user.photoURL || '',
+        comment: commentText,
+        content: commentText,
+        createdAt: serverTimestamp()
+      });
+
+      form.reset();
+      setFormMessage('[data-pi-comment-form]', 'Comentario publicado correctamente.', 'is-success');
+    } catch (error) {
+      console.error('No se pudo publicar el comentario:', error);
+      setFormMessage('[data-pi-comment-form]', 'No se pudo publicar el comentario. Inténtalo nuevamente.', 'is-error');
+    }
+  });
+}
+
+function bindLikes() {
+  const button = document.querySelector('[data-pi-like-btn]');
+  const count = document.querySelector('[data-pi-like-count]');
+  const label = document.querySelector('[data-pi-like-label]');
+  const message = document.querySelector('[data-pi-like-message]');
+  if (!button || !count || !label || !message) return;
+
+  let likesCache = [];
+
+  const likesQuery = query(collection(db, 'likes'), where('propertyId', '==', state.propertyId));
+  const unsubLikes = onSnapshot(likesQuery, (snapshot) => {
+    likesCache = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+    const total = likesCache.length;
+    const isLiked = Boolean(state.user && likesCache.some((item) => item.userId === state.user.uid));
+
+    count.textContent = String(total);
+    button.classList.toggle('is-liked', isLiked);
+    button.setAttribute('aria-pressed', String(isLiked));
+    label.textContent = isLiked ? 'Te gusta esta propiedad' : 'Me gusta';
+  }, (error) => {
+    console.error('No se pudieron cargar los likes:', error);
+    message.textContent = 'No se pudieron cargar los likes.';
+  });
+
+  state.unsubscribers.push(unsubLikes);
+
+  button.addEventListener('click', async () => {
+    if (!state.user) {
+      message.textContent = 'Debes iniciar sesión para dar me gusta.';
+      message.classList.remove('is-success');
+      message.classList.add('is-error');
+      return;
+    }
+
+    const likeId = `${state.propertyId}_${state.user.uid}`;
+    const likeDoc = doc(db, 'likes', likeId);
+    const alreadyLiked = likesCache.some((item) => item.userId === state.user.uid);
+
+    button.disabled = true;
+    try {
+      if (alreadyLiked) {
+        await deleteDoc(likeDoc);
+        message.textContent = 'Quitaste tu me gusta.';
+      } else {
+        await setDoc(likeDoc, {
+          propertyId: state.propertyId,
+          userId: state.user.uid,
+          userName: state.user.displayName || 'Usuario',
+          userPhoto: state.user.photoURL || '',
+          createdAt: serverTimestamp()
+        });
+        message.textContent = '¡Gracias por tu me gusta!';
+      }
+      message.classList.remove('is-error');
+      message.classList.add('is-success');
+    } catch (error) {
+      console.error('No se pudo registrar el like:', error);
+      message.textContent = 'No se pudo actualizar tu me gusta.';
+      message.classList.remove('is-success');
+      message.classList.add('is-error');
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
+function subscribeComments() {
+  const commentsQuery = query(collection(db, 'comments'), where('propertyId', '==', state.propertyId));
+  const unsub = onSnapshot(commentsQuery, (snapshot) => {
+    const comments = sortByDateDesc(normalizeItems(snapshot, 'comment'));
+    renderCommentList(comments);
+  }, (error) => {
+    console.error('No se pudieron cargar los comentarios:', error);
+  });
+
+  state.unsubscribers.push(unsub);
+}
+
+function subscribeReviews() {
+  const reviewsQuery = query(collection(db, 'reviews'), where('propertyId', '==', state.propertyId));
+  const unsub = onSnapshot(reviewsQuery, (snapshot) => {
+    const reviews = sortByDateDesc(normalizeItems(snapshot, 'review'));
+    renderReviewList(reviews);
+  }, (error) => {
+    console.error('No se pudieron cargar las reseñas:', error);
+  });
+
+  state.unsubscribers.push(unsub);
+}
+
+function clearSubscriptions() {
+  state.unsubscribers.forEach((unsubscribe) => {
+    try {
+      unsubscribe();
+    } catch (error) {
+      console.warn('No se pudo cerrar una suscripción:', error);
+    }
+  });
+  state.unsubscribers = [];
+}
+
+async function initInteractionSystem() {
   const nextPropertyId = getPropertyIdFromUrl();
   if (!nextPropertyId) return;
 
@@ -385,41 +516,44 @@ async function initReviewSystem() {
 
   if (!renderShell()) return;
 
-  clearReviewSubscriptions();
-  bindReviewForm();
-  refreshStarSelection();
-  subscribeToReviews();
+  clearSubscriptions();
+  state.reviewRating = 0;
+  state.reviewHover = 0;
 
-  if (!state.isInitialized) {
+  bindCommentForm();
+  bindReviewForm();
+  bindLikes();
+  subscribeComments();
+  subscribeReviews();
+  paintRatingPicker(0);
+
+  if (!state.initialized) {
     onAuthStateChanged(auth, (user) => {
       state.user = user;
       renderAuthBox();
     });
-    state.isInitialized = true;
+    state.initialized = true;
   } else {
     renderAuthBox();
   }
 }
 
-
-function queueReviewSystemInit() {
+function queueInit() {
   window.requestAnimationFrame(() => {
-    initReviewSystem().catch((error) => {
-      console.error('No se pudo inicializar el sistema de reseñas:', error);
+    initInteractionSystem().catch((error) => {
+      console.error('No se pudo inicializar el sistema de interacciones:', error);
     });
   });
 }
 
-window.addEventListener('propertyDetailReady', queueReviewSystemInit);
-window.addEventListener('DOMContentLoaded', queueReviewSystemInit);
-window.addEventListener('load', queueReviewSystemInit);
-window.addEventListener('beforeunload', clearReviewSubscriptions);
+window.addEventListener('propertyDetailReady', queueInit);
+window.addEventListener('DOMContentLoaded', queueInit);
+window.addEventListener('beforeunload', clearSubscriptions);
 
-const reviewSectionObserver = new MutationObserver(() => {
-  if (!document.getElementById('propertyReviews')) return;
-  queueReviewSystemInit();
+const observer = new MutationObserver(() => {
+  if (document.getElementById('propertyReviews')) queueInit();
 });
 
 if (document.body) {
-  reviewSectionObserver.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.body, { childList: true, subtree: true });
 }

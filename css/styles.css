@@ -5405,3 +5405,314 @@ body.dark-mode .gallery-nav {
     height: 36px;
   }
 }
+
+/* Property interactions (comments/reviews/likes) rebuilt */
+.pi-wrap {
+  margin-top: 2.5rem;
+  background: #ffffff;
+  border: 1px solid rgba(158, 11, 15, 0.18);
+  border-left: 5px solid #9E0B0F;
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 14px 35px rgba(27, 27, 27, 0.09);
+}
+
+.pi-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.pi-eyebrow {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9E0B0F;
+  font-weight: 700;
+}
+
+.pi-header h2 {
+  margin: 0.1rem 0 0;
+  color: #1B1B1B;
+}
+
+.pi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.pi-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(158, 11, 15, 0.13);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.pi-card-head h3 {
+  margin: 0;
+  color: #1B1B1B;
+}
+
+.pi-card-head p {
+  margin: 0.35rem 0 0.9rem;
+  color: #4f4f4f;
+  font-size: 0.93rem;
+}
+
+.pi-primary-btn {
+  width: fit-content;
+  min-height: 42px;
+  border: none;
+  border-radius: 10px;
+  padding: 0.62rem 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #fff;
+  background: #9E0B0F;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pi-primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(158, 11, 15, 0.22);
+}
+
+.pi-login-btn {
+  margin-left: auto;
+}
+
+.pi-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(158, 11, 15, 0.35);
+  padding: 0.55rem 1rem;
+  background: #fff;
+  color: #1B1B1B;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pi-like-btn.is-liked {
+  background: #9E0B0F;
+  color: #fff;
+}
+
+.pi-like-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.pi-like-count {
+  margin: 0.9rem 0 0;
+}
+
+.pi-card textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 100px;
+  border-radius: 10px;
+  border: 1px solid #d9d3cf;
+  background: #fff;
+  padding: 0.72rem 0.78rem;
+  color: #1B1B1B;
+  margin-bottom: 0.75rem;
+  pointer-events: auto;
+}
+
+.pi-card textarea:focus {
+  outline: none;
+  border-color: #9E0B0F;
+  box-shadow: 0 0 0 3px rgba(158, 11, 15, 0.14);
+}
+
+.pi-form-message {
+  margin: 0.65rem 0 0;
+  min-height: 1.2rem;
+  font-size: 0.88rem;
+}
+
+.pi-form-message.is-success {
+  color: #0d7a36;
+}
+
+.pi-form-message.is-error {
+  color: #9E0B0F;
+}
+
+.pi-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  background: #F1E6DD;
+  border-radius: 10px;
+  padding: 0.58rem 0.7rem;
+  margin-bottom: 0.75rem;
+}
+
+.pi-summary p {
+  margin: 0;
+}
+
+.pi-stars,
+.pi-inline-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.pi-star-icon {
+  width: 18px;
+  height: 18px;
+  fill: transparent;
+  stroke: #c4b9ae;
+  stroke-width: 1.5;
+}
+
+.pi-star-icon.is-filled {
+  fill: #D4AF37;
+  stroke: #D4AF37;
+}
+
+.pi-rating-picker {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.pi-rate-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s ease, background-color 0.2s ease;
+  pointer-events: auto;
+}
+
+.pi-rate-btn:hover,
+.pi-rate-btn.is-active {
+  background: rgba(212, 175, 55, 0.12);
+  transform: translateY(-1px);
+}
+
+.pi-rating-value {
+  margin: 0 0 0.55rem;
+  font-size: 0.88rem;
+}
+
+.pi-list {
+  margin-top: 0.95rem;
+  display: grid;
+  gap: 0.62rem;
+}
+
+.pi-item {
+  border: 1px solid #ece7e3;
+  border-radius: 10px;
+  padding: 0.7rem;
+  background: #fff;
+}
+
+.pi-item p {
+  margin: 0.58rem 0 0;
+  white-space: pre-wrap;
+}
+
+.pi-item-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pi-item-head small {
+  color: #696969;
+}
+
+.pi-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #F1E6DD;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+
+.pi-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pi-avatar-fallback,
+.pi-user-initial {
+  font-weight: 700;
+  color: #9E0B0F;
+}
+
+.pi-empty {
+  margin: 0;
+  color: #666;
+}
+
+.pi-user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(158, 11, 15, 0.16);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem 0.3rem 0.35rem;
+  background: #fff;
+}
+
+.pi-user-pill img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+@media (max-width: 1100px) {
+  .pi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pi-card[data-pi-reviews] {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .pi-wrap {
+    padding: 1rem;
+  }
+
+  .pi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pi-like-btn,
+  .pi-primary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pi-rate-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
