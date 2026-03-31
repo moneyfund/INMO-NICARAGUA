@@ -6268,11 +6268,24 @@ body.dark-mode.home-page,
   font-size: 0.95rem;
 }
 
-.home-page .premium-search button[type="submit"] {
-  background: var(--premium-red);
-  color: #fff;
-  border-color: var(--premium-red);
-  font-weight: 700;
+.home-page .premium-search .hero-search-submit,
+body.dark .home-page .premium-search .hero-search-submit,
+body.dark-mode .home-page .premium-search .hero-search-submit,
+body:not(.dark):not(.dark-mode) .home-page .premium-search .hero-search-submit {
+  background: var(--premium-red) !important;
+  color: #fff !important;
+  border-color: var(--premium-red) !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  justify-self: stretch;
+}
+
+.home-page .premium-search .hero-search-submit:hover,
+.home-page .premium-search .hero-search-submit:focus-visible {
+  background: var(--premium-red-dark) !important;
+  border-color: var(--premium-red-dark) !important;
+  color: #fff !important;
 }
 
 .home-page .section {
@@ -6709,6 +6722,7 @@ body.dark-mode.home-page,
 
 @media (max-width: 960px) {
   .home-page .premium-search { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .home-page .premium-search .hero-search-submit { width: 100%; }
   .home-page .agents-grid,
   .home-page .reviews-grid,
   .site-footer .footer-columns { grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -6742,6 +6756,7 @@ body.dark-mode.home-page,
   }
 
   .home-page .premium-search { grid-template-columns: 1fr; }
+  .home-page .premium-search .hero-search-submit { min-height: 48px; width: 100%; }
   .home-page .agents-grid,
   .home-page .reviews-grid,
   .site-footer .footer-columns { grid-template-columns: 1fr; }
