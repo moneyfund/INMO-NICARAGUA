@@ -3259,6 +3259,18 @@ body:not(.dark):not(.dark-mode) .agent-social svg {
   color: var(--text-secondary);
 }
 
+.property-video-placeholder {
+  border: 1px dashed var(--border-soft);
+  border-radius: 12px;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--bg-card) 92%, var(--primary-red) 8%);
+}
+
+.property-video-placeholder p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
 .image-preview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -5382,34 +5394,54 @@ body.dark-mode .btn-primary-property:focus-visible {
 .property-gallery,
 .detail-gallery {
   position: relative;
-  overflow: hidden;
-  background: #131313;
-  line-height: 0;
+  overflow: visible;
+  background: transparent;
+  line-height: normal;
   touch-action: pan-y;
 }
 
 .property-gallery {
   border-radius: 14px 14px 0 0;
-  aspect-ratio: 16 / 10;
 }
 
 .detail-gallery {
   min-height: 0;
-  height: fit-content;
+  height: auto;
+  align-self: start;
 }
 
-.property-gallery::after,
-.detail-gallery::after {
-  content: '';
+.gallery-viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #131313;
+  line-height: 0;
+  aspect-ratio: 16 / 10;
+}
+
+.detail-gallery .gallery-viewport {
+  aspect-ratio: 16 / 10;
+  max-height: min(70vh, 560px);
+}
+
+.gallery-watermark {
   position: absolute;
   inset: 0;
-  background-image: url('../assets/marca de agua.png');
-  background-repeat: no-repeat;
-  background-size: clamp(92px, 24%, 180px);
-  background-position: center;
-  opacity: 0.18;
+  display: grid;
+  place-items: center;
   pointer-events: none;
   z-index: 2;
+}
+
+.gallery-watermark::before {
+  content: '';
+  width: clamp(92px, 24%, 180px);
+  aspect-ratio: 523 / 294;
+  background-image: url('../assets/marca de agua.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  opacity: 0.16;
 }
 
 .property-gallery-main-image,
@@ -5422,7 +5454,6 @@ body.dark-mode .btn-primary-property:focus-visible {
 }
 
 .detail-gallery-main-image {
-  height: auto;
   min-height: 0;
   max-height: none;
 }
@@ -5487,16 +5518,18 @@ body.dark-mode .gallery-nav {
 }
 
 @media (max-width: 768px) {
-  .property-gallery {
+  .property-gallery .gallery-viewport {
     aspect-ratio: 16 / 11;
   }
 
-  .detail-gallery {
-    min-height: 0;
+  .gallery-viewport,
+  .detail-gallery .gallery-viewport {
+    aspect-ratio: 16 / 11;
+    max-height: min(56vh, 420px);
   }
 
   .detail-gallery-main-image {
-    min-height: 0;
+    max-height: none;
   }
 
   .gallery-nav {

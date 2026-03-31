@@ -119,7 +119,19 @@ function escapeHtml(value = '') {
 
 function buildPropertyVideoSectionMarkup(property = {}) {
   const videoData = videoUtils.getPropertyVideoData ? videoUtils.getPropertyVideoData(property) : null;
-  if (!videoData) return '';
+  if (!videoData) {
+    return `
+      <section class="property-video-section is-placeholder" aria-label="Video de la propiedad">
+        <header class="property-video-header">
+          <p class="property-video-eyebrow">Contenido multimedia</p>
+          <h2>Video de la propiedad</h2>
+        </header>
+        <div class="property-video-placeholder">
+          <p>Espacio listo para agregar el recorrido en video (YouTube o TikTok).</p>
+        </div>
+      </section>
+    `;
+  }
 
   if (videoData.type === 'youtube' && videoData.embedUrl) {
     return `
@@ -315,6 +327,10 @@ function buildGalleryControlsMarkup(images = []) {
   `;
 }
 
+function buildGalleryWatermarkMarkup() {
+  return '<span class="gallery-watermark" aria-hidden="true"></span>';
+}
+
 function propertyCardTemplate(property) {
   const featuredClass = property.featured ? ' is-featured' : '';
   const status = (property.status || 'disponible').toLowerCase();
@@ -328,8 +344,11 @@ function propertyCardTemplate(property) {
   return `
     <article class="property-card${featuredClass}">
       <section class="property-gallery" data-gallery-images='${JSON.stringify(galleryImages)}' data-gallery-label="${imageAlt}">
-        <img class="property-gallery-main-image" src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
-        ${buildGalleryControlsMarkup(galleryImages)}
+        <div class="gallery-viewport">
+          <img class="property-gallery-main-image" src="${imageSrc}" alt="${imageAlt}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
+          ${buildGalleryWatermarkMarkup()}
+          ${buildGalleryControlsMarkup(galleryImages)}
+        </div>
       </section>
       <div class="property-card-content">
         <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
@@ -673,8 +692,11 @@ async function renderPropertyDetail() {
   detailContainer.innerHTML = `
     <div class="detail-grid">
       <section class="detail-gallery" data-gallery-images='${JSON.stringify(galleryImages)}' data-gallery-label="${property.titulo || 'Imagen de la propiedad'}">
-        <img class="detail-gallery-main-image" src="${galleryImages[0] || getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
-        ${galleryMarkup}
+        <div class="gallery-viewport">
+          <img class="detail-gallery-main-image" src="${galleryImages[0] || getPrimaryPropertyImage(property)}" alt="${property.titulo || 'Imagen de la propiedad'}" loading="lazy" onerror="this.onerror=null;this.src='${PROPERTY_IMAGE_PLACEHOLDER}'">
+          ${buildGalleryWatermarkMarkup()}
+          ${galleryMarkup}
+        </div>
       </section>
       <div>
         <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
