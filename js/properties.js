@@ -467,7 +467,15 @@ function buildAgentProfileUrl(agentId) {
 }
 
 function createAgentCardTemplate(agent, property) {
-  if (!agent || !agent.id) return '';
+  const hasRenderableAgent =
+    Boolean(agent?.id) &&
+    Boolean(
+      String(agent?.name || '').trim() ||
+      String(agent?.photo || agent?.image || agent?.avatar || '').trim() ||
+      String(agent?.phone || agent?.whatsapp || '').trim()
+    );
+
+  if (!hasRenderableAgent) return '';
 
   const agentPhoto = normalizePropertyImageUrl(agent.photo || agent.image || agent.avatar || '') || AGENT_IMAGE_PLACEHOLDER;
   const profileUrl = buildAgentProfileUrl(agent.id);
@@ -609,7 +617,8 @@ async function renderPropertyDetail() {
     loadAgentById(property.agentId).catch(() => null),
     Promise.resolve(getPropertyImages(property))
   ]);
-  const publishedByName = agent?.name || property.agentName || 'Agente inmobiliario';
+  const publishedByName = agent?.name || property.agentName || '';
+  const hasAgentLink = Boolean(agent?.id || property.agentId);
   const agentProfileUrl = buildAgentProfileUrl(agent?.id || property.agentId);
   const status = String(property.status || 'available').toLowerCase();
   const detailParkingCount = Number(property.parking ?? property.garaje ?? property.garages ?? 0);
@@ -646,8 +655,8 @@ async function renderPropertyDetail() {
           <li>${featureIcon('area')} ${getAreaDisplay(property)}</li>
           <li>${featureIcon('location')} ${property.ubicacion || property.city || 'Ubicación no disponible'}</li>
         </ul>
-        <p><strong>Publicado por</strong><br>${publishedByName}</p>
-        <a class="button-outline" href="${agentProfileUrl}">Para más información aquí</a>
+        ${publishedByName ? `<p><strong>Publicado por</strong><br>${publishedByName}</p>` : ''}
+        ${hasAgentLink ? `<a class="button-outline" href="${agentProfileUrl}">Para más información aquí</a>` : ''}
       </div>
     </div>
     <section class="detail-map-section">
