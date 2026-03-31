@@ -57,6 +57,19 @@ function stars(rating) {
   return Array.from({ length: 5 }, (_, index) => (index < safeRating ? '★' : '☆')).join(' ');
 }
 
+function renderStarIcons(rating = 0, className = 'rating-stars') {
+  const safeRating = Math.max(0, Math.min(5, Number(rating) || 0));
+  return `
+    <span class="${className}" aria-label="${safeRating} de 5 estrellas">
+      ${Array.from({ length: 5 }, (_, index) => `
+        <svg class="rating-star-icon ${index < safeRating ? 'is-filled' : ''}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path>
+        </svg>
+      `).join('')}
+    </span>
+  `;
+}
+
 function formatDate(createdAt) {
   if (createdAt?.toDate) {
     return new Intl.DateTimeFormat('es-NI', { dateStyle: 'medium', timeStyle: 'short' }).format(createdAt.toDate());
@@ -108,17 +121,27 @@ function renderShell() {
       <div class="reviews-auth-controls" data-new-auth-box></div>
     </div>
     <div class="reviews-summary" data-new-reviews-summary>
-      <p class="reviews-stars" data-new-average-stars>☆ ☆ ☆ ☆ ☆</p>
+      <p class="reviews-stars" data-new-average-stars>${renderStarIcons(0, 'rating-stars rating-stars-summary')}</p>
       <p class="reviews-average" data-new-average-value>0.0 / 5</p>
       <p class="reviews-count" data-new-review-count>(0 reseñas)</p>
     </div>
     <form class="review-form" data-new-review-form>
       <div class="review-form-stars" aria-label="Calificación de estrellas">
-        <button type="button" data-new-star="1" aria-label="1 estrella">★</button>
-        <button type="button" data-new-star="2" aria-label="2 estrellas">★</button>
-        <button type="button" data-new-star="3" aria-label="3 estrellas">★</button>
-        <button type="button" data-new-star="4" aria-label="4 estrellas">★</button>
-        <button type="button" data-new-star="5" aria-label="5 estrellas">★</button>
+        <button type="button" data-new-star="1" aria-label="1 estrella">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
+        </button>
+        <button type="button" data-new-star="2" aria-label="2 estrellas">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
+        </button>
+        <button type="button" data-new-star="3" aria-label="3 estrellas">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
+        </button>
+        <button type="button" data-new-star="4" aria-label="4 estrellas">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
+        </button>
+        <button type="button" data-new-star="5" aria-label="5 estrellas">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.6l2.63 5.32 5.87.85-4.25 4.14 1 5.84L12 17.03l-5.25 2.72 1-5.84L3.5 9.77l5.87-.85L12 3.6z"></path></svg>
+        </button>
       </div>
       <textarea name="comment" rows="4" maxlength="600" placeholder="Comparte tu opinión sobre esta propiedad..."></textarea>
       <button type="submit">Enviar reseña</button>
@@ -189,7 +212,7 @@ function renderReviews(reviews) {
 
   count.textContent = `(${total} reseñas)`;
   average.textContent = `${averageValue.toFixed(1)} / 5`;
-  averageStars.textContent = stars(Math.round(averageValue));
+  averageStars.innerHTML = renderStarIcons(Math.round(averageValue), 'rating-stars rating-stars-summary');
 
   if (!total) {
     list.innerHTML = '<p class="reviews-empty">Aún no hay reseñas para esta propiedad</p>';
@@ -207,7 +230,7 @@ function renderReviews(reviews) {
           ${userPhoto ? `<img src="${userPhoto}" alt="${userName}" referrerpolicy="no-referrer">` : ''}
           <div>
             <strong>${userName}</strong>
-            <p class="review-rating">${stars(review.rating || 0)}</p>
+            <p class="review-rating">${renderStarIcons(review.rating || 0)}</p>
             <small>${formatDate(review.createdAt)}</small>
           </div>
         </header>

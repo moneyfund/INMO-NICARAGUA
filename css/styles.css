@@ -5210,3 +5210,72 @@ body.dark-mode .btn-primary-property:focus-visible {
 .review-rating {
   color: var(--diamond-red);
 }
+
+/* Consistencia de borde Rojo Diamante en cards clave */
+.property-card,
+.review-card,
+.agent-card,
+.agent-property-card,
+.highlight-card,
+.seller-benefit-card,
+.seller-contact-card,
+.dashboard-card {
+  border: 1px solid #9e0b0f !important;
+}
+
+.property-card:hover,
+.review-card:hover,
+.agent-card:hover,
+.agent-property-card:hover,
+.highlight-card:hover,
+.seller-benefit-card:hover,
+.seller-contact-card:hover,
+.dashboard-card:hover {
+  border-color: #9e0b0f !important;
+}
+
+.property-card.is-featured {
+  border-width: 1.5px !important;
+}
+
+/* Sistema premium de estrellas para reseñas */
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+}
+
+.rating-star-icon,
+.review-form-stars button svg {
+  width: 19px;
+  height: 19px;
+  fill: transparent;
+  stroke: color-mix(in srgb, var(--text-main) 62%, #8d8d8d);
+  stroke-width: 1.8;
+  transition: fill 0.24s ease, stroke 0.24s ease, transform 0.24s ease, filter 0.24s ease;
+}
+
+.rating-star-icon.is-filled {
+  fill: #d4af37;
+  stroke: #d4af37;
+}
+
+.review-form-stars button {
+  border-color: color-mix(in srgb, #9e0b0f 42%, transparent);
+}
+
+.review-form-stars button:hover svg {
+  stroke: #d4af37;
+  transform: scale(1.06);
+}
+
+.review-form-stars button.active {
+  border-color: #9e0b0f;
+  background: color-mix(in srgb, #d4af37 10%, var(--surface-overlay));
+}
+
+.review-form-stars button.active svg {
+  fill: #d4af37;
+  stroke: #d4af37;
+  filter: drop-shadow(0 1px 2px rgba(212, 175, 55, 0.32));
+}
