@@ -3,7 +3,6 @@ import {
   getFirestore,
   collection,
   addDoc,
-  getDocs,
   query,
   where,
   onSnapshot,
@@ -255,12 +254,44 @@ function normalizeItems(snapshot, kind) {
       userId: String(data.userId || '').trim(),
       userName: data.userName || data.authorName || 'Usuario',
       userPhoto: data.userPhoto || data.photoURL || '',
+      commentText: String(data.comment || '').trim(),
+      reviewText: String(data.review || '').trim(),
       text: data.comment || data.review || data.content || '',
       rating: Math.max(0, Math.min(5, Number(data.rating || 0))),
       createdAt: data.createdAt || data.date || null,
       kind
     };
   });
+}
+
+function splitInteractions(items = []) {
+  const comments = [];
+  const reviews = [];
+
+  items.forEach((item) => {
+    const hasComment = Boolean(item.commentText || item.text);
+    const hasReview = Boolean(item.reviewText || item.text);
+    const hasRating = Number(item.rating || 0) > 0;
+
+    if (hasComment) {
+      comments.push({
+        ...item,
+        text: item.commentText || item.text
+      });
+    }
+
+    if (hasReview && hasRating) {
+      reviews.push({
+        ...item,
+        text: item.reviewText || item.text
+      });
+    }
+  });
+
+  return {
+    comments: sortByDateDesc(comments),
+    reviews: sortByDateDesc(reviews)
+  };
 }
 
 function sortByDateDesc(items = []) {
@@ -509,12 +540,14 @@ function bindCommentForm() {
     try {
       state.isPublishingComment = true;
       updateFormsAvailability();
-      await addDoc(collection(db, 'comments'), {
+      await addDoc(collection(db, 'reviews'), {
         propertyId: state.propertyId,
         userId: state.user.uid,
         userName: state.user.displayName || 'Usuario',
         userPhoto: state.user.photoURL || '',
         comment: commentText,
+        review: '',
+        rating: 0,
         content: commentText,
         createdAt: serverTimestamp()
       });
@@ -569,40 +602,40 @@ function bindLikes() {
   });
 }
 
-function subscribeComments() {
-  const commentsQuery = query(
-    collection(db, 'comments'),
-    where('propertyId', '==', state.propertyId),
-    limit(80)
-  );
-  const unsub = onSnapshot(commentsQuery, (snapshot) => {
-    const comments = sortByDateDesc(normalizeItems(snapshot, 'comment'));
-    renderCommentList(comments);
-    writeListCache('comments', comments);
-  }, (error) => {
-    console.error('No se pudieron cargar los comentarios:', error);
-    renderCommentsError();
-  });
-
-  state.unsubscribers.push(unsub);
-}
-
-function subscribeReviews() {
+function subscribeInteractions() {
   const reviewsQuery = query(
     collection(db, 'reviews'),
     where('propertyId', '==', state.propertyId),
     limit(80)
   );
+
+  let resolvedFirstSnapshot = false;
+  const loadingGuard = window.setTimeout(() => {
+    if (resolvedFirstSnapshot) return;
+    renderCommentsError('No se pudo completar la carga de comentarios. Recarga la página.');
+    renderReviewsError('No se pudo completar la carga de reseñas. Recarga la página.');
+  }, 10000);
+
   const unsub = onSnapshot(reviewsQuery, (snapshot) => {
-    const reviews = sortByDateDesc(normalizeItems(snapshot, 'review'));
-    renderReviewList(reviews);
-    writeListCache('reviews', reviews);
+    resolvedFirstSnapshot = true;
+    window.clearTimeout(loadingGuard);
+    const interactions = splitInteractions(normalizeItems(snapshot, 'interaction'));
+    renderCommentList(interactions.comments);
+    renderReviewList(interactions.reviews);
+    writeListCache('comments', interactions.comments);
+    writeListCache('reviews', interactions.reviews);
   }, (error) => {
-    console.error('No se pudieron cargar las reseñas:', error);
+    resolvedFirstSnapshot = true;
+    window.clearTimeout(loadingGuard);
+    console.error('No se pudieron cargar las interacciones:', error);
+    renderCommentsError();
     renderReviewsError();
   });
 
-  state.unsubscribers.push(unsub);
+  state.unsubscribers.push(() => {
+    window.clearTimeout(loadingGuard);
+    unsub();
+  });
 }
 
 function subscribeLikes() {
@@ -708,31 +741,12 @@ async function initInteractionSystem(propertyIdFromEvent = '') {
   if (cachedReviews.length) renderReviewList(cachedReviews); else renderReviewsLoading();
 
   await Promise.allSettled([
-    getDocs(query(collection(db, 'comments'), where('propertyId', '==', state.propertyId), limit(80)))
-      .then((snapshot) => {
-        const comments = sortByDateDesc(normalizeItems(snapshot, 'comment'));
-        renderCommentList(comments);
-        writeListCache('comments', comments);
-      })
-      .catch((error) => {
-        console.error('No se pudo obtener comentarios:', error);
-        renderCommentsError();
-      }),
-    getDocs(query(collection(db, 'reviews'), where('propertyId', '==', state.propertyId), limit(80)))
-      .then((snapshot) => {
-        const reviews = sortByDateDesc(normalizeItems(snapshot, 'review'));
-        renderReviewList(reviews);
-        writeListCache('reviews', reviews);
-      })
-      .catch((error) => {
-        console.error('No se pudo obtener reseñas:', error);
-        renderReviewsError();
-      })
+    Promise.resolve().then(() => {
+      subscribeInteractions();
+    })
   ]);
 
   subscribeLikes();
-  subscribeComments();
-  subscribeReviews();
   state.initializedFor = state.propertyId;
 }
 
