@@ -653,8 +653,16 @@ async function initFavoriteButton(propertyId) {
     }
 
     favoriteButton.disabled = false;
-    favoriteRecord = await findFavorite(propertyId, currentUser.uid);
-    updateFavoriteUi(Boolean(favoriteRecord));
+    try {
+      favoriteRecord = await findFavorite(propertyId, currentUser.uid);
+      updateFavoriteUi(Boolean(favoriteRecord));
+    } catch (error) {
+      favoriteRecord = null;
+      favoriteButton.disabled = true;
+      favoriteButton.textContent = '🤍 Favoritos no disponible';
+      favoriteButton.setAttribute('aria-pressed', 'false');
+      console.error('No fue posible consultar favoritos:', error);
+    }
   };
 
   favoriteButton.addEventListener('click', async () => {
@@ -804,7 +812,11 @@ async function renderPropertyDetail() {
 
   initPropertyGallery(detailContainer);
   renderPropertyDetailMap(property);
-  await initFavoriteButton(normalizedPropertyId);
+  try {
+    await initFavoriteButton(normalizedPropertyId);
+  } catch (error) {
+    console.error('No fue posible inicializar favoritos:', error);
+  }
   window.dispatchEvent(new CustomEvent('propertyDetailReady', {
     detail: {
       property,
