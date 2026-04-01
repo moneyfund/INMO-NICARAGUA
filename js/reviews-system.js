@@ -3,9 +3,11 @@ import {
   getFirestore,
   collection,
   addDoc,
+  getDocs,
   query,
   where,
   onSnapshot,
+  limit,
   serverTimestamp,
   doc,
   setDoc,
@@ -42,7 +44,9 @@ const state = {
   unsubscribers: [],
   likesCache: [],
   isPublishingComment: false,
-  isPublishingReview: false
+  isPublishingReview: false,
+  initializedFor: '',
+  initQueued: false
 };
 
 function getPropertyIdFromUrl() {
@@ -101,7 +105,6 @@ function updateFormsAvailability() {
   const reviewForm = document.querySelector('[data-pi-review-form]');
   if (!commentForm || !reviewForm) return;
 
-  const enabled = Boolean(state.user);
   const controls = [
     ...commentForm.querySelectorAll('textarea, button'),
     ...reviewForm.querySelectorAll('textarea, button')
@@ -111,10 +114,10 @@ function updateFormsAvailability() {
     if (control.dataset.piLogin) return;
     const isRateButton = control.matches('[data-pi-rate]');
     const busy = isRateButton ? state.isPublishingReview : (control.closest('[data-pi-review-form]') ? state.isPublishingReview : state.isPublishingComment);
-    control.disabled = !enabled || busy;
+    control.disabled = busy;
   });
 
-  if (!enabled) {
+  if (!state.user) {
     setFormMessage('[data-pi-comment-form]', 'Inicia sesión para publicar un comentario.', 'is-error');
     setFormMessage('[data-pi-review-form]', 'Inicia sesión para publicar una reseña.', 'is-error');
   } else {
@@ -253,6 +256,32 @@ function sortByDateDesc(items = []) {
     const timeB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : new Date(b.createdAt || 0).getTime();
     return timeB - timeA;
   });
+}
+
+function getCacheKey(type) {
+  return `pi-cache:${type}:${state.propertyId}`;
+}
+
+function writeListCache(type, items) {
+  try {
+    sessionStorage.setItem(getCacheKey(type), JSON.stringify({ updatedAt: Date.now(), items }));
+  } catch (error) {
+    console.warn(`No se pudo guardar cache de ${type}:`, error);
+  }
+}
+
+function readListCache(type) {
+  try {
+    const raw = sessionStorage.getItem(getCacheKey(type));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    const ageMs = Date.now() - Number(parsed?.updatedAt || 0);
+    if (ageMs > 3 * 60 * 1000) return [];
+    return Array.isArray(parsed?.items) ? parsed.items : [];
+  } catch (error) {
+    console.warn(`No se pudo leer cache de ${type}:`, error);
+    return [];
+  }
 }
 
 function renderCommentList(comments = []) {
@@ -528,10 +557,15 @@ function bindLikes() {
 }
 
 function subscribeComments() {
-  const commentsQuery = query(collection(db, 'comments'), where('propertyId', '==', state.propertyId));
+  const commentsQuery = query(
+    collection(db, 'comments'),
+    where('propertyId', '==', state.propertyId),
+    limit(80)
+  );
   const unsub = onSnapshot(commentsQuery, (snapshot) => {
     const comments = sortByDateDesc(normalizeItems(snapshot, 'comment'));
     renderCommentList(comments);
+    writeListCache('comments', comments);
   }, (error) => {
     console.error('No se pudieron cargar los comentarios:', error);
   });
@@ -540,10 +574,15 @@ function subscribeComments() {
 }
 
 function subscribeReviews() {
-  const reviewsQuery = query(collection(db, 'reviews'), where('propertyId', '==', state.propertyId));
+  const reviewsQuery = query(
+    collection(db, 'reviews'),
+    where('propertyId', '==', state.propertyId),
+    limit(80)
+  );
   const unsub = onSnapshot(reviewsQuery, (snapshot) => {
     const reviews = sortByDateDesc(normalizeItems(snapshot, 'review'));
     renderReviewList(reviews);
+    writeListCache('reviews', reviews);
   }, (error) => {
     console.error('No se pudieron cargar las reseñas:', error);
   });
@@ -552,7 +591,11 @@ function subscribeReviews() {
 }
 
 function subscribeLikes() {
-  const likesQuery = query(collection(db, 'likes'), where('propertyId', '==', state.propertyId));
+  const likesQuery = query(
+    collection(db, 'likes'),
+    where('propertyId', '==', state.propertyId),
+    limit(300)
+  );
   const unsub = onSnapshot(likesQuery, (snapshot) => {
     state.likesCache = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
     renderLikeState();
@@ -600,6 +643,7 @@ async function initInteractionSystem(propertyIdFromEvent = '') {
   }
 
   state.propertyId = nextPropertyId;
+  if (state.initializedFor === state.propertyId) return;
   state.reviewRating = 0;
   state.reviewHover = 0;
   state.likesCache = [];
@@ -619,16 +663,39 @@ async function initInteractionSystem(propertyIdFromEvent = '') {
   renderLikeState();
   updateFormsAvailability();
 
+  const cachedComments = readListCache('comments');
+  const cachedReviews = readListCache('reviews');
+  if (cachedComments.length) renderCommentList(cachedComments);
+  if (cachedReviews.length) renderReviewList(cachedReviews);
+
+  await Promise.allSettled([
+    getDocs(query(collection(db, 'comments'), where('propertyId', '==', state.propertyId), limit(80))).then((snapshot) => {
+      const comments = sortByDateDesc(normalizeItems(snapshot, 'comment'));
+      renderCommentList(comments);
+      writeListCache('comments', comments);
+    }),
+    getDocs(query(collection(db, 'reviews'), where('propertyId', '==', state.propertyId), limit(80))).then((snapshot) => {
+      const reviews = sortByDateDesc(normalizeItems(snapshot, 'review'));
+      renderReviewList(reviews);
+      writeListCache('reviews', reviews);
+    })
+  ]);
+
   subscribeLikes();
   subscribeComments();
   subscribeReviews();
+  state.initializedFor = state.propertyId;
 }
 
 function queueInit(event) {
+  if (state.initQueued) return;
+  state.initQueued = true;
   const propertyId = event?.detail?.propertyId || '';
   window.requestAnimationFrame(() => {
     initInteractionSystem(propertyId).catch((error) => {
       console.error('No se pudo inicializar el sistema de interacciones:', error);
+    }).finally(() => {
+      state.initQueued = false;
     });
   });
 }
