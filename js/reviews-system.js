@@ -49,6 +49,19 @@ const state = {
   initQueued: false
 };
 
+const LIST_STATE = {
+  comments: {
+    loading: 'Cargando comentarios...',
+    empty: 'Aún no hay comentarios para esta propiedad.',
+    error: 'No se pudieron cargar los comentarios en este momento.'
+  },
+  reviews: {
+    loading: 'Cargando reseñas...',
+    empty: 'Aún no hay reseñas para esta propiedad.',
+    error: 'No se pudieron cargar las reseñas en este momento.'
+  }
+};
+
 function getPropertyIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return String(params.get('id') || '').trim();
@@ -289,7 +302,7 @@ function renderCommentList(comments = []) {
   if (!list) return;
 
   if (!comments.length) {
-    list.innerHTML = '<p class="pi-empty">Aún no hay comentarios para esta propiedad.</p>';
+    list.innerHTML = `<p class="pi-empty">${LIST_STATE.comments.empty}</p>`;
     return;
   }
 
@@ -333,7 +346,7 @@ function renderReviewList(reviews = []) {
   count.textContent = `${total} reseña${total === 1 ? '' : 's'}`;
 
   if (!reviews.length) {
-    list.innerHTML = '<p class="pi-empty">Aún no hay reseñas para esta propiedad.</p>';
+    list.innerHTML = `<p class="pi-empty">${LIST_STATE.reviews.empty}</p>`;
     return;
   }
 
@@ -568,6 +581,7 @@ function subscribeComments() {
     writeListCache('comments', comments);
   }, (error) => {
     console.error('No se pudieron cargar los comentarios:', error);
+    renderCommentsError();
   });
 
   state.unsubscribers.push(unsub);
@@ -585,6 +599,7 @@ function subscribeReviews() {
     writeListCache('reviews', reviews);
   }, (error) => {
     console.error('No se pudieron cargar las reseñas:', error);
+    renderReviewsError();
   });
 
   state.unsubscribers.push(unsub);
@@ -631,6 +646,30 @@ function bindAuth() {
   state.authBound = true;
 }
 
+function renderCommentsLoading() {
+  const list = document.querySelector('[data-pi-comment-list]');
+  if (!list) return;
+  list.innerHTML = `<p class="pi-empty">${LIST_STATE.comments.loading}</p>`;
+}
+
+function renderReviewsLoading() {
+  const list = document.querySelector('[data-pi-review-list]');
+  if (!list) return;
+  list.innerHTML = `<p class="pi-empty">${LIST_STATE.reviews.loading}</p>`;
+}
+
+function renderCommentsError(message = LIST_STATE.comments.error) {
+  const list = document.querySelector('[data-pi-comment-list]');
+  if (!list) return;
+  list.innerHTML = `<p class="pi-empty">${escapeHtml(message)}</p>`;
+}
+
+function renderReviewsError(message = LIST_STATE.reviews.error) {
+  const list = document.querySelector('[data-pi-review-list]');
+  if (!list) return;
+  list.innerHTML = `<p class="pi-empty">${escapeHtml(message)}</p>`;
+}
+
 async function initInteractionSystem(propertyIdFromEvent = '') {
   const propertyIdFromUrl = getPropertyIdFromUrl();
   const nextPropertyId = String(propertyIdFromEvent || propertyIdFromUrl || '').trim();
@@ -665,20 +704,30 @@ async function initInteractionSystem(propertyIdFromEvent = '') {
 
   const cachedComments = readListCache('comments');
   const cachedReviews = readListCache('reviews');
-  if (cachedComments.length) renderCommentList(cachedComments);
-  if (cachedReviews.length) renderReviewList(cachedReviews);
+  if (cachedComments.length) renderCommentList(cachedComments); else renderCommentsLoading();
+  if (cachedReviews.length) renderReviewList(cachedReviews); else renderReviewsLoading();
 
   await Promise.allSettled([
-    getDocs(query(collection(db, 'comments'), where('propertyId', '==', state.propertyId), limit(80))).then((snapshot) => {
-      const comments = sortByDateDesc(normalizeItems(snapshot, 'comment'));
-      renderCommentList(comments);
-      writeListCache('comments', comments);
-    }),
-    getDocs(query(collection(db, 'reviews'), where('propertyId', '==', state.propertyId), limit(80))).then((snapshot) => {
-      const reviews = sortByDateDesc(normalizeItems(snapshot, 'review'));
-      renderReviewList(reviews);
-      writeListCache('reviews', reviews);
-    })
+    getDocs(query(collection(db, 'comments'), where('propertyId', '==', state.propertyId), limit(80)))
+      .then((snapshot) => {
+        const comments = sortByDateDesc(normalizeItems(snapshot, 'comment'));
+        renderCommentList(comments);
+        writeListCache('comments', comments);
+      })
+      .catch((error) => {
+        console.error('No se pudo obtener comentarios:', error);
+        renderCommentsError();
+      }),
+    getDocs(query(collection(db, 'reviews'), where('propertyId', '==', state.propertyId), limit(80)))
+      .then((snapshot) => {
+        const reviews = sortByDateDesc(normalizeItems(snapshot, 'review'));
+        renderReviewList(reviews);
+        writeListCache('reviews', reviews);
+      })
+      .catch((error) => {
+        console.error('No se pudo obtener reseñas:', error);
+        renderReviewsError();
+      })
   ]);
 
   subscribeLikes();
