@@ -745,16 +745,16 @@ async function renderPropertyDetail() {
       <section class="detail-summary-card" aria-label="Resumen principal de la propiedad">
         <p class="badge">${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'Venta').toLowerCase()}</p>
         ${status === 'sold' ? '<p class="property-status-tag">VENDIDA</p>' : ''}
-        <h1>${property.titulo}</h1>
-        <p>${property.ubicacion}</p>
-        <p><strong>${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
-        <p class="price">${formatDualPrice(getPriceUsd(property))}</p>
+        <h1 class="detail-summary-title">${property.titulo}</h1>
+        <p class="detail-summary-location">${property.ubicacion}</p>
+        <p class="detail-summary-type"><strong>${property.typeLabel || getPropertyTypeLabel(property.tipo) || 'Propiedad'} en ${(property.operationLabel || formatPropertyOperation(property.operacion) || 'venta').toLowerCase()}</strong></p>
+        <p class="price detail-summary-price">${formatDualPrice(getPriceUsd(property))}</p>
         <div class="property-main-actions">
           <div id="propertyLikeMount" class="property-like-mount" aria-live="polite"></div>
           <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
         </div>
-        <p><strong>Área:</strong> ${getAreaDisplay(property)}</p>
-        <p><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
+        <p class="detail-summary-metric"><strong>Área:</strong> ${getAreaDisplay(property)}</p>
+        <p class="detail-summary-metric"><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
       </section>
     </div>
     <section class="detail-extended-card" aria-label="Información extendida de la propiedad">
