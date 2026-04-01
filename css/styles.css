@@ -5905,6 +5905,11 @@ body.dark-mode .gallery-nav {
     align-items: stretch;
   }
 
+  .detail-summary-card .property-main-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+
   .pi-like-top {
     justify-content: space-between;
   }
@@ -6100,9 +6105,50 @@ body:not(.dark):not(.dark-mode) .site-nav a { color: var(--premium-text); }
 }
 
 .detail-summary-card {
-  padding: 1.1rem;
+  padding: 0.95rem 1rem;
   display: grid;
-  gap: 0.62rem;
+  gap: 0.42rem;
+}
+
+.detail-summary-card .badge {
+  margin: 0;
+  line-height: 1.2;
+  padding: 0.16rem 0.6rem;
+}
+
+.detail-summary-title {
+  margin: 0.04rem 0 0;
+  line-height: 1.18;
+}
+
+.detail-summary-location {
+  margin: 0;
+  line-height: 1.28;
+}
+
+.detail-summary-type {
+  margin: 0.03rem 0 0;
+  line-height: 1.25;
+}
+
+.detail-summary-price {
+  margin: 0.08rem 0 0;
+  line-height: 1.12;
+}
+
+.detail-summary-metric {
+  margin: 0;
+  line-height: 1.26;
+}
+
+.detail-summary-card .property-main-actions {
+  gap: 0.5rem;
+  margin: 0.2rem 0 0.32rem;
+}
+
+.detail-summary-card .favorite-property-button,
+.detail-summary-card .property-like-mount {
+  min-height: 40px;
 }
 
 .detail-extended-card {
@@ -6180,6 +6226,14 @@ body.dark-mode .properties-map-full {
 @media (max-width: 900px) {
   .property-meta { grid-template-columns: 1fr; }
   .hero { border-radius: 0 0 24px 24px; }
+  .detail-summary-card {
+    padding: 0.85rem 0.9rem;
+    gap: 0.38rem;
+  }
+  .detail-summary-card .property-main-actions {
+    margin: 0.18rem 0 0.28rem;
+    gap: 0.45rem;
+  }
 }
 
 @media (max-width: 720px) {
