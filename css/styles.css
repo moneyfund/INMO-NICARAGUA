@@ -5459,13 +5459,13 @@ body.dark-mode .btn-primary-property:focus-visible {
 
 .gallery-watermark::before {
   content: '';
-  width: clamp(92px, 24%, 180px);
+  width: clamp(276px, 72%, 540px);
   aspect-ratio: 523 / 294;
   background-image: url('../assets/marca de agua.png');
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
-  opacity: 0.16;
+  opacity: 0.14;
 }
 
 .property-gallery-main-image,
