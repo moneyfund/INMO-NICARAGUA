@@ -587,116 +587,9 @@ async function loadAgentById(agentId) {
   return { id: agentSnap.id, ...agentSnap.data() };
 }
 
-function getCurrentUser() {
-  if (window.inmoAuthState?.currentUser) return window.inmoAuthState.currentUser;
-  if (window.inmoFirebase?.currentUser) return window.inmoFirebase.currentUser;
-  return null;
-}
-
 function buildAgentProfileUrl(agentId) {
   if (!agentId) return 'agentes.html';
   return `agente.html?id=${encodeURIComponent(agentId)}`;
-}
-
-async function findFavorite(propertyId, userId) {
-  if (!propertyId || !userId) return null;
-
-  const { db, collection, query, where, getDocs } = await getModularFirestore();
-  const favoritesRef = collection(db, 'favorites');
-  const favoriteQuery = query(
-    favoritesRef,
-    where('userId', '==', userId),
-    where('propertyId', '==', propertyId)
-  );
-  const favoriteSnapshot = await getDocs(favoriteQuery);
-  const favoriteDoc = favoriteSnapshot.docs[0];
-  return favoriteDoc ? { id: favoriteDoc.id, ...favoriteDoc.data() } : null;
-}
-
-async function createFavorite(propertyId, userId) {
-  const { db, collection, addDoc, serverTimestamp } = await getModularFirestore();
-  const favoritesRef = collection(db, 'favorites');
-  const created = await addDoc(favoritesRef, {
-    userId,
-    propertyId,
-    createdAt: serverTimestamp()
-  });
-  return created.id;
-}
-
-async function removeFavorite(favoriteId) {
-  if (!favoriteId) return;
-  const { db, doc, deleteDoc } = await getModularFirestore();
-  await deleteDoc(doc(db, 'favorites', favoriteId));
-}
-
-async function initFavoriteButton(propertyId) {
-  const favoriteButton = document.getElementById('favoritePropertyButton');
-  if (!favoriteButton) return;
-
-  let favoriteRecord = null;
-  let pending = false;
-
-  const updateFavoriteUi = (isFavorite) => {
-    favoriteButton.textContent = isFavorite ? '❤️ Guardada' : '🤍 Guardar';
-    favoriteButton.setAttribute('aria-pressed', isFavorite ? 'true' : 'false');
-  };
-
-  const syncFavoriteState = async () => {
-    const currentUser = getCurrentUser();
-    if (!currentUser?.uid) {
-      favoriteRecord = null;
-      favoriteButton.disabled = true;
-      favoriteButton.textContent = '🤍 Inicia sesión para guardar';
-      favoriteButton.setAttribute('aria-pressed', 'false');
-      return;
-    }
-
-    favoriteButton.disabled = false;
-    try {
-      favoriteRecord = await findFavorite(propertyId, currentUser.uid);
-      updateFavoriteUi(Boolean(favoriteRecord));
-    } catch (error) {
-      favoriteRecord = null;
-      favoriteButton.disabled = true;
-      favoriteButton.textContent = '🤍 Favoritos no disponible';
-      favoriteButton.setAttribute('aria-pressed', 'false');
-      console.error('No fue posible consultar favoritos:', error);
-    }
-  };
-
-  favoriteButton.addEventListener('click', async () => {
-    const currentUser = getCurrentUser();
-    if (!currentUser?.uid || pending) return;
-
-    pending = true;
-    favoriteButton.disabled = true;
-
-    try {
-      if (favoriteRecord?.id) {
-        await removeFavorite(favoriteRecord.id);
-        favoriteRecord = null;
-        updateFavoriteUi(false);
-      } else {
-        const favoriteId = await createFavorite(propertyId, currentUser.uid);
-        favoriteRecord = { id: favoriteId, userId: currentUser.uid, propertyId };
-        updateFavoriteUi(true);
-      }
-    } catch (error) {
-      console.error('No fue posible actualizar favorito:', error);
-    } finally {
-      pending = false;
-      favoriteButton.disabled = false;
-    }
-  });
-
-  document.addEventListener('inmo:auth-state-changed', () => {
-    syncFavoriteState().catch((error) => {
-      console.error('No fue posible sincronizar favoritos:', error);
-    });
-  });
-
-  await syncFavoriteState();
 }
 
 async function renderPropertyDetail() {
@@ -751,7 +644,6 @@ async function renderPropertyDetail() {
         <p class="price detail-summary-price">${formatDualPrice(getPriceUsd(property))}</p>
         <div class="property-main-actions">
           <div id="propertyLikeMount" class="property-like-mount" aria-live="polite"></div>
-          <button id="favoritePropertyButton" class="favorite-property-button" type="button" aria-label="Guardar propiedad en favoritos" aria-pressed="false">🤍 Guardar</button>
         </div>
         <p class="detail-summary-metric"><strong>Área:</strong> ${getAreaDisplay(property)}</p>
         <p class="detail-summary-metric"><strong>Precio por área:</strong> ${formatPricePerArea(getPricePerAreaUsd(property), property.areaUnit)}</p>
@@ -812,11 +704,6 @@ async function renderPropertyDetail() {
 
   initPropertyGallery(detailContainer);
   renderPropertyDetailMap(property);
-  try {
-    await initFavoriteButton(normalizedPropertyId);
-  } catch (error) {
-    console.error('No fue posible inicializar favoritos:', error);
-  }
   window.dispatchEvent(new CustomEvent('propertyDetailReady', {
     detail: {
       property,
