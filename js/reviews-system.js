@@ -37,7 +37,12 @@ const state = {
   isSubmittingReview: false,
   isSubmittingFavorite: false,
   authBound: false,
-  unsubscribers: []
+  unsubscribers: [],
+  loadTimeouts: {
+    comments: null,
+    reviews: null,
+    favorites: null
+  }
 };
 
 function isDebugEnabled() {
@@ -53,6 +58,10 @@ function debugLog(message, payload = {}) {
 function getPropertyIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return String(params.get('id') || '').trim();
+}
+
+function isValidPropertyId(value) {
+  return typeof value === 'string' && value.trim().length > 0;
 }
 
 function escapeHtml(value = '') {
@@ -117,6 +126,21 @@ function renderFavoriteShell() {
   `;
 
   return true;
+}
+
+function renderPropertyIdError(message = 'No se pudo identificar la propiedad.') {
+  const reviewsSection = document.getElementById('propertyReviews');
+  if (reviewsSection) {
+    reviewsSection.innerHTML = `
+      <section class="pi-wrap">
+        <p class="pi-empty">${escapeHtml(message)}</p>
+      </section>
+    `;
+  }
+  const favoriteMount = document.getElementById('propertyLikeMount');
+  if (favoriteMount) {
+    favoriteMount.innerHTML = `<p class="pi-empty">${escapeHtml(message)}</p>`;
+  }
 }
 
 function renderDiscussionShell() {
@@ -239,7 +263,7 @@ function renderCommentList() {
     return;
   }
   if (!comments.length) {
-    renderCommentsState('Aún no hay comentarios para esta propiedad.');
+    renderCommentsState('Aún no hay comentarios');
     return;
   }
 
@@ -292,7 +316,7 @@ function renderReviewList() {
     return;
   }
   if (!reviews.length) {
-    renderReviewsState('Aún no hay reseñas para esta propiedad.');
+    renderReviewsState('Aún no hay reseñas');
     return;
   }
 
@@ -333,12 +357,17 @@ function renderFavoriteState() {
 
   if (!state.authReady) {
     button.disabled = true;
+    setFavoriteMessage('Verificando sesión...');
     return;
   }
 
   button.disabled = state.isSubmittingFavorite || !state.user;
   if (!state.user) {
     setFavoriteMessage('Inicia sesión para guardar favoritos.');
+  } else if (state.favoritesStatus === 'loading') {
+    setFavoriteMessage('Verificando estado de favorito...');
+  } else if (state.favoritesStatus === 'success') {
+    setFavoriteMessage('');
   }
 }
 
@@ -390,6 +419,12 @@ function normalizeSnapshot(snapshot) {
 }
 
 function clearSubscriptions() {
+  Object.keys(state.loadTimeouts).forEach((key) => {
+    if (state.loadTimeouts[key]) {
+      window.clearTimeout(state.loadTimeouts[key]);
+      state.loadTimeouts[key] = null;
+    }
+  });
   state.unsubscribers.forEach((unsubscribe) => {
     try {
       unsubscribe();
@@ -400,24 +435,60 @@ function clearSubscriptions() {
   state.unsubscribers = [];
 }
 
+function startLoadTimeout(scope) {
+  if (state.loadTimeouts[scope]) window.clearTimeout(state.loadTimeouts[scope]);
+  state.loadTimeouts[scope] = window.setTimeout(() => {
+    if (scope === 'comments' && state.commentsStatus === 'loading') {
+      state.commentsStatus = 'error';
+      state.comments = [];
+      debugLog('[Comments] timeout', { propertyId: state.propertyId });
+      renderCommentList();
+    }
+    if (scope === 'reviews' && state.reviewsStatus === 'loading') {
+      state.reviewsStatus = 'error';
+      state.reviews = [];
+      debugLog('[Reviews] timeout', { propertyId: state.propertyId });
+      renderReviewList();
+    }
+    if (scope === 'favorites' && state.favoritesStatus === 'loading') {
+      state.favoritesStatus = 'error';
+      state.favoritesCount = 0;
+      state.isFavorite = false;
+      debugLog('[Favorites] timeout', { propertyId: state.propertyId });
+      setFavoriteMessage('No se pudo verificar el favorito.', 'is-error');
+      renderFavoriteState();
+    }
+  }, 12000);
+}
+
+function resolveLoadTimeout(scope) {
+  if (!state.loadTimeouts[scope]) return;
+  window.clearTimeout(state.loadTimeouts[scope]);
+  state.loadTimeouts[scope] = null;
+}
+
 function subscribeComments() {
   state.commentsStatus = 'loading';
   renderCommentList();
 
   const commentsRef = collection(db, 'properties', state.propertyId, 'comments');
   const commentsQuery = query(commentsRef, orderBy('createdAt', 'desc'), limit(MAX_ITEMS));
-  debugLog('Iniciando lectura de comentarios', { propertyId: state.propertyId });
+  debugLog('[Comments] propertyId', { propertyId: state.propertyId });
+  debugLog('[Comments] loading start', { propertyId: state.propertyId });
+  startLoadTimeout('comments');
 
   const unsubscribe = onSnapshot(commentsQuery, (snapshot) => {
+    resolveLoadTimeout('comments');
     state.comments = normalizeSnapshot(snapshot);
     state.commentsStatus = 'success';
-    debugLog('Comentarios cargados', { propertyId: state.propertyId, total: state.comments.length });
+    debugLog('[Comments] snapshot received', { propertyId: state.propertyId, total: state.comments.length });
     renderCommentList();
   }, (error) => {
+    resolveLoadTimeout('comments');
     state.comments = [];
     state.commentsStatus = 'error';
     console.error('No se pudieron cargar comentarios:', error);
-    debugLog('Error leyendo comentarios', { propertyId: state.propertyId, error });
+    debugLog('[Comments] error', { propertyId: state.propertyId, error });
     renderCommentList();
   });
 
@@ -430,18 +501,22 @@ function subscribeReviews() {
 
   const reviewsRef = collection(db, 'properties', state.propertyId, 'reviews');
   const reviewsQuery = query(reviewsRef, orderBy('createdAt', 'desc'), limit(MAX_ITEMS));
-  debugLog('Iniciando lectura de reseñas', { propertyId: state.propertyId });
+  debugLog('[Reviews] propertyId', { propertyId: state.propertyId });
+  debugLog('[Reviews] loading start', { propertyId: state.propertyId });
+  startLoadTimeout('reviews');
 
   const unsubscribe = onSnapshot(reviewsQuery, (snapshot) => {
+    resolveLoadTimeout('reviews');
     state.reviews = normalizeSnapshot(snapshot);
     state.reviewsStatus = 'success';
-    debugLog('Reseñas cargadas', { propertyId: state.propertyId, total: state.reviews.length });
+    debugLog('[Reviews] snapshot received', { propertyId: state.propertyId, total: state.reviews.length });
     renderReviewList();
   }, (error) => {
+    resolveLoadTimeout('reviews');
     state.reviews = [];
     state.reviewsStatus = 'error';
     console.error('No se pudieron cargar reseñas:', error);
-    debugLog('Error leyendo reseñas', { propertyId: state.propertyId, error });
+    debugLog('[Reviews] error', { propertyId: state.propertyId, error });
     renderReviewList();
   });
 
@@ -454,25 +529,29 @@ function subscribeFavorites() {
 
   const favoritesRef = collection(db, 'properties', state.propertyId, 'favorites');
   const favoritesQuery = query(favoritesRef, limit(1000));
-  debugLog('Iniciando lectura de favoritos', { propertyId: state.propertyId });
+  debugLog('[Favorites] propertyId', { propertyId: state.propertyId });
+  debugLog('[Favorites] loading start', { propertyId: state.propertyId, user: state.user?.uid || null });
+  startLoadTimeout('favorites');
 
   const unsubscribe = onSnapshot(favoritesQuery, (snapshot) => {
+    resolveLoadTimeout('favorites');
     const favorites = normalizeSnapshot(snapshot);
     state.favoritesCount = favorites.length;
     state.isFavorite = Boolean(state.user?.uid && favorites.some((entry) => entry.userId === state.user.uid));
     state.favoritesStatus = 'success';
-    debugLog('Favoritos cargados', {
+    debugLog('[Favorites] snapshot received', {
       propertyId: state.propertyId,
       total: state.favoritesCount,
       isFavorite: state.isFavorite
     });
     renderFavoriteState();
   }, (error) => {
+    resolveLoadTimeout('favorites');
     state.favoritesStatus = 'error';
     state.favoritesCount = 0;
     state.isFavorite = false;
     console.error('No se pudieron cargar favoritos:', error);
-    debugLog('Error leyendo favoritos', { propertyId: state.propertyId, error });
+    debugLog('[Favorites] error', { propertyId: state.propertyId, error });
     setFavoriteMessage('No se pudo cargar favoritos.', 'is-error');
     renderFavoriteState();
   });
@@ -649,7 +728,7 @@ function bindAuth() {
   onAuthStateChanged(auth, (user) => {
     state.user = user;
     state.authReady = true;
-    debugLog('Estado auth actualizado', { isLoggedIn: Boolean(user), userId: user?.uid || null });
+    debugLog('[Auth] state changed', { isLoggedIn: Boolean(user), userId: user?.uid || null });
     renderAuthBox();
     updateFormsAvailability();
     renderFavoriteState();
@@ -660,12 +739,29 @@ function bindAuth() {
 async function initInteractionSystem(propertyIdFromEvent = '') {
   const fromUrl = getPropertyIdFromUrl();
   const propertyId = String(propertyIdFromEvent || fromUrl || '').trim();
-  debugLog('Init solicitado', { propertyIdFromEvent, propertyIdFromUrl: fromUrl, resolvedPropertyId: propertyId });
-  if (!propertyId) return;
-  if (state.initializedFor === propertyId) return;
+  debugLog('[Init] propertyId resolved', { propertyIdFromEvent, propertyIdFromUrl: fromUrl, propertyId });
+  if (!isValidPropertyId(propertyId)) {
+    debugLog('[Init] propertyId inválido', { propertyIdFromEvent, propertyIdFromUrl: fromUrl });
+    renderPropertyIdError('No se pudo cargar interacciones: identificador de propiedad inválido.');
+    return;
+  }
+  if (state.initializedFor === propertyId) {
+    debugLog('[Init] ya inicializado', { propertyId });
+    return;
+  }
+
+  const hasFavoriteMount = Boolean(document.getElementById('propertyLikeMount'));
+  const hasReviewsSection = Boolean(document.getElementById('propertyReviews'));
+  if (!hasFavoriteMount || !hasReviewsSection) {
+    debugLog('[Init] esperando montaje del detalle', {
+      propertyId,
+      hasFavoriteMount,
+      hasReviewsSection
+    });
+    return;
+  }
 
   state.propertyId = propertyId;
-  state.initializedFor = propertyId;
   state.comments = [];
   state.reviews = [];
   state.favoritesCount = 0;
@@ -676,7 +772,11 @@ async function initInteractionSystem(propertyIdFromEvent = '') {
   state.reviewRating = 0;
   state.reviewHover = 0;
 
-  if (!renderFavoriteShell() || !renderDiscussionShell()) return;
+  if (!renderFavoriteShell() || !renderDiscussionShell()) {
+    debugLog('[Init] no se pudieron renderizar contenedores', { propertyId });
+    return;
+  }
+  state.initializedFor = propertyId;
 
   clearSubscriptions();
   bindAuth();
