@@ -598,10 +598,10 @@ async function renderPropertyDetail() {
 
   const params = new URLSearchParams(window.location.search);
   const propertyId = params.get('id');
-  console.log('Property ID from URL:', propertyId);
+  console.log('[PropertyDetail] propertyId from URL:', propertyId);
 
   if (!propertyId || !propertyId.trim()) {
-    detailContainer.innerHTML = '<p>Property not found. <a href="propiedades.html" class="text-link">Ver propiedades</a></p>';
+    detailContainer.innerHTML = '<p>No se pudo identificar la propiedad. <a href="propiedades.html" class="text-link">Ver propiedades</a></p>';
     return;
   }
 
@@ -609,7 +609,7 @@ async function renderPropertyDetail() {
   const property = await loadPropertyDetailFromFirestore(normalizedPropertyId);
 
   if (!property) {
-    detailContainer.innerHTML = '<p>Property not found. <a href="propiedades.html" class="text-link">Ver propiedades</a></p>';
+    detailContainer.innerHTML = '<p>No se encontró la propiedad solicitada. <a href="propiedades.html" class="text-link">Ver propiedades</a></p>';
     return;
   }
 
@@ -710,6 +710,7 @@ async function renderPropertyDetail() {
       propertyId: normalizedPropertyId
     }
   }));
+  console.log('[PropertyDetail] propertyDetailReady dispatched', { propertyId: normalizedPropertyId });
 }
 
 function initPropertyGallery(scope = document) {
